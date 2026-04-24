@@ -40,6 +40,12 @@
 <script async src="https://f.convertkit.com/ckjs/ck.5.js"></script>
 
 <style>
+  @font-face {
+    font-family: 'Cubic11';
+    src: url('fonts/Cubic_11_1.013_R.ttf') format('truetype');
+    font-display: swap;
+  }
+
   :root {
     --gb-darkest: #0f380f;
     --gb-dark: #306230;
@@ -617,11 +623,13 @@
     border: 3px solid var(--gb-darkest);
     padding: 14px 16px 16px;
     margin-bottom: 22px;
-    font-family: "VT323", monospace;
+    font-family: "Cubic11", "VT323", "PingFang TC", monospace;
     font-size: 16px;
-    line-height: 1.65;
+    line-height: 1.7;
+    letter-spacing: 1px;
     color: var(--ink);
     box-shadow: 4px 4px 0 var(--gb-dark), inset 0 0 0 2px var(--paper-edge);
+    image-rendering: pixelated;
   }
 
   .audio-block {
