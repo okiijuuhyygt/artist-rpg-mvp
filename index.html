@@ -1093,6 +1093,14 @@ async function loadContent() {
 }
 
 function applyContent() {
+  // Site name — drives <title>, OG share preview, and fallbacks.
+  const siteName = CONTENT.meta?.worldName || '陳則皞の世界';
+  document.title = siteName;
+  const ogTitle = document.querySelector('meta[property="og:title"]');
+  if (ogTitle) ogTitle.setAttribute('content', siteName);
+  const ogDesc = document.querySelector('meta[property="og:description"]');
+  if (ogDesc && CONTENT.meta?.subtitle) ogDesc.setAttribute('content', CONTENT.meta.subtitle);
+
   document.getElementById('pixelTitle').textContent = CONTENT.meta?.pixelTitle || 'CHEN TSE-HAO';
   document.getElementById('subtitle').textContent = CONTENT.meta?.subtitle || '';
   document.getElementById('introSpeaker').textContent = (CONTENT.speaker || 'HAO').split(' ')[0];
