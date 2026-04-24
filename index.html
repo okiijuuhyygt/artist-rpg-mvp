@@ -743,6 +743,62 @@
     background: var(--gb-light);
     color: var(--gb-darkest);
   }
+  .vote-results {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--paper-edge);
+  }
+  .vote-results-title {
+    font-family: "Press Start 2P", monospace;
+    font-size: 9px;
+    color: var(--gb-dark);
+    letter-spacing: 1.5px;
+    margin-bottom: 10px;
+  }
+  .vote-row {
+    display: grid;
+    grid-template-columns: 24px 1fr auto;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .vote-label {
+    font-family: "Press Start 2P", monospace;
+    font-size: 11px;
+    color: var(--gb-darkest);
+    text-align: center;
+  }
+  .vote-bar-wrap {
+    height: 16px;
+    background: var(--paper);
+    border: 2px solid var(--gb-darkest);
+    position: relative;
+    overflow: hidden;
+    padding: 1px;
+  }
+  .vote-bar {
+    height: 100%;
+    background-image: linear-gradient(90deg, var(--gb-dark) 50%, var(--gb-mid) 50%);
+    background-size: 8px 100%;
+    transition: width 0.7s ease;
+    min-width: 2px;
+  }
+  .vote-pct {
+    font-family: "VT323", monospace;
+    font-size: 15px;
+    color: var(--gb-dark);
+    letter-spacing: 1px;
+    white-space: nowrap;
+    min-width: 88px;
+    text-align: right;
+  }
+  .vote-loading {
+    font-family: "VT323", monospace;
+    font-size: 15px;
+    color: var(--ink-soft);
+    text-align: center;
+    padding: 6px 0;
+  }
 
   /* Action block — per-level completion task */
   .action-block {
@@ -1631,6 +1687,73 @@ function renderActionBlock(lv) {
   appendPaywallJoinBtn(body, lv.id);
 }
 
+// ============================================================
+// SHARED VOTE COUNTER (abacus.jasoncameron.dev — free, no auth)
+// Each (levelId, choiceId) pair gets its own counter key.
+// Only first pick per player hits the counter; re-picks are
+// local-only so we don't inflate.
+// ============================================================
+const POLL_API = 'https://abacus.jasoncameron.dev';
+const POLL_NS = 'hao-artist-rpg-mvp';
+
+async function recordVote(levelId, choiceId) {
+  const key = `vote-${String(levelId).toLowerCase()}-${String(choiceId).toLowerCase()}`;
+  try {
+    await fetch(`${POLL_API}/hit/${POLL_NS}/${key}`);
+  } catch (e) {
+    console.warn('recordVote failed', e);
+  }
+}
+
+async function fetchVoteResults(lv) {
+  if (!lv.branches || !lv.branches.length) return null;
+  const out = {};
+  await Promise.all(lv.branches.map(async ch => {
+    const key = `vote-${String(lv.id).toLowerCase()}-${String(ch.id).toLowerCase()}`;
+    try {
+      const res = await fetch(`${POLL_API}/get/${POLL_NS}/${key}`);
+      if (res.ok) {
+        const data = await res.json();
+        out[ch.id] = data.value || 0;
+      } else {
+        out[ch.id] = 0;
+      }
+    } catch {
+      out[ch.id] = 0;
+    }
+  }));
+  return out;
+}
+
+async function renderVoteResults(lv) {
+  if (!state.picks[lv.id]) return; // don't show until voted
+  const branchBlock = document.getElementById('branchBlock');
+  if (!branchBlock || branchBlock.style.display === 'none') return;
+  let resEl = branchBlock.querySelector('.vote-results');
+  if (!resEl) {
+    resEl = document.createElement('div');
+    resEl.className = 'vote-results';
+    resEl.innerHTML = '<div class="vote-results-title">◆ 目前投票結果</div><div class="vote-rows"><div class="vote-loading">載入中…</div></div>';
+    branchBlock.appendChild(resEl);
+  }
+  const results = await fetchVoteResults(lv);
+  if (!results) return;
+  const total = Object.values(results).reduce((a, b) => a + b, 0);
+  const rowsEl = resEl.querySelector('.vote-rows');
+  rowsEl.innerHTML = '';
+  lv.branches.forEach(ch => {
+    const count = results[ch.id] || 0;
+    const pct = total > 0 ? Math.round(count / total * 100) : 0;
+    const row = document.createElement('div');
+    row.className = 'vote-row';
+    row.innerHTML =
+      '<span class="vote-label">' + escapeHtml(ch.id) + '</span>' +
+      '<div class="vote-bar-wrap"><div class="vote-bar" style="width:' + pct + '%"></div></div>' +
+      '<span class="vote-pct">' + pct + '% · ' + count + ' 票</span>';
+    rowsEl.appendChild(row);
+  });
+}
+
 function appendPaywallJoinBtn(body, levelId) {
   const p = CONTENT.paywall;
   if (!p || p.enabled === false) return;
@@ -1741,22 +1864,31 @@ function renderLevel(levelId) {
         const c = document.createElement('div');
         c.className = 'choice' + (state.picks[lv.id] === ch.id ? ' picked' : '');
         c.textContent = ch.label;
-        c.addEventListener('click', () => {
+        c.addEventListener('click', async () => {
           const firstPick = !state.picks[lv.id];
           state.picks[lv.id] = ch.id;
           saveState();
           branchChoices.querySelectorAll('.choice').forEach(x => x.classList.remove('picked'));
           c.classList.add('picked');
           toast(`已投票:${ch.label}`);
-          if (firstPick && !state.cleared.includes(lv.id)) {
-            clearLevel(lv.id, LEVEL_ACTIONS[lv.id]?.clearedMsg || '投票完成,下一關解鎖。');
+          if (firstPick) {
+            await recordVote(lv.id, ch.id);
+            if (!state.cleared.includes(lv.id)) {
+              clearLevel(lv.id, LEVEL_ACTIONS[lv.id]?.clearedMsg || '投票完成,下一關解鎖。');
+            }
           }
+          renderVoteResults(lv);
         });
         branchChoices.appendChild(c);
       });
+      // If already voted (returning player), show current tally right away
+      if (state.picks[lv.id]) renderVoteResults(lv);
     } else {
       branchLocked.style.display = 'block';
       branchChoices.style.display = 'none';
+      // Remove any previous results UI when locked
+      const prevRes = branchBlock.querySelector('.vote-results');
+      if (prevRes) prevRes.remove();
     }
   } else {
     branchBlock.style.display = 'none';
