@@ -12,14 +12,14 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build-version" content="1.2">
+<meta name="build-version" content="1.3">
 <script>
   // iOS Safari aggressive cache buster.
   // On load, compare the version this page thinks it is vs the last version
   // stored locally. If they differ on a CACHED page (i.e. localStorage has
   // newer version than current HTML), force a hard reload with fresh query.
   (function() {
-    const CURRENT = '1.2';
+    const CURRENT = '1.3';
     const LAST = localStorage.getItem('hao-rpg-build');
     if (LAST && LAST !== CURRENT && !location.search.includes('_nocache=')) {
       const sep = location.search ? '&' : '?';
@@ -854,6 +854,156 @@
   .btn-secondary { background: var(--paper); color: var(--ink); }
   .btn-secondary:hover { background: var(--gb-lightest); }
 
+  /* Action-btn secondary variant for 加入製作委員會 */
+  .action-btn.secondary {
+    background: var(--paper-light);
+    color: var(--gold-deep);
+    border-color: var(--gold-deep);
+    font-weight: 500;
+  }
+  .action-btn.secondary:hover {
+    background: var(--gb-lightest);
+    color: var(--ink);
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0 var(--gold);
+  }
+
+  /* ========== Paywall Modal ========== */
+  .paywall-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 56, 15, 0.65);
+    backdrop-filter: blur(3px);
+    display: none;
+    align-items: flex-start;
+    justify-content: center;
+    z-index: 1000;
+    padding: 32px 18px;
+    overflow-y: auto;
+    animation: fadeIn 0.25s ease;
+  }
+  .paywall-modal.open { display: flex; }
+  .paywall-card {
+    max-width: 440px;
+    width: 100%;
+    background: var(--paper-light);
+    border: 3px solid var(--gold-deep);
+    box-shadow: 6px 6px 0 var(--ink);
+    padding: 36px 28px 28px;
+    position: relative;
+    animation: slideIn 0.3s ease;
+  }
+  .paywall-close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 32px;
+    height: 32px;
+    background: var(--paper);
+    border: 2px solid var(--gb-darkest);
+    font-family: "Press Start 2P", monospace;
+    font-size: 14px;
+    cursor: pointer;
+    color: var(--gb-darkest);
+  }
+  .paywall-close:hover { background: var(--gb-lightest); }
+  .paywall-eyebrow {
+    font-family: "Press Start 2P", monospace;
+    font-size: 10px;
+    color: var(--gold-deep);
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+  }
+  .paywall-title {
+    font-size: 22px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    color: var(--ink);
+    margin: 0 0 18px;
+  }
+  .paywall-teaser {
+    font-family: "VT323", monospace;
+    font-size: 18px;
+    color: var(--ink);
+    background: var(--gb-lightest);
+    border-left: 4px solid var(--gb-dark);
+    padding: 12px 16px;
+    margin: 0 0 20px;
+    line-height: 1.65;
+  }
+  .paywall-bundle {
+    border-top: 1px dashed var(--paper-edge);
+    border-bottom: 1px dashed var(--paper-edge);
+    padding: 16px 0;
+    margin-bottom: 20px;
+  }
+  .paywall-bundle-title {
+    font-family: "Press Start 2P", monospace;
+    font-size: 9px;
+    color: var(--gb-darkest);
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+  }
+  .paywall-bundle-items {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-family: "VT323", monospace;
+    font-size: 17px;
+    line-height: 1.9;
+    color: var(--ink);
+  }
+  .paywall-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .paywall-price {
+    font-family: "Press Start 2P", monospace;
+    font-size: 13px;
+    color: var(--gold-deep);
+    letter-spacing: 2px;
+    flex-shrink: 0;
+  }
+  .paywall-checkout {
+    font-family: "Press Start 2P", monospace;
+    font-size: 11px;
+    padding: 14px 16px;
+    background: var(--gold-deep);
+    color: var(--paper-light);
+    border: 2px solid var(--ink);
+    cursor: pointer;
+    letter-spacing: 2px;
+    flex: 1;
+    min-width: 160px;
+    transition: all 0.15s;
+  }
+  .paywall-checkout:hover:not(:disabled) {
+    background: var(--ink);
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0 var(--gold);
+  }
+  .paywall-checkout:disabled {
+    background: var(--paper-edge);
+    color: var(--ink-soft);
+    border-color: var(--paper-edge);
+    cursor: not-allowed;
+    letter-spacing: 1px;
+    font-size: 9px;
+    padding: 10px 12px;
+  }
+  .paywall-soon {
+    font-family: "VT323", monospace;
+    font-size: 14px;
+    color: var(--ink-soft);
+    margin: 0;
+    padding: 6px 0 0;
+    width: 100%;
+    line-height: 1.5;
+  }
+
   /* Toast */
   .toast {
     position: fixed;
@@ -986,7 +1136,7 @@
 
     <footer>
       <p>Artist IG · <a href="https://instagram.com/haohao.zip" target="_blank" rel="noopener">@haohao.zip</a></p>
-      <p class="credits">MVP BUILD 1.2 · 音檔上傳 · 5 關 + 2 BGM</p>
+      <p class="credits">MVP BUILD 1.3 · 製作委員會 · 付費支線</p>
       <p><a href="admin.html" class="admin-link-footer">關主登入 →</a></p>
     </footer>
   </div>
@@ -1029,6 +1179,25 @@
     </div>
   </div>
 </section>
+
+<!-- ============ Paywall Modal (加入製作委員會) ============ -->
+<div class="paywall-modal" id="paywallModal" aria-hidden="true">
+  <div class="paywall-card">
+    <button class="paywall-close" id="paywallClose" aria-label="關閉">×</button>
+    <div class="paywall-eyebrow" id="paywallEyebrow">加入製作委員會</div>
+    <h2 class="paywall-title" id="paywallSubtitle">從這一關開始</h2>
+    <p class="paywall-teaser" id="paywallTeaser">—</p>
+    <div class="paywall-bundle">
+      <div class="paywall-bundle-title" id="paywallBundleTitle">完整包含:</div>
+      <ul class="paywall-bundle-items" id="paywallItems"></ul>
+    </div>
+    <div class="paywall-footer">
+      <div class="paywall-price" id="paywallPrice">199 TWD</div>
+      <button class="paywall-checkout" id="paywallCheckout" type="button">▶ 前往結帳</button>
+      <p class="paywall-soon" id="paywallSoon" hidden></p>
+    </div>
+  </div>
+</div>
 
 <div class="toast" id="toast">—</div>
 
@@ -1399,14 +1568,15 @@ function renderActionBlock(lv) {
       yours.textContent = '你寫的:「' + state.texts[lv.id] + '」';
       body.appendChild(yours);
     }
-    // Player-driven continue button — keeps pace in the player's hands
-    // and leaves room for paid-unlock / side-quest CTAs next to it later.
+    // Player-driven continue button — keeps pace in the player's hands.
     const cta = document.createElement('button');
     cta.className = 'action-btn';
     cta.textContent = '繼續 →';
     cta.style.marginTop = '16px';
     cta.addEventListener('click', () => navigate('#map'));
     body.appendChild(cta);
+    // Also append join CTA in cleared state (unified at end of function)
+    appendPaywallJoinBtn(body, lv.id);
     return;
   }
 
@@ -1455,7 +1625,70 @@ function renderActionBlock(lv) {
     });
     body.appendChild(btn);
   }
+  // Append join CTA in non-cleared state too (always offer the bundle).
+  appendPaywallJoinBtn(body, lv.id);
 }
+
+function appendPaywallJoinBtn(body, levelId) {
+  const p = CONTENT.paywall;
+  if (!p || p.enabled === false) return;
+  const joinBtn = document.createElement('button');
+  joinBtn.className = 'action-btn secondary';
+  joinBtn.textContent = '✦ 加入製作委員會';
+  joinBtn.style.marginTop = '10px';
+  joinBtn.addEventListener('click', (e) => { e.stopPropagation(); openPaywall(levelId); });
+  body.appendChild(joinBtn);
+}
+
+function openPaywall(levelId) {
+  const p = CONTENT.paywall || {};
+  document.getElementById('paywallEyebrow').textContent = p.bundleTitle || '加入製作委員會';
+  document.getElementById('paywallSubtitle').textContent = p.bundleSubtitle || '從這一關開始';
+  document.getElementById('paywallTeaser').textContent = (p.perLevelTeaser && p.perLevelTeaser[levelId]) || '';
+  const itemsEl = document.getElementById('paywallItems');
+  itemsEl.innerHTML = '';
+  (p.bundleItems || []).forEach(item => {
+    const li = document.createElement('li');
+    li.textContent = item;
+    itemsEl.appendChild(li);
+  });
+  document.getElementById('paywallPrice').textContent = p.priceLabel || '';
+  const checkout = document.getElementById('paywallCheckout');
+  const soon = document.getElementById('paywallSoon');
+  if (p.checkoutUrl) {
+    checkout.disabled = false;
+    checkout.textContent = '▶ 前往結帳';
+    checkout.onclick = () => window.open(p.checkoutUrl, '_blank', 'noopener');
+    soon.hidden = true;
+  } else {
+    checkout.disabled = true;
+    checkout.textContent = '結帳系統建置中';
+    checkout.onclick = null;
+    soon.hidden = false;
+    soon.textContent = p.comingSoonMsg || '';
+  }
+  const modal = document.getElementById('paywallModal');
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+}
+
+function closePaywall() {
+  const modal = document.getElementById('paywallModal');
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('paywallClose').addEventListener('click', closePaywall);
+document.getElementById('paywallModal').addEventListener('click', (e) => {
+  if (e.target.id === 'paywallModal') closePaywall();
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && document.getElementById('paywallModal').classList.contains('open')) {
+    closePaywall();
+  }
+});
 
 function renderLevel(levelId) {
   const lv = (CONTENT.levels || []).find(l => l.id === levelId);

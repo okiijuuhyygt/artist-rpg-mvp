@@ -22,7 +22,30 @@
   },
   "classes": {
     "guest": "訪客",
-    "villager": "村民"
+    "villager": "村民",
+    "hao": "關主"
+  },
+  "paywall": {
+    "enabled": true,
+    "priceLabel": "199 TWD",
+    "checkoutUrl": "",
+    "memberRole": "製作委員會",
+    "bundleTitle": "加入製作委員會",
+    "bundleSubtitle": "從這一關開始",
+    "bundleItems": [
+      "🎧 完整 demo mp3(這張 EP 全部)",
+      "💌 歌詞手稿 PDF(我親手寫的)",
+      "🎙 幕後 podcast 連結",
+      "🎬 名字進 MV credit"
+    ],
+    "perLevelTeaser": {
+      "L0": "還沒付費也能看。但如果你想要這張 EP 所有歌的完整 demo、歌詞手稿,從這裡按進來就對了。",
+      "L1": "付費後:聽這首歌的完整 demo、把你手寫的字放進 MV 的 0:47 那個 cut。",
+      "L2": "付費後:聽兩條路的完整 demo、看最後我錄的是 A 還是 B、投票名單裡有你。",
+      "L3": "付費後:你寫的歌詞會印成實體明信片,這張 EP 發行前寄到你信箱。",
+      "L4": "付費後:你的名字會進召喚陣名單、翻唱歌手的 credit。"
+    },
+    "comingSoonMsg": "結帳系統建置中,我還在跟綠界串。先填下面那個 email 名單,我這邊好了會寄信給你。"
   },
   "levels": [
     {
