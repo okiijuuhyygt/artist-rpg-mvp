@@ -1634,6 +1634,10 @@ function renderActionBlock(lv) {
 function appendPaywallJoinBtn(body, levelId) {
   const p = CONTENT.paywall;
   if (!p || p.enabled === false) return;
+  // Skip this level if its teaser is empty — lets 關主 hide the CTA
+  // on specific levels (e.g. L0 is an invitation, no sale pitch there).
+  const teaser = p.perLevelTeaser && p.perLevelTeaser[levelId];
+  if (!teaser || !String(teaser).trim()) return;
   const joinBtn = document.createElement('button');
   joinBtn.className = 'action-btn secondary';
   joinBtn.textContent = '✦ 加入製作委員會';
