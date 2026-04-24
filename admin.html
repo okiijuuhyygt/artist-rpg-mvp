@@ -344,6 +344,75 @@
   .save-bar .save-btn:hover:not(:disabled) { background: var(--gb-mid); }
   .save-bar .save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
+  /* Audio upload slots */
+  .audio-slot {
+    background: var(--paper);
+    border: 2px solid var(--paper-edge);
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    align-items: center;
+  }
+  .audio-slot.has-file {
+    border-color: var(--gb-dark);
+    background: var(--gb-lightest);
+  }
+  .audio-slot.uploading {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+  .audio-slot-head { min-width: 0; }
+  .audio-slot-label {
+    font-family: "Press Start 2P", monospace;
+    font-size: 9px;
+    color: var(--gb-darkest);
+    letter-spacing: 1.5px;
+    display: block;
+    margin-bottom: 4px;
+  }
+  .audio-slot-current {
+    font-family: "VT323", monospace;
+    font-size: 14px;
+    color: var(--ink-soft);
+    word-break: break-all;
+    display: block;
+  }
+  .audio-slot.has-file .audio-slot-current { color: var(--gb-dark); }
+  .audio-slot-actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  .audio-file-btn {
+    font-family: "PingFang TC", sans-serif;
+    font-size: 12px;
+    padding: 9px 14px;
+    background: var(--gb-dark);
+    color: var(--paper-light);
+    border: 2px solid var(--gb-darkest);
+    cursor: pointer;
+    letter-spacing: 1px;
+    display: inline-block;
+    white-space: nowrap;
+  }
+  .audio-file-btn:hover { background: var(--gb-darkest); }
+  .audio-clear-btn {
+    font-family: "PingFang TC", sans-serif;
+    font-size: 11px;
+    padding: 9px 10px;
+    background: transparent;
+    color: var(--danger);
+    border: 1px solid var(--danger);
+    cursor: pointer;
+    letter-spacing: 1px;
+  }
+  @media (max-width: 500px) {
+    .audio-slot { grid-template-columns: 1fr; }
+    .audio-slot-actions { justify-content: flex-start; }
+  }
+
   .hidden { display: none !important; }
   .mono { font-family: "VT323", monospace; font-size: 15px; }
 
@@ -566,6 +635,11 @@
     <h2 class="page-title" style="font-size: 13px; margin-top: 28px;">▸ 關卡</h2>
     <div id="levelsEditor"></div>
 
+    <!-- Audio uploads -->
+    <h2 class="page-title" style="font-size: 13px; margin-top: 32px;">♪ 音檔上傳</h2>
+    <p class="page-sub" style="font-size: 12px;">MP3 / WAV / M4A — 上傳後取代預設 8-bit 音。空的槽用內建 8-bit。</p>
+    <div id="audioUploads"></div>
+
   </div>
 
   <div class="save-bar" id="saveBar">
@@ -714,6 +788,133 @@ function renderEditor() {
   renderIntroLines();
   // Levels
   renderLevels();
+  // Audio uploads
+  renderAudioUploads();
+}
+
+// =======================================================
+// AUDIO UPLOADS — 5 levels + 2 BGM slots, each uploads to
+// audio/ folder in repo via GitHub Contents API, updates
+// contentData.audio.{bgm|levels}.{key} with the path.
+// =======================================================
+const AUDIO_SLOTS = [
+  { key: 'bgm.intro',  label: 'INTRO BGM(開場)' },
+  { key: 'bgm.map',    label: 'MAP BGM(世界地圖)' },
+  { key: 'levels.L0',  label: 'L0 · 新手村' },
+  { key: 'levels.L1',  label: 'L1 · 第一首歌' },
+  { key: 'levels.L2',  label: 'L2 · 分岔路' },
+  { key: 'levels.L3',  label: 'L3 · 章節式 EP' },
+  { key: 'levels.L4',  label: 'L4 · 傭兵召喚陣' },
+];
+
+function renderAudioUploads() {
+  const box = $('audioUploads');
+  if (!box) return;
+  box.innerHTML = '';
+  AUDIO_SLOTS.forEach(slot => {
+    const current = getPath(contentData, 'audio.' + slot.key) || '';
+    const hasFile = !!current;
+    const el = document.createElement('div');
+    el.className = 'audio-slot' + (hasFile ? ' has-file' : '');
+    el.dataset.key = slot.key;
+    const shortName = hasFile ? current.replace(/^audio\//, '') : '';
+    el.innerHTML = `
+      <div class="audio-slot-head">
+        <span class="audio-slot-label">${escapeHtml(slot.label)}</span>
+        <span class="audio-slot-current">${hasFile ? '✓ ' + escapeHtml(shortName) : '(8-bit 預設)'}</span>
+      </div>
+      <div class="audio-slot-actions">
+        <label class="audio-file-btn">${hasFile ? '更換' : '選音檔'}
+          <input type="file" accept="audio/*,.mp3,.wav,.m4a,.ogg" hidden>
+        </label>
+        ${hasFile ? '<button class="audio-clear-btn" type="button">清除</button>' : ''}
+      </div>
+    `;
+    const fileInput = el.querySelector('input[type="file"]');
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (file) uploadAudio(file, slot.key, el);
+      e.target.value = ''; // allow reselecting same file
+    });
+    const clearBtn = el.querySelector('.audio-clear-btn');
+    if (clearBtn) clearBtn.addEventListener('click', () => clearAudio(slot.key));
+    box.appendChild(el);
+  });
+}
+
+async function uploadAudio(file, key, slotEl) {
+  const tok = localStorage.getItem(LS_TOKEN);
+  if (!tok) { alert('需要登入才能上傳。'); return; }
+
+  const MAX = 20 * 1024 * 1024;
+  if (file.size > MAX) {
+    alert('檔案太大(' + (file.size/1024/1024).toFixed(1) + ' MB)。請壓縮到 20 MB 以內。');
+    return;
+  }
+
+  slotEl.classList.add('uploading');
+  const currentEl = slotEl.querySelector('.audio-slot-current');
+  const prevText = currentEl.textContent;
+  currentEl.textContent = '上傳中... ' + (file.size/1024/1024).toFixed(1) + ' MB';
+
+  try {
+    // Base64 encode file
+    const base64 = await new Promise((res, rej) => {
+      const r = new FileReader();
+      r.onload = () => res(String(r.result).split(',')[1]);
+      r.onerror = () => rej(new Error('讀檔失敗'));
+      r.readAsDataURL(file);
+    });
+
+    const rawExt = (file.name.split('.').pop() || 'mp3').toLowerCase();
+    const ext = rawExt.replace(/[^a-z0-9]/g, '') || 'mp3';
+    const filename = key.replace(/\./g, '-') + '.' + ext;
+    const path = 'audio/' + filename;
+
+    // Look up existing sha if replacing
+    let sha = null;
+    try {
+      const check = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`, {
+        headers: { 'Authorization': `Bearer ${tok}`, 'Accept': 'application/vnd.github+json' }
+      });
+      if (check.ok) { const data = await check.json(); sha = data.sha; }
+    } catch {}
+
+    const body = { message: 'admin: upload audio ' + filename, content: base64 };
+    if (sha) body.sha = sha;
+
+    const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${tok}`,
+        'Accept': 'application/vnd.github+json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!res.ok) {
+      const txt = await res.text();
+      throw new Error(res.status + ' ' + txt.slice(0, 200));
+    }
+
+    // Update contentData → will be saved to content.json on next 儲存到網站
+    setPath(contentData, 'audio.' + key, path);
+    renderAudioUploads();
+    updateSaveBar();
+    alert('✓ 音檔已上傳到 repo。\n記得按底下「儲存到網站」讓網頁真的用上它。');
+  } catch (e) {
+    slotEl.classList.remove('uploading');
+    currentEl.textContent = prevText;
+    alert('上傳失敗:' + e.message);
+  }
+}
+
+function clearAudio(key) {
+  if (!confirm('清除這個音檔的設定?(檔案留在 repo,只是網頁不再引用)')) return;
+  setPath(contentData, 'audio.' + key, '');
+  renderAudioUploads();
+  updateSaveBar();
 }
 
 function renderIntroLines() {
