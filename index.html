@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>陳則皞の世界 · 把聽眾變玩家</title>
+<meta name="description" content="不是一張 EP,是一款遊戲。一起推進這張世界地圖 — 解鎖歌、填補空白、決定下一首走哪條路。">
+<meta property="og:title" content="陳則皞の世界 · 把聽眾變玩家">
+<meta property="og:description" content="不是一張 EP,是一款遊戲。一起推進這張世界地圖。">
+<meta property="og:locale" content="zh_TW">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    /* Gameboy palette (DMG) */
+    --gb-darkest: #0f380f;
+    --gb-dark: #306230;
+    --gb-mid: #8bac0f;
+    --gb-light: #9bbc0f;
+    --gb-lightest: #d0d88c;
+    /* Sepia warmth */
+    --paper: #efe9de;
+    --paper-light: #fdfaf3;
+    --paper-edge: #cbc0ae;
+    --ink: #2a2624;
+    --ink-soft: #7a6d5c;
+    --gold: #b39a78;
+    --gold-deep: #6a4e32;
+    /* State */
+    --locked: #8a7d6c;
+    --unlocked: var(--gb-dark);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+    background-image:
+      radial-gradient(circle at 20% 10%, rgba(139, 172, 15, 0.05) 0%, transparent 40%),
+      radial-gradient(circle at 80% 70%, rgba(179, 154, 120, 0.08) 0%, transparent 40%);
+    min-height: 100vh;
+  }
+
+  /* Pixel dither background helper */
+  .dither {
+    background-image:
+      radial-gradient(rgba(42, 38, 36, 0.12) 1px, transparent 1px);
+    background-size: 3px 3px;
+  }
+
+  /* ========== Layout ========== */
+  main {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 32px 20px 96px;
+  }
+
+  /* ========== Gameboy Dialog Box (Intro) ========== */
+  .gb-dialog {
+    position: relative;
+    background: var(--gb-lightest);
+    border: 3px solid var(--gb-darkest);
+    padding: 22px 20px 20px;
+    margin-bottom: 36px;
+    box-shadow:
+      4px 4px 0 var(--gb-darkest),
+      inset 0 0 0 2px var(--gb-light);
+    font-family: "VT323", "Courier New", monospace;
+    color: var(--gb-darkest);
+  }
+  .gb-dialog::before {
+    content: "";
+    position: absolute;
+    top: -3px; left: -3px; right: -3px; bottom: -3px;
+    pointer-events: none;
+    background-image:
+      linear-gradient(45deg, transparent 46%, var(--gb-darkest) 46%, var(--gb-darkest) 54%, transparent 54%);
+    background-size: 6px 6px;
+    background-position: -3px -3px;
+    opacity: 0;
+  }
+  .gb-dialog .speaker {
+    font-family: "Press Start 2P", monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: var(--gb-dark);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .gb-dialog .speaker::before {
+    content: "";
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    background: var(--gb-darkest);
+    box-shadow:
+      4px 0 0 var(--gb-darkest),
+      0 4px 0 var(--gb-darkest),
+      4px 4px 0 var(--gb-darkest);
+    transform: scale(0.6);
+    transform-origin: left center;
+  }
+  .gb-dialog .text {
+    font-size: 20px;
+    line-height: 1.55;
+    min-height: 3.1em;
+    white-space: pre-wrap;
+  }
+  .gb-dialog .cursor {
+    display: inline-block;
+    width: 10px;
+    height: 14px;
+    background: var(--gb-darkest);
+    animation: blink 0.8s step-end infinite;
+    vertical-align: middle;
+    margin-left: 2px;
+  }
+  .gb-dialog .next {
+    position: absolute;
+    right: 14px;
+    bottom: 10px;
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 10px solid var(--gb-darkest);
+    animation: bob 0.9s ease-in-out infinite;
+    opacity: 0;
+  }
+  .gb-dialog.typed .next { opacity: 1; }
+  @keyframes blink { 50% { opacity: 0; } }
+  @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(3px); } }
+
+  .gb-dialog .skip {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    font-family: "Press Start 2P", monospace;
+    font-size: 8px;
+    color: var(--gb-dark);
+    background: transparent;
+    border: 1px solid var(--gb-dark);
+    padding: 4px 6px;
+    cursor: pointer;
+    opacity: 0.7;
+  }
+  .gb-dialog .skip:hover { opacity: 1; }
+
+  /* ========== Header ========== */
+  .header {
+    text-align: center;
+    padding: 28px 0 20px;
+    border-bottom: 1px dashed var(--paper-edge);
+    margin-bottom: 28px;
+  }
+  .header .pixel-title {
+    font-family: "Press Start 2P", monospace;
+    font-size: 14px;
+    color: var(--gb-darkest);
+    letter-spacing: 2px;
+    margin: 0 0 10px;
+    line-height: 1.6;
+  }
+  .header .sub {
+    font-size: 13px;
+    color: var(--ink-soft);
+    letter-spacing: 3px;
+    margin: 0;
+  }
+  .header .status {
+    margin-top: 14px;
+    font-family: "VT323", monospace;
+    font-size: 16px;
+    color: var(--gb-dark);
+  }
+  .header .status .class-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    background: var(--gb-light);
+    border: 2px solid var(--gb-darkest);
+    color: var(--gb-darkest);
+    font-size: 12px;
+    letter-spacing: 1px;
+    margin-left: 6px;
+  }
+
+  /* ========== World Map ========== */
+  .map-title {
+    font-family: "Press Start 2P", monospace;
+    font-size: 11px;
+    color: var(--gb-darkest);
+    letter-spacing: 2px;
+    margin: 0 0 6px;
+  }
+  .map-note {
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin: 0 0 20px;
+    letter-spacing: 1px;
+  }
+
+  .world-map {
+    position: relative;
+    padding: 18px 14px;
+    background: var(--paper-light);
+    border: 2px solid var(--gold);
+    border-radius: 2px;
+    box-shadow: 3px 3px 0 var(--paper-edge);
+    margin-bottom: 36px;
+  }
+
+  .nodes { position: relative; z-index: 2; }
+
+  .path-svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .path-svg path {
+    fill: none;
+    stroke: var(--gold);
+    stroke-width: 2;
+    stroke-dasharray: 4 4;
+    opacity: 0.55;
+  }
+
+  .node {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 12px;
+    margin-bottom: 12px;
+    background: var(--paper);
+    border: 2px solid var(--paper-edge);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+  }
+  .node:hover:not(.locked) {
+    border-color: var(--gb-dark);
+    background: var(--gb-lightest);
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0 var(--gb-darkest);
+  }
+  .node.locked {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+  .node.locked:hover {
+    border-color: var(--locked);
+  }
+  .node.cleared {
+    border-color: var(--gb-dark);
+    background: var(--gb-lightest);
+  }
+  .node-icon {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Press Start 2P", monospace;
+    font-size: 12px;
+    background: var(--gb-light);
+    border: 2px solid var(--gb-darkest);
+    color: var(--gb-darkest);
+    image-rendering: pixelated;
+    position: relative;
+  }
+  .node.locked .node-icon {
+    background: var(--paper-edge);
+    border-color: var(--locked);
+    color: var(--paper-light);
+  }
+  .node.cleared .node-icon {
+    background: var(--gb-mid);
+  }
+  .node.cleared .node-icon::after {
+    content: "✓";
+    font-size: 18px;
+    color: var(--gb-darkest);
+  }
+  .node-body {
+    flex: 1;
+    min-width: 0;
+  }
+  .node-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ink);
+    margin: 0 0 4px;
+    letter-spacing: 1px;
+  }
+  .node-title .num {
+    font-family: "VT323", monospace;
+    color: var(--gold);
+    margin-right: 8px;
+    font-size: 16px;
+  }
+  .node-desc {
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin: 0;
+    letter-spacing: 0.5px;
+  }
+  .node-badge {
+    font-family: "Press Start 2P", monospace;
+    font-size: 8px;
+    padding: 3px 6px;
+    background: transparent;
+    border: 1px solid var(--ink-soft);
+    color: var(--ink-soft);
+    letter-spacing: 1px;
+  }
+  .node-badge.main { background: var(--gold); color: var(--paper-light); border-color: var(--gold-deep); }
+  .node-badge.side { background: var(--gb-lightest); color: var(--gb-darkest); border-color: var(--gb-dark); }
+  .node-badge.hidden { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+  /* Progress bar */
+  .progress-wrap {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--paper-edge);
+  }
+  .progress-label {
+    font-family: "VT323", monospace;
+    font-size: 15px;
+    color: var(--gb-dark);
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .progress-bar {
+    height: 14px;
+    background: var(--paper);
+    border: 2px solid var(--gb-darkest);
+    padding: 2px;
+    image-rendering: pixelated;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--gb-dark);
+    background-image: linear-gradient(90deg, var(--gb-dark) 50%, var(--gb-mid) 50%);
+    background-size: 8px 100%;
+    transition: width 0.6s ease;
+  }
+
+  /* ========== Modal (Level Page) ========== */
+  .modal-bg {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 56, 15, 0.55);
+    backdrop-filter: blur(2px);
+    display: none;
+    align-items: flex-start;
+    justify-content: center;
+    z-index: 100;
+    overflow-y: auto;
+    padding: 24px 14px;
+  }
+  .modal-bg.open {
+    display: flex;
+    animation: fadeIn 0.2s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .modal {
+    width: 100%;
+    max-width: 600px;
+    background: var(--paper-light);
+    border: 3px solid var(--gb-darkest);
+    box-shadow: 6px 6px 0 var(--gb-darkest);
+    padding: 28px 24px 24px;
+    position: relative;
+    animation: slideIn 0.25s ease;
+  }
+  @keyframes slideIn {
+    from { transform: translateY(16px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  .modal .close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 32px;
+    height: 32px;
+    background: var(--paper);
+    border: 2px solid var(--gb-darkest);
+    font-family: "Press Start 2P", monospace;
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gb-darkest);
+  }
+  .modal .close:hover { background: var(--gb-lightest); }
+
+  .modal .level-tag {
+    font-family: "Press Start 2P", monospace;
+    font-size: 9px;
+    color: var(--gold-deep);
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+  }
+  .modal h2 {
+    font-size: 20px;
+    font-weight: 500;
+    margin: 0 0 6px;
+    color: var(--ink);
+    letter-spacing: 2px;
+  }
+  .modal .level-sub {
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin: 0 0 20px;
+    letter-spacing: 1px;
+  }
+
+  .modal .story {
+    background: var(--paper);
+    border-left: 3px solid var(--gold);
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    line-height: 1.9;
+    color: var(--ink);
+    font-family: "VT323", monospace;
+    font-size: 18px;
+    line-height: 1.65;
+  }
+
+  .modal .audio-block {
+    margin-bottom: 20px;
+    padding: 14px;
+    background: var(--gb-lightest);
+    border: 2px solid var(--gb-darkest);
+  }
+  .modal .audio-block .audio-title {
+    font-family: "Press Start 2P", monospace;
+    font-size: 9px;
+    color: var(--gb-darkest);
+    margin-bottom: 10px;
+    letter-spacing: 1.5px;
+  }
+  .modal .audio-block audio {
+    width: 100%;
+    height: 36px;
+  }
+  .modal .audio-block .tone-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .modal .audio-block button.tone-btn {
+    font-family: "VT323", monospace;
+    font-size: 16px;
+    background: var(--gb-darkest);
+    color: var(--gb-lightest);
+    border: 2px solid var(--gb-darkest);
+    padding: 6px 14px;
+    cursor: pointer;
+    letter-spacing: 1px;
+  }
+  .modal .audio-block button.tone-btn:hover { background: var(--gb-dark); }
+  .modal .audio-block .tone-meta {
+    font-family: "VT323", monospace;
+    font-size: 15px;
+    color: var(--gb-darkest);
+    flex: 1;
+  }
+
+  /* The Missing Piece — 填空式資產 */
+  .missing-piece {
+    position: relative;
+    padding: 24px 18px;
+    margin-bottom: 20px;
+    background: var(--paper);
+    border: 2px dashed var(--gold-deep);
+    text-align: center;
+    min-height: 120px;
+  }
+  .missing-piece::before {
+    content: "???";
+    font-family: "Press Start 2P", monospace;
+    font-size: 28px;
+    color: var(--gold);
+    letter-spacing: 6px;
+    display: block;
+    margin-bottom: 10px;
+    animation: glitch 3s infinite;
+  }
+  @keyframes glitch {
+    0%, 90%, 100% { transform: translate(0, 0); opacity: 1; }
+    93% { transform: translate(-2px, 1px); opacity: 0.8; }
+    96% { transform: translate(2px, -1px); opacity: 0.9; }
+  }
+  .missing-piece .mp-caption {
+    font-size: 12px;
+    color: var(--ink-soft);
+    font-style: italic;
+    letter-spacing: 1px;
+    line-height: 1.7;
+  }
+  .missing-piece.filled::before {
+    content: "✓ FILLED";
+    font-size: 14px;
+    color: var(--gb-dark);
+    animation: none;
+  }
+  .missing-piece.filled {
+    border-style: solid;
+    border-color: var(--gb-dark);
+    background: var(--gb-lightest);
+  }
+
+  /* Branching choice — 分支決策(高階玩家) */
+  .branch-block {
+    padding: 16px;
+    margin-bottom: 20px;
+    background: var(--paper);
+    border: 2px solid var(--paper-edge);
+  }
+  .branch-block .branch-title {
+    font-family: "Press Start 2P", monospace;
+    font-size: 9px;
+    color: var(--gold-deep);
+    margin-bottom: 10px;
+    letter-spacing: 1.5px;
+  }
+  .branch-block .branch-locked {
+    font-family: "VT323", monospace;
+    font-size: 16px;
+    color: var(--ink-soft);
+    text-align: center;
+    padding: 18px 0;
+    letter-spacing: 1px;
+  }
+  .branch-block .branch-locked .key-icon {
+    display: inline-block;
+    font-size: 20px;
+    margin-right: 6px;
+  }
+  .branch-block .choices {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .branch-block .choice {
+    padding: 12px;
+    border: 2px solid var(--paper-edge);
+    background: var(--paper-light);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-size: 13px;
+  }
+  .branch-block .choice:hover {
+    border-color: var(--gb-dark);
+    background: var(--gb-lightest);
+  }
+  .branch-block .choice.picked {
+    border-color: var(--gb-dark);
+    background: var(--gb-light);
+    color: var(--gb-darkest);
+  }
+
+  /* Action row */
+  .modal .actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .modal .actions button {
+    flex: 1;
+    min-width: 120px;
+    padding: 12px;
+    font-family: "PingFang TC", sans-serif;
+    font-size: 13px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 2px solid var(--gb-darkest);
+  }
+  .btn-primary {
+    background: var(--gb-dark);
+    color: var(--paper-light);
+  }
+  .btn-primary:hover { background: var(--gb-darkest); }
+  .btn-secondary {
+    background: var(--paper);
+    color: var(--ink);
+  }
+  .btn-secondary:hover { background: var(--gb-lightest); }
+
+  /* ========== Email Signup (Village Gate) ========== */
+  .gate {
+    margin-top: 40px;
+    padding: 28px 20px;
+    background: var(--paper-light);
+    border: 3px solid var(--gb-darkest);
+    box-shadow: 5px 5px 0 var(--paper-edge);
+    text-align: center;
+    position: relative;
+  }
+  .gate::before {
+    content: "";
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 28px;
+    height: 28px;
+    background: var(--gb-light);
+    border: 3px solid var(--gb-darkest);
+    image-rendering: pixelated;
+  }
+  .gate .gate-title {
+    font-family: "Press Start 2P", monospace;
+    font-size: 12px;
+    color: var(--gb-darkest);
+    letter-spacing: 2px;
+    margin: 4px 0 12px;
+  }
+  .gate .gate-sub {
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin: 0 0 8px;
+    letter-spacing: 1px;
+  }
+  .gate .gate-note {
+    font-size: 11px;
+    color: var(--ink-soft);
+    margin: 0 0 18px;
+    font-style: italic;
+    letter-spacing: 0.5px;
+  }
+  .gate .gate-form {
+    display: flex;
+    gap: 8px;
+    max-width: 440px;
+    margin: 0 auto;
+  }
+  .gate input[type="email"] {
+    flex: 1;
+    padding: 10px 12px;
+    font-family: "VT323", monospace;
+    font-size: 18px;
+    background: var(--paper);
+    border: 2px solid var(--gb-darkest);
+    color: var(--ink);
+    min-width: 0;
+  }
+  .gate input[type="email"]:focus {
+    outline: none;
+    background: var(--gb-lightest);
+  }
+  .gate button.gate-submit {
+    padding: 10px 18px;
+    font-family: "Press Start 2P", monospace;
+    font-size: 10px;
+    background: var(--gb-darkest);
+    color: var(--gb-lightest);
+    border: 2px solid var(--gb-darkest);
+    cursor: pointer;
+    letter-spacing: 1px;
+    white-space: nowrap;
+  }
+  .gate button.gate-submit:hover { background: var(--gb-dark); }
+
+  .gate .success {
+    display: none;
+    padding: 12px;
+    background: var(--gb-lightest);
+    border: 2px solid var(--gb-dark);
+    color: var(--gb-darkest);
+    font-family: "VT323", monospace;
+    font-size: 18px;
+    margin-top: 12px;
+    letter-spacing: 1px;
+  }
+  .gate .success.show { display: block; }
+
+  /* ========== Toast ========== */
+  .toast {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%) translateY(40px);
+    background: var(--gb-darkest);
+    color: var(--gb-lightest);
+    padding: 12px 20px;
+    font-family: "VT323", monospace;
+    font-size: 18px;
+    letter-spacing: 1px;
+    border: 2px solid var(--gb-light);
+    box-shadow: 3px 3px 0 var(--gb-dark);
+    z-index: 200;
+    opacity: 0;
+    transition: all 0.3s ease;
+    pointer-events: none;
+    max-width: 90%;
+    text-align: center;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* ========== Footer ========== */
+  footer {
+    margin-top: 56px;
+    padding-top: 28px;
+    border-top: 1px dashed var(--paper-edge);
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 11px;
+    letter-spacing: 2px;
+  }
+  footer a {
+    color: var(--gold-deep);
+    text-decoration: none;
+    border-bottom: 1px solid var(--gold);
+  }
+  footer .credits {
+    font-family: "Press Start 2P", monospace;
+    font-size: 8px;
+    margin-top: 14px;
+    letter-spacing: 2px;
+    color: var(--paper-edge);
+  }
+
+  /* ========== Mobile ========== */
+  @media (max-width: 600px) {
+    main { padding: 20px 14px 80px; }
+    .header .pixel-title { font-size: 12px; }
+    .gb-dialog .text { font-size: 18px; }
+    .node-title { font-size: 14px; }
+    .node-icon { width: 38px; height: 38px; font-size: 10px; }
+    .modal { padding: 24px 18px 20px; }
+    .modal h2 { font-size: 18px; }
+    .branch-block .choices { grid-template-columns: 1fr; }
+    .gate .gate-form { flex-direction: column; }
+    .gate .gate-title { font-size: 10px; }
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+<main>
+
+  <!-- ===== Artist Intro Dialog (Gameboy) ===== -->
+  <div class="gb-dialog" id="introDialog">
+    <button class="skip" id="skipIntro">SKIP ▶</button>
+    <div class="speaker">HAO · 陳則皞</div>
+    <div class="text"><span id="typedText"></span><span class="cursor"></span></div>
+    <div class="next">▼</div>
+  </div>
+
+  <!-- ===== Header ===== -->
+  <header class="header">
+    <h1 class="pixel-title">CHEN TSE-HAO</h1>
+    <p class="sub">H A O · の 世 界</p>
+    <div class="status" id="playerStatus">
+      目前身份<span class="class-tag" id="classTag">遊客</span>
+    </div>
+  </header>
+
+  <!-- ===== World Map ===== -->
+  <section>
+    <h2 class="map-title">▸ 世界地圖</h2>
+    <p class="map-note">每個節點是一首歌、一個章節、或一個企劃。點進去看關卡細節。</p>
+
+    <div class="world-map">
+      <svg class="path-svg" id="pathSvg" preserveAspectRatio="none"></svg>
+      <div class="nodes" id="nodes">
+        <!-- rendered by JS -->
+      </div>
+
+      <div class="progress-wrap">
+        <div class="progress-label">
+          <span>世界推進度</span>
+          <span id="progressText">0 / 5</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Village Gate (Free Email Signup) ===== -->
+  <section class="gate">
+    <h2 class="gate-title">加入村民</h2>
+    <p class="gate-sub">免費。我會不定期寄一些手寫信、碎念、或發行前的 Demo。</p>
+    <p class="gate-note">你也可以把生活垃圾丟回來。我不一定會回,但我在。</p>
+    <form class="gate-form" id="gateForm">
+      <input type="email" id="gateEmail" placeholder="your@email.com" required autocomplete="email">
+      <button type="submit" class="gate-submit">REGISTER ▶</button>
+    </form>
+    <div class="success" id="gateSuccess">
+      ✓ 你已進入村莊。身份升級為「村民」。往下走,找找隱藏節點。
+    </div>
+  </section>
+
+  <footer>
+    <p>Artist IG · <a href="https://instagram.com/mr.alleys" target="_blank" rel="noopener">@mr.alleys</a></p>
+    <p class="credits">MVP BUILD 0.1 · MADE WITH ♥ &amp; PIXELS</p>
+  </footer>
+
+</main>
+
+<!-- ===== Modal (Level Page) ===== -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal" id="modal">
+    <button class="close" id="modalClose">×</button>
+    <div class="level-tag" id="levelTag">LEVEL 01</div>
+    <h2 id="levelTitle">—</h2>
+    <p class="level-sub" id="levelSub">—</p>
+
+    <div class="story" id="levelStory">—</div>
+
+    <div class="audio-block">
+      <div class="audio-title">♪ 試聽(30 秒 / 8-bit Demo)</div>
+      <div class="tone-controls">
+        <button class="tone-btn" id="playTone">▶ PLAY</button>
+        <span class="tone-meta" id="toneMeta">—</span>
+      </div>
+    </div>
+
+    <div class="missing-piece" id="missingPiece">
+      <p class="mp-caption" id="mpCaption">這首歌的 MV 裡有一個畫面還空著。付費玩家可以把自己的筆跡 / 手寫字 / 貓的照片填進去。</p>
+    </div>
+
+    <div class="branch-block" id="branchBlock">
+      <div class="branch-title">◆ 分支決策(下一首走哪條路)</div>
+      <div class="branch-locked" id="branchLocked">
+        <span class="key-icon">🔒</span>需要「初代 Demo 鑰匙」才能投票
+      </div>
+      <div class="choices" id="branchChoices" style="display:none;">
+        <!-- filled by JS -->
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn-primary" id="actClear">標記「我已聽過」</button>
+      <button class="btn-secondary" id="actKey">取得 Demo 鑰匙</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Toast ===== -->
+<div class="toast" id="toast">—</div>
+
+<script>
+// ============================================================
+// STATE (localStorage)
+// ============================================================
+const STORAGE_KEY = 'hao-rpg-v1';
+const defaultState = {
+  cleared: [],          // level ids
+  filled: [],           // missing-piece ids filled
+  hasKey: false,        // branching decision key
+  picks: {},            // level id -> choice id
+  email: null,          // village member email
+  class: 'guest',       // guest | villager | merchant | patron
+};
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return { ...defaultState };
+    return { ...defaultState, ...JSON.parse(raw) };
+  } catch { return { ...defaultState }; }
+}
+function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+let state = loadState();
+
+// ============================================================
+// LEVELS — 3/23 RPG 設計落地:填空式資產 / 分支決策 / NPC 階級 / 傭兵
+// ============================================================
+const LEVELS = [
+  {
+    id: 'L0',
+    num: '00',
+    title: '新手村:歸隊信',
+    desc: '半年沒講話,先把門重新打開。',
+    tag: 'main',
+    story: '我消失了半年。不是沒在寫歌 — 是把這半年的碎片整理成一張地圖。你現在站在村口,這封信是我遞給你的。不用付費,也不用回信。你可以只是站在這裡,看我把歌一首一首搬出來。',
+    tone: { note: 'C4', bpm: 72, mood: 'warm reset · lo-fi keys' },
+    mpCaption: '(這一關沒有填空 — 歸隊信本來就不該賣任何東西)',
+    branches: null,
+    hasMissingPiece: false,
+    defaultUnlocked: true,
+  },
+  {
+    id: 'L1',
+    num: '01',
+    title: '第一首單曲:???',
+    desc: '回歸後第一首。MV 裡有個畫面,還沒填。',
+    tag: 'main',
+    story: '這首歌講一個半夜醒來,發現自己還在原地的時刻。MV 腳本裡,主角會路過一面牆,上面貼著一張「不認識的人手寫的一句話」。那面牆現在是空的。如果沒有人填,它就會是空的上架。',
+    tone: { note: 'A3', bpm: 88, mood: '慢板 · 木吉他 + bitcrush' },
+    mpCaption: '這面牆上的那句話,由付費玩家寫。衛生紙、便條紙、筆跡都可以。寫完拍照回傳,它會進 MV 的 0:47 那個 cut。',
+    branches: null,
+    hasMissingPiece: true,
+    defaultUnlocked: true,
+  },
+  {
+    id: 'L2',
+    num: '02',
+    title: '分岔路:悲 or 爆',
+    desc: '下一首走哪條路,由拿到鑰匙的人決定。',
+    tag: 'main',
+    story: '走到這裡,地圖分岔了。A 是繼續往深處走的慢歌,B 是把情緒撕開的節奏歌。我都寫了一半。拿到「初代 Demo 鑰匙」的人可以投票決定我先把哪一首錄完。免費玩家只能看著他們投。',
+    tone: { note: 'E3', bpm: 104, mood: '岔路 · 雙版本 Demo' },
+    mpCaption: null,
+    hasMissingPiece: false,
+    branches: [
+      { id: 'A', label: 'A · 繼續往下沉(ballad)' },
+      { id: 'B', label: 'B · 把它撕開(upbeat)' },
+    ],
+    defaultUnlocked: false,
+    unlockedBy: 'L1',
+  },
+  {
+    id: 'L3',
+    num: '03',
+    title: '章節式 EP:第一章',
+    desc: '五首歌的小地圖,慢慢解鎖。',
+    tag: 'side',
+    story: '這不是單張 EP。是「章節式 EP」— 每一首都是獨立上架的單曲,但五首連起來是一個故事。第一章會先放鑰匙在村裡某處。村民可以撿,不用付費。',
+    tone: { note: 'G3', bpm: 96, mood: '章節式 · 五首組合' },
+    mpCaption: '章節封面需要一張「影響過你的歌詞」截圖。截圖本身會變成章節首頁的底圖。',
+    branches: null,
+    hasMissingPiece: true,
+    defaultUnlocked: false,
+    unlockedBy: 'L2',
+  },
+  {
+    id: 'L4',
+    num: '??',
+    title: '傭兵召喚陣',
+    desc: '累積貢獻到門檻,聘請客座 NPC。',
+    tag: 'hidden',
+    story: '這一關是隱藏的。當村民總數達到某個門檻,會觸發「召喚陣」— 我會花錢請一位現在還在 cover 的歌手翻唱這一首。不是偷偷業配,是公開的「任務發包」。歌手拿錢,玩家拿流量,我拿市場驗證。',
+    tone: { note: 'F4', bpm: 120, mood: '召喚陣 · 客座 NPC' },
+    mpCaption: '召喚陣需要 30 個村民才會啟動。每一個 email 都是一個符文。',
+    branches: null,
+    hasMissingPiece: false,
+    defaultUnlocked: false,
+    unlockedBy: '__village_30__',
+  },
+];
+
+// ============================================================
+// INTRO DIALOG (typewriter)
+// ============================================================
+const introLines = [
+  '嘿,好久沒聯絡。',
+  '這不是一張 EP,是一款遊戲。',
+  '五個關卡、一張世界地圖 — 陪我把歌搬出來。',
+  '不用付費,也能看;想決定走向,就拿鑰匙。',
+  '往下滑,先看看地圖。',
+];
+let introIndex = 0;
+let introTyping = false;
+const typedEl = document.getElementById('typedText');
+const introEl = document.getElementById('introDialog');
+const skipBtn = document.getElementById('skipIntro');
+
+function typeLine(line, cb) {
+  introTyping = true;
+  introEl.classList.remove('typed');
+  typedEl.textContent = '';
+  let i = 0;
+  const iv = setInterval(() => {
+    typedEl.textContent += line[i];
+    i++;
+    if (i >= line.length) {
+      clearInterval(iv);
+      introTyping = false;
+      introEl.classList.add('typed');
+      cb && cb();
+    }
+  }, 45);
+  return iv;
+}
+let currentIv = null;
+function advanceIntro() {
+  if (introTyping && currentIv) {
+    clearInterval(currentIv);
+    typedEl.textContent = introLines[introIndex];
+    introEl.classList.add('typed');
+    introTyping = false;
+    return;
+  }
+  introIndex++;
+  if (introIndex >= introLines.length) {
+    // collapse dialog
+    introEl.style.transition = 'opacity 0.4s, max-height 0.4s';
+    introEl.style.maxHeight = introEl.offsetHeight + 'px';
+    requestAnimationFrame(() => {
+      introEl.style.opacity = '0.6';
+    });
+    return;
+  }
+  currentIv = typeLine(introLines[introIndex]);
+}
+introEl.addEventListener('click', (e) => {
+  if (e.target === skipBtn) return;
+  advanceIntro();
+});
+skipBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  introIndex = introLines.length - 1;
+  if (currentIv) clearInterval(currentIv);
+  typedEl.textContent = introLines[introLines.length - 1];
+  introEl.classList.add('typed');
+  introTyping = false;
+});
+currentIv = typeLine(introLines[0]);
+
+// ============================================================
+// RENDER WORLD MAP
+// ============================================================
+const nodesEl = document.getElementById('nodes');
+
+function isUnlocked(level) {
+  if (level.defaultUnlocked) return true;
+  if (!level.unlockedBy) return false;
+  if (level.unlockedBy === '__village_30__') {
+    // Hidden lvl demo: unlock when email registered (MVP stub)
+    return !!state.email;
+  }
+  return state.cleared.includes(level.unlockedBy);
+}
+
+function renderNodes() {
+  nodesEl.innerHTML = '';
+  LEVELS.forEach((lv) => {
+    const unlocked = isUnlocked(lv);
+    const cleared = state.cleared.includes(lv.id);
+    const el = document.createElement('div');
+    el.className = 'node' + (unlocked ? '' : ' locked') + (cleared ? ' cleared' : '');
+    el.dataset.id = lv.id;
+    el.innerHTML = `
+      <div class="node-icon">${unlocked ? lv.num : '?'}</div>
+      <div class="node-body">
+        <p class="node-title"><span class="num">${lv.num}</span>${unlocked ? escapeHtml(lv.title) : '???'}</p>
+        <p class="node-desc">${unlocked ? escapeHtml(lv.desc) : '尚未解鎖。完成前一關才看得到這裡。'}</p>
+      </div>
+      <span class="node-badge ${lv.tag}">${lv.tag === 'main' ? 'MAIN' : lv.tag === 'side' ? 'SIDE' : 'HIDDEN'}</span>
+    `;
+    if (unlocked) {
+      el.addEventListener('click', () => openLevel(lv));
+    } else {
+      el.addEventListener('click', () => toast('這裡還沒開 — 先往前推進。'));
+    }
+    nodesEl.appendChild(el);
+  });
+  // progress
+  const cleared = state.cleared.length;
+  const total = LEVELS.length;
+  document.getElementById('progressText').textContent = `${cleared} / ${total}`;
+  document.getElementById('progressFill').style.width = `${(cleared / total) * 100}%`;
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+// ============================================================
+// MODAL (Level page)
+// ============================================================
+const modalBg = document.getElementById('modalBg');
+const modalClose = document.getElementById('modalClose');
+let activeLevel = null;
+
+function openLevel(lv) {
+  activeLevel = lv;
+  document.getElementById('levelTag').textContent = `LEVEL ${lv.num}`;
+  document.getElementById('levelTitle').textContent = lv.title;
+  document.getElementById('levelSub').textContent = lv.desc;
+  document.getElementById('levelStory').textContent = lv.story;
+  document.getElementById('toneMeta').textContent = `${lv.tone.note} · ${lv.tone.bpm} BPM · ${lv.tone.mood}`;
+
+  // Missing piece
+  const mpEl = document.getElementById('missingPiece');
+  const mpCap = document.getElementById('mpCaption');
+  if (lv.hasMissingPiece && lv.mpCaption) {
+    mpEl.style.display = 'block';
+    mpCap.textContent = lv.mpCaption;
+    if (state.filled.includes(lv.id)) mpEl.classList.add('filled');
+    else mpEl.classList.remove('filled');
+  } else {
+    mpEl.style.display = 'none';
+  }
+
+  // Branches
+  const branchBlock = document.getElementById('branchBlock');
+  const branchLocked = document.getElementById('branchLocked');
+  const branchChoices = document.getElementById('branchChoices');
+  if (lv.branches) {
+    branchBlock.style.display = 'block';
+    if (state.hasKey) {
+      branchLocked.style.display = 'none';
+      branchChoices.style.display = 'grid';
+      branchChoices.innerHTML = '';
+      lv.branches.forEach(ch => {
+        const c = document.createElement('div');
+        c.className = 'choice' + (state.picks[lv.id] === ch.id ? ' picked' : '');
+        c.textContent = ch.label;
+        c.addEventListener('click', () => {
+          state.picks[lv.id] = ch.id;
+          saveState();
+          branchChoices.querySelectorAll('.choice').forEach(x => x.classList.remove('picked'));
+          c.classList.add('picked');
+          toast(`已投票:${ch.label}`);
+        });
+        branchChoices.appendChild(c);
+      });
+    } else {
+      branchLocked.style.display = 'block';
+      branchChoices.style.display = 'none';
+    }
+  } else {
+    branchBlock.style.display = 'none';
+  }
+
+  modalBg.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLevel() {
+  modalBg.classList.remove('open');
+  document.body.style.overflow = '';
+  activeLevel = null;
+  stopTone();
+}
+
+modalClose.addEventListener('click', closeLevel);
+modalBg.addEventListener('click', (e) => { if (e.target === modalBg) closeLevel(); });
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && modalBg.classList.contains('open')) closeLevel();
+});
+
+// Clear + Key actions
+document.getElementById('actClear').addEventListener('click', () => {
+  if (!activeLevel) return;
+  if (!state.cleared.includes(activeLevel.id)) {
+    state.cleared.push(activeLevel.id);
+    // Also mark missing piece as filled for flavor (MVP: no real upload)
+    if (activeLevel.hasMissingPiece && !state.filled.includes(activeLevel.id)) {
+      state.filled.push(activeLevel.id);
+    }
+    saveState();
+    renderNodes();
+    toast(`✓ ${activeLevel.title} 已推進`);
+    const mpEl = document.getElementById('missingPiece');
+    if (activeLevel.hasMissingPiece) mpEl.classList.add('filled');
+  } else {
+    toast('這關已推進過了');
+  }
+});
+
+document.getElementById('actKey').addEventListener('click', () => {
+  if (state.hasKey) {
+    toast('鑰匙已在你身上。');
+    return;
+  }
+  state.hasKey = true;
+  // Promote class
+  if (state.class === 'villager' || state.class === 'guest') state.class = 'merchant';
+  saveState();
+  updateClass();
+  toast('✓ 取得「初代 Demo 鑰匙」— 你現在可以在分岔路投票。');
+  // Re-render branches
+  if (activeLevel && activeLevel.branches) openLevel(activeLevel);
+});
+
+// ============================================================
+// TONE GENERATOR (Web Audio API · 8-bit placeholder)
+// ============================================================
+let audioCtx = null;
+let activeOsc = null;
+let activeGain = null;
+let toneInterval = null;
+
+const NOTE_FREQ = {
+  'C3': 130.81, 'D3': 146.83, 'E3': 164.81, 'F3': 174.61, 'G3': 196.00, 'A3': 220.00, 'B3': 246.94,
+  'C4': 261.63, 'D4': 293.66, 'E4': 329.63, 'F4': 349.23, 'G4': 392.00, 'A4': 440.00,
+};
+
+function playTone() {
+  if (!activeLevel) return;
+  stopTone();
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const baseFreq = NOTE_FREQ[activeLevel.tone.note] || 220;
+  const bpm = activeLevel.tone.bpm;
+  const stepMs = (60 / bpm) * 1000 / 2; // 8th notes
+  const melody = [0, 4, 7, 4, 0, 7, 4, 0]; // semitone offsets
+  let step = 0;
+  const btn = document.getElementById('playTone');
+  btn.textContent = '■ STOP';
+  const startTime = audioCtx.currentTime;
+  activeGain = audioCtx.createGain();
+  activeGain.gain.value = 0.08;
+  activeGain.connect(audioCtx.destination);
+
+  function playStep() {
+    const osc = audioCtx.createOscillator();
+    osc.type = 'square';
+    const offset = melody[step % melody.length];
+    const freq = baseFreq * Math.pow(2, offset / 12);
+    osc.frequency.value = freq;
+    const g = audioCtx.createGain();
+    g.gain.setValueAtTime(0.15, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + stepMs / 1000 * 0.9);
+    osc.connect(g);
+    g.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + stepMs / 1000);
+    step++;
+  }
+  playStep();
+  toneInterval = setInterval(playStep, stepMs);
+  // Auto-stop after 30s
+  setTimeout(stopTone, 30000);
+}
+function stopTone() {
+  if (toneInterval) { clearInterval(toneInterval); toneInterval = null; }
+  const btn = document.getElementById('playTone');
+  btn.textContent = '▶ PLAY';
+}
+document.getElementById('playTone').addEventListener('click', () => {
+  if (toneInterval) stopTone();
+  else playTone();
+});
+
+// ============================================================
+// EMAIL GATE (Village Registration)
+// ============================================================
+const gateForm = document.getElementById('gateForm');
+const gateSuccess = document.getElementById('gateSuccess');
+const gateEmail = document.getElementById('gateEmail');
+
+gateForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const email = gateEmail.value.trim();
+  if (!email || !email.includes('@')) {
+    toast('email 格式怪怪的,再檢查一下');
+    return;
+  }
+  state.email = email;
+  if (state.class === 'guest') state.class = 'villager';
+  saveState();
+  gateSuccess.classList.add('show');
+  gateEmail.value = '';
+  updateClass();
+  renderNodes(); // may unlock hidden lvl
+  toast('✓ 歡迎來到村莊,' + email.split('@')[0]);
+});
+
+function updateClass() {
+  const tag = document.getElementById('classTag');
+  const labels = { guest: '遊客', villager: '村民', merchant: '商人', patron: '金主媽媽' };
+  tag.textContent = labels[state.class] || '遊客';
+  if (state.email) {
+    gateSuccess.classList.add('show');
+  }
+}
+
+// ============================================================
+// TOAST
+// ============================================================
+const toastEl = document.getElementById('toast');
+let toastTimer = null;
+function toast(msg) {
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2400);
+}
+
+// ============================================================
+// INIT
+// ============================================================
+renderNodes();
+updateClass();
+
+// Easter egg: if player clears 3 levels, promote to patron
+setInterval(() => {
+  if (state.cleared.length >= 3 && state.class !== 'patron') {
+    state.class = 'patron';
+    saveState();
+    updateClass();
+    toast('身份升級:金主媽媽 — 解鎖後續支線。');
+  }
+}, 1000);
+
+</script>
+</body>
+</html>
