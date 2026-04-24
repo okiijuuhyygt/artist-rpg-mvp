@@ -28,7 +28,7 @@
   "paywall": {
     "enabled": true,
     "priceLabel": "150 TWD",
-    "checkoutUrl": "",
+    "checkoutUrl": "https://p.ecpay.com.tw/6963529",
     "memberRole": "製作委員會",
     "bundleTitle": "加入製作委員會",
     "bundleSubtitle": "從這一關開始",
