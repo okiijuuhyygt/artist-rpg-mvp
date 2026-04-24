@@ -851,8 +851,9 @@
       <h2 class="gate-title" id="gateTitle">加入村民</h2>
       <p class="gate-sub" id="gateSub">—</p>
       <p class="gate-note" id="gateNote">—</p>
-      <form class="gate-form" id="gateForm">
-        <input type="email" id="gateEmail" placeholder="your@email.com" required autocomplete="email">
+      <iframe name="kitSink" style="display:none" aria-hidden="true"></iframe>
+      <form class="gate-form" id="gateForm" action="https://app.kit.com/forms/9365801/subscriptions" method="POST" target="kitSink">
+        <input type="email" name="email_address" id="gateEmail" placeholder="your@email.com" required autocomplete="email">
         <button type="submit" class="gate-submit">REGISTER ▶</button>
       </form>
       <div class="success" id="gateSuccess">—</div>
@@ -1490,20 +1491,26 @@ function bgmOnFirstGesture() {
 // GATE (Email)
 // ============================================================
 document.getElementById('gateForm').addEventListener('submit', (e) => {
-  e.preventDefault();
   const email = document.getElementById('gateEmail').value.trim();
   if (!email || !email.includes('@')) {
+    e.preventDefault();
     toast('email 格式怪怪的,再檢查一下');
     return;
   }
+  // Let the form POST to Kit via hidden iframe (CORS-free pattern).
+  // We optimistically update UI/state; Kit handles dedupe on its side.
   state.email = email;
   if (state.class === 'guest') state.class = 'villager';
   saveState();
   document.getElementById('gateSuccess').classList.add('show');
-  document.getElementById('gateEmail').value = '';
   updateClass();
   renderNodes();
   toast('✓ 歡迎來到村莊,' + email.split('@')[0]);
+  // Clear input after the native form submit has fired
+  setTimeout(() => {
+    const inp = document.getElementById('gateEmail');
+    if (inp) inp.value = '';
+  }, 200);
 });
 
 function updateClass() {
