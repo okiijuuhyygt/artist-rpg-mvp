@@ -1366,15 +1366,9 @@ function clearLevel(id, msg) {
       if (mpEl) mpEl.classList.toggle('filled', state.filled.includes(id));
     }
     stopTone();
-    // Auto-return to the map after the clear message sinks in.
-    // Only trigger if the player is still on this level (hasn't
-    // already navigated away manually).
-    setTimeout(() => {
-      const h = location.hash.replace(/^#/, '');
-      if (h === id || h === 'level/' + id) {
-        navigate('#map');
-      }
-    }, 1600);
+    // (No auto-return — renderActionBlock draws a 繼續 → CTA button
+    //  so the player decides when to move on. Keeps room for
+    //  future paid-unlock / side-quest prompts next to it.)
   }
   renderNodes();
 }
@@ -1405,6 +1399,14 @@ function renderActionBlock(lv) {
       yours.textContent = '你寫的:「' + state.texts[lv.id] + '」';
       body.appendChild(yours);
     }
+    // Player-driven continue button — keeps pace in the player's hands
+    // and leaves room for paid-unlock / side-quest CTAs next to it later.
+    const cta = document.createElement('button');
+    cta.className = 'action-btn';
+    cta.textContent = '繼續 →';
+    cta.style.marginTop = '16px';
+    cta.addEventListener('click', () => navigate('#map'));
+    body.appendChild(cta);
     return;
   }
 
