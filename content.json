@@ -137,5 +137,14 @@
       "defaultUnlocked": false,
       "unlockedBy": "__village__"
     }
-  ]
+  ],
+  "audio": {
+    "bgm": {
+      "intro": "",
+      "map": "audio/bgm-map.mp3"
+    },
+    "levels": {
+      "L0": "audio/levels-L0.mp3"
+    }
+  }
 }
