@@ -103,8 +103,8 @@
     justify-content: center;
   }
   .avatar-pixel {
-    width: 72px;
-    height: 72px;
+    width: 96px;
+    height: 96px;
     border: 3px solid var(--gb-darkest);
     image-rendering: pixelated;
     image-rendering: crisp-edges;
@@ -860,7 +860,7 @@
 
     <footer>
       <p>Artist IG · <a href="https://instagram.com/haohao.zip" target="_blank" rel="noopener">@haohao.zip</a></p>
-      <p class="credits">MVP BUILD 0.4 · MADE WITH ♥ &amp; PIXELS</p>
+      <p class="credits">MVP BUILD 0.5 · 8-BIT BGM + BIGGER HERO</p>
       <p><a href="admin.html" class="admin-link-footer">關主登入 →</a></p>
     </footer>
   </div>
@@ -1007,6 +1007,8 @@ function switchScene(to, params = {}) {
   }
   next.classList.add('active');
   next.scrollTop = 0;
+  // BGM: intro and map each have their own track; level stops music
+  switchBgm(to === 'level' ? null : to);
 }
 
 function navigate(hash) {
@@ -1104,7 +1106,15 @@ function restartIntro() {
   if (lines.length) typeLine(lines[0]);
 }
 
-document.getElementById('introDialog').addEventListener('click', advanceIntro);
+document.getElementById('introDialog').addEventListener('click', () => {
+  // Retry BGM on user gesture (first page-load autoplay is blocked)
+  if (activeBgmScene && bgmEls[activeBgmScene] && bgmEls[activeBgmScene].paused) {
+    switchBgm(activeBgmScene);
+  } else if (!activeBgmScene) {
+    bgmOnFirstGesture();
+  }
+  advanceIntro();
+});
 document.getElementById('btnSkip').addEventListener('click', () => {
   state.introSeen = true; saveState();
   navigate('#map');
@@ -1360,6 +1370,121 @@ document.getElementById('playTone').addEventListener('click', () => {
   if (audioEl && !audioEl.paused) stopTone();
   else playTone();
 });
+
+// ============================================================
+// BGM — Two 8-bit tracks (intro + map) that crossfade between
+// scenes. First user tap starts audio (browser autoplay rule).
+// Level scene stops BGM (level has its own tone preview).
+// ============================================================
+function fadeVolume(el, from, to, ms, cb) {
+  const start = Date.now();
+  el.volume = from;
+  (function tick() {
+    if (!el) return;
+    const p = Math.min(1, (Date.now() - start) / ms);
+    el.volume = from + (to - from) * p;
+    if (p < 1) requestAnimationFrame(tick);
+    else cb && cb();
+  })();
+}
+
+async function renderBgm({ baseFreq, bpm, melody, bass, durationSec = 8 }) {
+  const sampleRate = 16000;
+  const totalSamples = sampleRate * durationSec;
+  const OfflineCtx = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+  const ctx = new OfflineCtx(1, totalSamples, sampleRate);
+  const stepSec = (60 / bpm) / 2;
+  let t = 0, step = 0;
+  while (t < durationSec - stepSec * 0.5) {
+    const mOff = melody[step % melody.length];
+    const bOff = bass[step % bass.length];
+    const o1 = ctx.createOscillator();
+    o1.type = 'square';
+    o1.frequency.value = baseFreq * Math.pow(2, mOff / 12);
+    const g1 = ctx.createGain();
+    g1.gain.setValueAtTime(0.09, t);
+    g1.gain.exponentialRampToValueAtTime(0.001, t + stepSec * 0.92);
+    o1.connect(g1); g1.connect(ctx.destination);
+    o1.start(t); o1.stop(t + stepSec);
+    const o2 = ctx.createOscillator();
+    o2.type = 'triangle';
+    o2.frequency.value = baseFreq * Math.pow(2, bOff / 12);
+    const g2 = ctx.createGain();
+    g2.gain.setValueAtTime(0.13, t);
+    g2.gain.exponentialRampToValueAtTime(0.001, t + stepSec * 0.85);
+    o2.connect(g2); g2.connect(ctx.destination);
+    o2.start(t); o2.stop(t + stepSec);
+    t += stepSec;
+    step++;
+  }
+  const buffer = await ctx.startRendering();
+  return audioBufferToWavBlob(buffer);
+}
+
+const BGM_PATTERNS = {
+  intro: {
+    baseFreq: 261.63, bpm: 72,
+    melody: [ 0, 4, 7, 4,  5, 9, 12, 9,  7, 11, 14, 11,  12, 7, 4, 0 ],
+    bass:   [-12,-12,-12,-12, -7,-7,-7,-7, -5,-5,-5,-5, -12,-12,-12,-12],
+  },
+  map: {
+    baseFreq: 220.00, bpm: 88,
+    melody: [ 0, 3, 7, 3,  5, 8, 12, 8,  7, 10, 14, 10,  12, 7, 3, 0 ],
+    bass:   [-12,-12,-12,-12, -7,-7,-7,-7, -5,-5,-5,-5, -12,-12,-12,-12],
+  },
+};
+
+const bgmEls = {}; // scene -> audio element
+const bgmUrls = {};
+let activeBgmScene = null;
+
+async function getBgmUrl(scene) {
+  if (bgmUrls[scene]) return bgmUrls[scene];
+  const blob = await renderBgm(BGM_PATTERNS[scene]);
+  const url = URL.createObjectURL(blob);
+  bgmUrls[scene] = url;
+  return url;
+}
+
+async function switchBgm(toScene) {
+  // Fade out the currently playing track
+  if (activeBgmScene && activeBgmScene !== toScene && bgmEls[activeBgmScene]) {
+    const old = bgmEls[activeBgmScene];
+    fadeVolume(old, old.volume, 0, 500, () => {
+      try { old.pause(); } catch {}
+    });
+  }
+  activeBgmScene = toScene;
+  if (!toScene) return;
+  let el = bgmEls[toScene];
+  if (!el) {
+    try {
+      const url = await getBgmUrl(toScene);
+      el = document.createElement('audio');
+      el.setAttribute('playsinline', '');
+      el.setAttribute('webkit-playsinline', '');
+      el.loop = true;
+      el.src = url;
+      el.volume = 0;
+      document.body.appendChild(el);
+      bgmEls[toScene] = el;
+    } catch (e) {
+      console.warn('BGM render failed', e);
+      return;
+    }
+  }
+  try {
+    await el.play();
+    fadeVolume(el, el.volume, 0.32, 800);
+  } catch {
+    // autoplay denied — will retry on next user gesture
+  }
+}
+
+function bgmOnFirstGesture() {
+  // Called from first user tap on intro dialog
+  if (!activeBgmScene) switchBgm('intro');
+}
 
 // ============================================================
 // GATE (Email)
