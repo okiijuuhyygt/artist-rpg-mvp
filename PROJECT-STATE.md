@@ -1,4 +1,8 @@
-# Artist RPG MVP · 專案狀態
+# haohao.unzip · 專案狀態
+
+> Project name: **haohao.unzip**(原代號 Artist RPG MVP,現統一成 site brand)
+> Tagline: 把聽眾變玩家
+> Repo 保留原名 `artist-rpg-mvp`(改 repo 名會斷所有連結)
 
 > 最後更新:2026-04-25 凌晨 **05:10**
 > Build: **index v1.3 / code v1.27** · content 已被耗耗 admin 編輯
@@ -7,6 +11,19 @@
 - 公開站 · https://okiijuuhyygt.github.io/artist-rpg-mvp/
 - 關主後台 · https://okiijuuhyygt.github.io/artist-rpg-mvp/admin.html
 - GitHub · https://github.com/okiijuuhyygt/artist-rpg-mvp
+
+## 這輪新增(v1.22 → v1.28)
+
+- **付費解鎖 Phase 1 完成** — 每關「✦ 加入製作委員會」modal,teaser 角度依關不同,跳綠界真實 URL(https://p.ecpay.com.tw/6963529),150 TWD digital bundle
+- **綠界商品已建** — 巷弄故事館 → 收款工具 → 收款連結 → "加入製作委員會EP1",永遠有效、全支付方式
+- **Admin 加 Paywall 設定區** — 5 個 teaser 欄位 + URL + 價格 + coming-soon msg 都可編
+- **Site name 可編輯 → 已設為 `haohao.unzip`**
+- **Favicon + apple-touch-icon** — 用耗耗自己去背的 `主題.png`
+- **關主登入 = 隱藏付費 CTA**(自己不付自己錢)
+- **L0 付費 CTA 移除**(歸隊信不該賣)
+- **L2 投票結果顯示** — 共享計數器(abacus),投完看到 A/B 佔比條,讓按鈕不像假的
+- **Admin 音檔上傳**:7 槽(intro BGM + map BGM + L0-L4)已 ship,耗耗開始用
+- **音檔 lifecycle 完整化**:清除 = 從 repo 真刪,新 📁 按鈕瀏覽既有音檔 swap 關卡不用重傳
 
 ## 功能狀態
 
