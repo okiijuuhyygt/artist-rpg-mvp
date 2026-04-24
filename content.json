@@ -1,0 +1,112 @@
+{
+  "meta": {
+    "pixelTitle": "CHEN TSE-HAO",
+    "subtitle": "H A O · の 世 界",
+    "worldName": "陳則皞の世界"
+  },
+  "intro": [
+    "嘿,好久沒聯絡。",
+    "這不是一張 EP,是一款遊戲。",
+    "五個關卡、一張世界地圖 — 陪我把歌搬出來。",
+    "不用付費,也能看;想決定走向,就拿鑰匙。",
+    "往下滑,先看看地圖。"
+  ],
+  "speaker": "HAO · 陳則皞",
+  "mapTitle": "▸ 世界地圖",
+  "mapNote": "每個節點是一首歌、一個章節、或一個企劃。點進去看關卡細節。",
+  "gate": {
+    "title": "加入村民",
+    "sub": "免費。我會不定期寄一些手寫信、碎念、或發行前的 Demo。",
+    "note": "你也可以把生活垃圾丟回來。我不一定會回,但我在。",
+    "successText": "✓ 你已進入村莊。身份升級為「村民」。往下走,找找隱藏節點。"
+  },
+  "classes": {
+    "guest": "訪客",
+    "villager": "村民"
+  },
+  "levels": [
+    {
+      "id": "L0",
+      "num": "00",
+      "title": "新手村:歸隊信",
+      "desc": "半年沒講話,先把門重新打開。",
+      "tag": "main",
+      "story": "我消失了半年。不是沒在寫歌 — 是把這半年的碎片整理成一張地圖。你現在站在村口,這封信是我遞給你的。不用付費,也不用回信。你可以只是站在這裡,看我把歌一首一首搬出來。",
+      "toneNote": "C4",
+      "toneBpm": 72,
+      "toneMood": "warm reset · lo-fi keys",
+      "hasMissingPiece": false,
+      "mpCaption": "(這一關沒有填空 — 歸隊信本來就不該賣任何東西)",
+      "branches": null,
+      "defaultUnlocked": true,
+      "unlockedBy": null
+    },
+    {
+      "id": "L1",
+      "num": "01",
+      "title": "第一首單曲:???",
+      "desc": "回歸後第一首。MV 裡有個畫面,還沒填。",
+      "tag": "main",
+      "story": "這首歌講一個半夜醒來,發現自己還在原地的時刻。MV 腳本裡,主角會路過一面牆,上面貼著一張「不認識的人手寫的一句話」。那面牆現在是空的。如果沒有人填,它就會是空的上架。",
+      "toneNote": "A3",
+      "toneBpm": 88,
+      "toneMood": "慢板 · 木吉他 + bitcrush",
+      "hasMissingPiece": true,
+      "mpCaption": "這面牆上的那句話,由付費玩家寫。衛生紙、便條紙、筆跡都可以。寫完拍照回傳,它會進 MV 的 0:47 那個 cut。",
+      "branches": null,
+      "defaultUnlocked": true,
+      "unlockedBy": null
+    },
+    {
+      "id": "L2",
+      "num": "02",
+      "title": "分岔路:悲 or 爆",
+      "desc": "下一首走哪條路,由拿到鑰匙的人決定。",
+      "tag": "main",
+      "story": "走到這裡,地圖分岔了。A 是繼續往深處走的慢歌,B 是把情緒撕開的節奏歌。我都寫了一半。拿到「初代 Demo 鑰匙」的人可以投票決定我先把哪一首錄完。免費玩家只能看著他們投。",
+      "toneNote": "E3",
+      "toneBpm": 104,
+      "toneMood": "岔路 · 雙版本 Demo",
+      "hasMissingPiece": false,
+      "mpCaption": "",
+      "branches": [
+        { "id": "A", "label": "A · 繼續往下沉(ballad)" },
+        { "id": "B", "label": "B · 把它撕開(upbeat)" }
+      ],
+      "defaultUnlocked": false,
+      "unlockedBy": "L1"
+    },
+    {
+      "id": "L3",
+      "num": "03",
+      "title": "章節式 EP:第一章",
+      "desc": "五首歌的小地圖,慢慢解鎖。",
+      "tag": "side",
+      "story": "這不是單張 EP。是「章節式 EP」— 每一首都是獨立上架的單曲,但五首連起來是一個故事。第一章會先放鑰匙在村裡某處。村民可以撿,不用付費。",
+      "toneNote": "G3",
+      "toneBpm": 96,
+      "toneMood": "章節式 · 五首組合",
+      "hasMissingPiece": true,
+      "mpCaption": "章節封面需要一張「影響過你的歌詞」截圖。截圖本身會變成章節首頁的底圖。",
+      "branches": null,
+      "defaultUnlocked": false,
+      "unlockedBy": "L2"
+    },
+    {
+      "id": "L4",
+      "num": "??",
+      "title": "傭兵召喚陣",
+      "desc": "累積貢獻到門檻,聘請客座 NPC。",
+      "tag": "hidden",
+      "story": "這一關是隱藏的。當村民總數達到某個門檻,會觸發「召喚陣」— 我會花錢請一位現在還在 cover 的歌手翻唱這一首。不是偷偷業配,是公開的「任務發包」。歌手拿錢,玩家拿流量,我拿市場驗證。",
+      "toneNote": "F4",
+      "toneBpm": 120,
+      "toneMood": "召喚陣 · 客座 NPC",
+      "hasMissingPiece": false,
+      "mpCaption": "召喚陣需要 30 個村民才會啟動。每一個 email 都是一個符文。",
+      "branches": null,
+      "defaultUnlocked": false,
+      "unlockedBy": "__village__"
+    }
+  ]
+}

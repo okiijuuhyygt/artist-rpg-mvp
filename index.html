@@ -4,10 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>陳則皞の世界 · 把聽眾變玩家</title>
-<meta name="description" content="不是一張 EP,是一款遊戲。一起推進這張世界地圖 — 解鎖歌、填補空白、決定下一首走哪條路。">
+<meta name="description" content="不是一張 EP,是一款遊戲。一起推進這張世界地圖。">
 <meta property="og:title" content="陳則皞の世界 · 把聽眾變玩家">
 <meta property="og:description" content="不是一張 EP,是一款遊戲。一起推進這張世界地圖。">
 <meta property="og:locale" content="zh_TW">
+<meta name="theme-color" content="#efe9de">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,13 +16,11 @@
 
 <style>
   :root {
-    /* Gameboy palette (DMG) */
     --gb-darkest: #0f380f;
     --gb-dark: #306230;
     --gb-mid: #8bac0f;
     --gb-light: #9bbc0f;
     --gb-lightest: #d0d88c;
-    /* Sepia warmth */
     --paper: #efe9de;
     --paper-light: #fdfaf3;
     --paper-edge: #cbc0ae;
@@ -29,16 +28,16 @@
     --ink-soft: #7a6d5c;
     --gold: #b39a78;
     --gold-deep: #6a4e32;
-    /* State */
     --locked: #8a7d6c;
-    --unlocked: var(--gb-dark);
   }
 
   * { box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
+  html, body {
+    margin: 0; padding: 0;
+    height: 100%;
+    overflow: hidden;
+  }
   body {
-    margin: 0;
-    padding: 0;
     font-family: "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", -apple-system, BlinkMacSystemFont, sans-serif;
     background: var(--paper);
     color: var(--ink);
@@ -47,89 +46,134 @@
     background-image:
       radial-gradient(circle at 20% 10%, rgba(139, 172, 15, 0.05) 0%, transparent 40%),
       radial-gradient(circle at 80% 70%, rgba(179, 154, 120, 0.08) 0%, transparent 40%);
-    min-height: 100vh;
   }
 
-  /* Pixel dither background helper */
-  .dither {
-    background-image:
-      radial-gradient(rgba(42, 38, 36, 0.12) 1px, transparent 1px);
-    background-size: 3px 3px;
+  /* ========== Scene Engine ========== */
+  .scene {
+    position: fixed;
+    inset: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateX(24px);
+    -webkit-overflow-scrolling: touch;
+  }
+  .scene.active {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(0);
+  }
+  .scene.leaving {
+    opacity: 0;
+    transform: translateX(-24px);
+    pointer-events: none;
   }
 
-  /* ========== Layout ========== */
-  main {
+  .wrap {
     max-width: 680px;
     margin: 0 auto;
-    padding: 32px 20px 96px;
+    padding: 28px 20px 96px;
   }
 
-  /* ========== Gameboy Dialog Box (Intro) ========== */
+  /* ========== SCENE 1: Intro ========== */
+  .scene-intro {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: var(--paper);
+    background-image:
+      radial-gradient(rgba(15, 56, 15, 0.06) 1px, transparent 1px);
+    background-size: 4px 4px;
+  }
+  .intro-card {
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 20px;
+  }
+  .intro-speaker-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    justify-content: center;
+  }
+  .avatar-pixel {
+    width: 56px;
+    height: 56px;
+    background: var(--gb-light);
+    border: 3px solid var(--gb-darkest);
+    position: relative;
+    image-rendering: pixelated;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+  /* Simple pixel face */
+  .avatar-pixel::before,
+  .avatar-pixel::after {
+    content: "";
+    position: absolute;
+    background: var(--gb-darkest);
+  }
+  .avatar-pixel::before {
+    top: 30%; left: 25%;
+    width: 10%;
+    height: 10%;
+    box-shadow: 140% 0 0 var(--gb-darkest);
+  }
+  .avatar-pixel::after {
+    bottom: 24%; left: 32%;
+    width: 36%;
+    height: 8%;
+  }
+
+  .intro-name {
+    font-family: "Press Start 2P", monospace;
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: var(--gb-darkest);
+  }
+
+  /* Gameboy dialog */
   .gb-dialog {
     position: relative;
     background: var(--gb-lightest);
     border: 3px solid var(--gb-darkest);
-    padding: 22px 20px 20px;
-    margin-bottom: 36px;
+    padding: 22px 20px 28px;
     box-shadow:
       4px 4px 0 var(--gb-darkest),
       inset 0 0 0 2px var(--gb-light);
     font-family: "VT323", "Courier New", monospace;
     color: var(--gb-darkest);
-  }
-  .gb-dialog::before {
-    content: "";
-    position: absolute;
-    top: -3px; left: -3px; right: -3px; bottom: -3px;
-    pointer-events: none;
-    background-image:
-      linear-gradient(45deg, transparent 46%, var(--gb-darkest) 46%, var(--gb-darkest) 54%, transparent 54%);
-    background-size: 6px 6px;
-    background-position: -3px -3px;
-    opacity: 0;
-  }
-  .gb-dialog .speaker {
-    font-family: "Press Start 2P", monospace;
-    font-size: 10px;
-    letter-spacing: 1px;
-    color: var(--gb-dark);
-    margin-bottom: 14px;
+    cursor: pointer;
+    min-height: 180px;
     display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .gb-dialog .speaker::before {
-    content: "";
-    display: inline-block;
-    width: 14px;
-    height: 14px;
-    background: var(--gb-darkest);
-    box-shadow:
-      4px 0 0 var(--gb-darkest),
-      0 4px 0 var(--gb-darkest),
-      4px 4px 0 var(--gb-darkest);
-    transform: scale(0.6);
-    transform-origin: left center;
+    flex-direction: column;
   }
   .gb-dialog .text {
-    font-size: 20px;
+    font-size: 22px;
     line-height: 1.55;
-    min-height: 3.1em;
+    min-height: 3.4em;
     white-space: pre-wrap;
+    flex: 1;
   }
   .gb-dialog .cursor {
     display: inline-block;
     width: 10px;
-    height: 14px;
+    height: 16px;
     background: var(--gb-darkest);
     animation: blink 0.8s step-end infinite;
     vertical-align: middle;
-    margin-left: 2px;
+    margin-left: 3px;
   }
-  .gb-dialog .next {
+  .gb-dialog .next-indicator {
     position: absolute;
     right: 14px;
-    bottom: 10px;
+    bottom: 8px;
     width: 0;
     height: 0;
     border-left: 8px solid transparent;
@@ -138,33 +182,73 @@
     animation: bob 0.9s ease-in-out infinite;
     opacity: 0;
   }
-  .gb-dialog.typed .next { opacity: 1; }
+  .gb-dialog.typed .next-indicator { opacity: 1; }
+  .gb-dialog.last .next-indicator { display: none; }
+
   @keyframes blink { 50% { opacity: 0; } }
   @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(3px); } }
 
-  .gb-dialog .skip {
-    position: absolute;
-    top: 8px;
-    right: 10px;
-    font-family: "Press Start 2P", monospace;
-    font-size: 8px;
-    color: var(--gb-dark);
-    background: transparent;
-    border: 1px solid var(--gb-dark);
-    padding: 4px 6px;
-    cursor: pointer;
-    opacity: 0.7;
+  .intro-progress {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
   }
-  .gb-dialog .skip:hover { opacity: 1; }
+  .intro-progress .dot {
+    width: 8px;
+    height: 8px;
+    background: var(--paper-edge);
+    border: 2px solid var(--gb-darkest);
+  }
+  .intro-progress .dot.done { background: var(--gb-dark); }
 
-  /* ========== Header ========== */
-  .header {
-    text-align: center;
-    padding: 28px 0 20px;
-    border-bottom: 1px dashed var(--paper-edge);
-    margin-bottom: 28px;
+  .intro-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
   }
-  .header .pixel-title {
+  .intro-actions button {
+    font-family: "Press Start 2P", monospace;
+    font-size: 10px;
+    padding: 12px 18px;
+    background: var(--paper-light);
+    color: var(--gb-darkest);
+    border: 2px solid var(--gb-darkest);
+    cursor: pointer;
+    letter-spacing: 2px;
+    transition: all 0.15s;
+  }
+  .intro-actions button:hover {
+    background: var(--gb-lightest);
+    transform: translate(-1px, -1px);
+    box-shadow: 2px 2px 0 var(--gb-darkest);
+  }
+  .intro-actions .btn-enter {
+    background: var(--gb-dark);
+    color: var(--paper-light);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+  }
+  .intro-actions .btn-enter.show {
+    opacity: 1;
+    pointer-events: auto;
+    animation: pulse 1.2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(-1px, -1px); box-shadow: 2px 2px 0 var(--gb-darkest); }
+  }
+
+  /* ========== SCENE 2: Map ========== */
+  .scene-map { background: var(--paper); }
+
+  .map-header {
+    text-align: center;
+    padding: 32px 0 16px;
+    border-bottom: 1px dashed var(--paper-edge);
+    margin-bottom: 22px;
+  }
+  .map-header .pixel-title {
     font-family: "Press Start 2P", monospace;
     font-size: 14px;
     color: var(--gb-darkest);
@@ -172,21 +256,21 @@
     margin: 0 0 10px;
     line-height: 1.6;
   }
-  .header .sub {
+  .map-header .sub {
     font-size: 13px;
     color: var(--ink-soft);
     letter-spacing: 3px;
     margin: 0;
   }
-  .header .status {
+  .map-header .status {
     margin-top: 14px;
     font-family: "VT323", monospace;
     font-size: 16px;
     color: var(--gb-dark);
   }
-  .header .status .class-tag {
+  .map-header .class-tag {
     display: inline-block;
-    padding: 2px 8px;
+    padding: 3px 9px;
     background: var(--gb-light);
     border: 2px solid var(--gb-darkest);
     color: var(--gb-darkest);
@@ -195,47 +279,27 @@
     margin-left: 6px;
   }
 
-  /* ========== World Map ========== */
-  .map-title {
+  .map-section-title {
     font-family: "Press Start 2P", monospace;
     font-size: 11px;
     color: var(--gb-darkest);
     letter-spacing: 2px;
     margin: 0 0 6px;
   }
-  .map-note {
+  .map-section-note {
     font-size: 12px;
     color: var(--ink-soft);
-    margin: 0 0 20px;
+    margin: 0 0 18px;
     letter-spacing: 1px;
   }
 
   .world-map {
     position: relative;
-    padding: 18px 14px;
+    padding: 16px 12px;
     background: var(--paper-light);
     border: 2px solid var(--gold);
-    border-radius: 2px;
     box-shadow: 3px 3px 0 var(--paper-edge);
     margin-bottom: 36px;
-  }
-
-  .nodes { position: relative; z-index: 2; }
-
-  .path-svg {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 1;
-    pointer-events: none;
-  }
-  .path-svg path {
-    fill: none;
-    stroke: var(--gold);
-    stroke-width: 2;
-    stroke-dasharray: 4 4;
-    opacity: 0.55;
   }
 
   .node {
@@ -243,12 +307,16 @@
     align-items: center;
     gap: 14px;
     padding: 14px 12px;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
     background: var(--paper);
     border: 2px solid var(--paper-edge);
     cursor: pointer;
     transition: all 0.2s ease;
     position: relative;
+    -webkit-tap-highlight-color: rgba(139, 172, 15, 0.3);
+  }
+  .node:active:not(.locked) {
+    transform: scale(0.98);
   }
   .node:hover:not(.locked) {
     border-color: var(--gb-dark);
@@ -256,20 +324,11 @@
     transform: translate(-1px, -1px);
     box-shadow: 3px 3px 0 var(--gb-darkest);
   }
-  .node.locked {
-    cursor: not-allowed;
-    opacity: 0.6;
-  }
-  .node.locked:hover {
-    border-color: var(--locked);
-  }
-  .node.cleared {
-    border-color: var(--gb-dark);
-    background: var(--gb-lightest);
-  }
+  .node.locked { cursor: not-allowed; opacity: 0.55; }
+  .node.cleared { border-color: var(--gb-dark); background: var(--gb-lightest); }
+
   .node-icon {
-    width: 44px;
-    height: 44px;
+    width: 44px; height: 44px;
     flex-shrink: 0;
     display: flex;
     align-items: center;
@@ -280,25 +339,15 @@
     border: 2px solid var(--gb-darkest);
     color: var(--gb-darkest);
     image-rendering: pixelated;
-    position: relative;
   }
   .node.locked .node-icon {
     background: var(--paper-edge);
     border-color: var(--locked);
     color: var(--paper-light);
   }
-  .node.cleared .node-icon {
-    background: var(--gb-mid);
-  }
-  .node.cleared .node-icon::after {
-    content: "✓";
-    font-size: 18px;
-    color: var(--gb-darkest);
-  }
-  .node-body {
-    flex: 1;
-    min-width: 0;
-  }
+  .node.cleared .node-icon { background: var(--gb-mid); }
+  .node.cleared .node-icon::after { content: "✓"; font-size: 18px; color: var(--gb-darkest); }
+  .node-body { flex: 1; min-width: 0; }
   .node-title {
     font-size: 15px;
     font-weight: 500;
@@ -316,13 +365,11 @@
     font-size: 12px;
     color: var(--ink-soft);
     margin: 0;
-    letter-spacing: 0.5px;
   }
   .node-badge {
     font-family: "Press Start 2P", monospace;
     font-size: 8px;
     padding: 3px 6px;
-    background: transparent;
     border: 1px solid var(--ink-soft);
     color: var(--ink-soft);
     letter-spacing: 1px;
@@ -331,9 +378,8 @@
   .node-badge.side { background: var(--gb-lightest); color: var(--gb-darkest); border-color: var(--gb-dark); }
   .node-badge.hidden { background: var(--ink); color: var(--paper); border-color: var(--ink); }
 
-  /* Progress bar */
   .progress-wrap {
-    margin-top: 16px;
+    margin-top: 14px;
     padding-top: 14px;
     border-top: 1px dashed var(--paper-edge);
   }
@@ -350,147 +396,224 @@
     background: var(--paper);
     border: 2px solid var(--gb-darkest);
     padding: 2px;
-    image-rendering: pixelated;
   }
   .progress-fill {
     height: 100%;
-    background: var(--gb-dark);
     background-image: linear-gradient(90deg, var(--gb-dark) 50%, var(--gb-mid) 50%);
     background-size: 8px 100%;
     transition: width 0.6s ease;
   }
 
-  /* ========== Modal (Level Page) ========== */
-  .modal-bg {
-    position: fixed;
-    inset: 0;
-    background: rgba(15, 56, 15, 0.55);
-    backdrop-filter: blur(2px);
-    display: none;
-    align-items: flex-start;
-    justify-content: center;
-    z-index: 100;
-    overflow-y: auto;
-    padding: 24px 14px;
-  }
-  .modal-bg.open {
-    display: flex;
-    animation: fadeIn 0.2s ease;
-  }
-  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-  .modal {
-    width: 100%;
-    max-width: 600px;
+  /* Gate (Email) */
+  .gate {
+    margin-top: 32px;
+    padding: 26px 20px;
     background: var(--paper-light);
     border: 3px solid var(--gb-darkest);
-    box-shadow: 6px 6px 0 var(--gb-darkest);
-    padding: 28px 24px 24px;
+    box-shadow: 5px 5px 0 var(--paper-edge);
+    text-align: center;
     position: relative;
-    animation: slideIn 0.25s ease;
   }
-  @keyframes slideIn {
-    from { transform: translateY(16px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-  }
-  .modal .close {
+  .gate::before {
+    content: "";
     position: absolute;
-    top: 8px;
-    right: 8px;
-    width: 32px;
-    height: 32px;
-    background: var(--paper);
-    border: 2px solid var(--gb-darkest);
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 28px;
+    height: 28px;
+    background: var(--gb-light);
+    border: 3px solid var(--gb-darkest);
+  }
+  .gate .gate-title {
     font-family: "Press Start 2P", monospace;
     font-size: 12px;
+    color: var(--gb-darkest);
+    letter-spacing: 2px;
+    margin: 4px 0 12px;
+  }
+  .gate .gate-sub {
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin: 0 0 6px;
+    letter-spacing: 1px;
+  }
+  .gate .gate-note {
+    font-size: 11px;
+    color: var(--ink-soft);
+    margin: 0 0 16px;
+    font-style: italic;
+  }
+  .gate .gate-form {
+    display: flex;
+    gap: 8px;
+    max-width: 440px;
+    margin: 0 auto;
+  }
+  .gate input[type="email"] {
+    flex: 1;
+    padding: 10px 12px;
+    font-family: "VT323", monospace;
+    font-size: 18px;
+    background: var(--paper);
+    border: 2px solid var(--gb-darkest);
+    color: var(--ink);
+    min-width: 0;
+  }
+  .gate input[type="email"]:focus { outline: none; background: var(--gb-lightest); }
+  .gate button.gate-submit {
+    padding: 10px 18px;
+    font-family: "Press Start 2P", monospace;
+    font-size: 10px;
+    background: var(--gb-darkest);
+    color: var(--gb-lightest);
+    border: 2px solid var(--gb-darkest);
     cursor: pointer;
+    letter-spacing: 1px;
+    white-space: nowrap;
+  }
+  .gate .success {
+    display: none;
+    padding: 12px;
+    background: var(--gb-lightest);
+    border: 2px solid var(--gb-dark);
+    color: var(--gb-darkest);
+    font-family: "VT323", monospace;
+    font-size: 18px;
+    margin-top: 12px;
+  }
+  .gate .success.show { display: block; }
+
+  footer {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px dashed var(--paper-edge);
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 11px;
+    letter-spacing: 2px;
+  }
+  footer a { color: var(--gold-deep); text-decoration: none; border-bottom: 1px solid var(--gold); }
+  footer .credits {
+    font-family: "Press Start 2P", monospace;
+    font-size: 8px;
+    margin-top: 12px;
+    letter-spacing: 2px;
+    color: var(--paper-edge);
+  }
+
+  /* ========== SCENE 3: Level ========== */
+  .scene-level {
+    background: var(--paper);
+  }
+  .level-topbar {
+    position: sticky;
+    top: 0;
+    background: var(--paper);
+    border-bottom: 2px solid var(--gb-darkest);
+    padding: 12px 16px;
     display: flex;
     align-items: center;
-    justify-content: center;
-    color: var(--gb-darkest);
+    gap: 12px;
+    z-index: 10;
   }
-  .modal .close:hover { background: var(--gb-lightest); }
-
-  .modal .level-tag {
+  .level-topbar .back-btn {
     font-family: "Press Start 2P", monospace;
-    font-size: 9px;
+    font-size: 10px;
+    background: var(--gb-darkest);
+    color: var(--gb-lightest);
+    border: 2px solid var(--gb-darkest);
+    padding: 8px 12px;
+    cursor: pointer;
+    letter-spacing: 1px;
+  }
+  .level-topbar .back-btn:hover { background: var(--gb-dark); }
+  .level-topbar .topbar-title {
+    font-family: "VT323", monospace;
+    font-size: 18px;
+    color: var(--gb-darkest);
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .level-body {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 24px 20px 80px;
+  }
+  .level-body .level-tag {
+    font-family: "Press Start 2P", monospace;
+    font-size: 10px;
     color: var(--gold-deep);
     letter-spacing: 2px;
     margin-bottom: 8px;
   }
-  .modal h2 {
-    font-size: 20px;
+  .level-body h2 {
+    font-size: 22px;
     font-weight: 500;
     margin: 0 0 6px;
     color: var(--ink);
     letter-spacing: 2px;
   }
-  .modal .level-sub {
+  .level-body .level-sub {
     font-size: 13px;
     color: var(--ink-soft);
-    margin: 0 0 20px;
-    letter-spacing: 1px;
+    margin: 0 0 22px;
   }
-
-  .modal .story {
-    background: var(--paper);
-    border-left: 3px solid var(--gold);
-    padding: 14px 16px;
-    margin-bottom: 20px;
-    font-size: 14px;
-    line-height: 1.9;
-    color: var(--ink);
+  .level-body .story {
+    background: var(--paper-light);
+    border-left: 4px solid var(--gold);
+    padding: 16px 18px;
+    margin-bottom: 22px;
     font-family: "VT323", monospace;
-    font-size: 18px;
-    line-height: 1.65;
+    font-size: 19px;
+    line-height: 1.7;
+    color: var(--ink);
   }
 
-  .modal .audio-block {
+  .audio-block {
     margin-bottom: 20px;
     padding: 14px;
     background: var(--gb-lightest);
     border: 2px solid var(--gb-darkest);
   }
-  .modal .audio-block .audio-title {
+  .audio-block .audio-title {
     font-family: "Press Start 2P", monospace;
     font-size: 9px;
     color: var(--gb-darkest);
     margin-bottom: 10px;
     letter-spacing: 1.5px;
   }
-  .modal .audio-block audio {
-    width: 100%;
-    height: 36px;
-  }
-  .modal .audio-block .tone-controls {
+  .audio-block .tone-controls {
     display: flex;
-    gap: 8px;
+    gap: 10px;
     align-items: center;
   }
-  .modal .audio-block button.tone-btn {
+  .audio-block button.tone-btn {
     font-family: "VT323", monospace;
-    font-size: 16px;
+    font-size: 17px;
     background: var(--gb-darkest);
     color: var(--gb-lightest);
     border: 2px solid var(--gb-darkest);
-    padding: 6px 14px;
+    padding: 6px 16px;
     cursor: pointer;
     letter-spacing: 1px;
   }
-  .modal .audio-block button.tone-btn:hover { background: var(--gb-dark); }
-  .modal .audio-block .tone-meta {
+  .audio-block .tone-meta {
     font-family: "VT323", monospace;
     font-size: 15px;
     color: var(--gb-darkest);
     flex: 1;
   }
 
-  /* The Missing Piece — 填空式資產 */
   .missing-piece {
     position: relative;
     padding: 24px 18px;
-    margin-bottom: 20px;
-    background: var(--paper);
+    margin-bottom: 22px;
+    background: var(--paper-light);
     border: 2px dashed var(--gold-deep);
     text-align: center;
     min-height: 120px;
@@ -511,10 +634,9 @@
     96% { transform: translate(2px, -1px); opacity: 0.9; }
   }
   .missing-piece .mp-caption {
-    font-size: 12px;
+    font-size: 13px;
     color: var(--ink-soft);
     font-style: italic;
-    letter-spacing: 1px;
     line-height: 1.7;
   }
   .missing-piece.filled::before {
@@ -529,11 +651,10 @@
     background: var(--gb-lightest);
   }
 
-  /* Branching choice — 分支決策(高階玩家) */
   .branch-block {
     padding: 16px;
-    margin-bottom: 20px;
-    background: var(--paper);
+    margin-bottom: 22px;
+    background: var(--paper-light);
     border: 2px solid var(--paper-edge);
   }
   .branch-block .branch-title {
@@ -545,16 +666,11 @@
   }
   .branch-block .branch-locked {
     font-family: "VT323", monospace;
-    font-size: 16px;
+    font-size: 17px;
     color: var(--ink-soft);
     text-align: center;
     padding: 18px 0;
     letter-spacing: 1px;
-  }
-  .branch-block .branch-locked .key-icon {
-    display: inline-block;
-    font-size: 20px;
-    margin-right: 6px;
   }
   .branch-block .choices {
     display: grid;
@@ -562,9 +678,9 @@
     gap: 10px;
   }
   .branch-block .choice {
-    padding: 12px;
+    padding: 14px;
     border: 2px solid var(--paper-edge);
-    background: var(--paper-light);
+    background: var(--paper);
     cursor: pointer;
     transition: all 0.15s;
     font-size: 13px;
@@ -579,123 +695,27 @@
     color: var(--gb-darkest);
   }
 
-  /* Action row */
-  .modal .actions {
+  .level-actions {
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
   }
-  .modal .actions button {
+  .level-actions button {
     flex: 1;
-    min-width: 120px;
-    padding: 12px;
+    min-width: 140px;
+    padding: 14px;
     font-family: "PingFang TC", sans-serif;
     font-size: 13px;
     letter-spacing: 2px;
     cursor: pointer;
-    transition: all 0.15s;
     border: 2px solid var(--gb-darkest);
   }
-  .btn-primary {
-    background: var(--gb-dark);
-    color: var(--paper-light);
-  }
+  .btn-primary { background: var(--gb-dark); color: var(--paper-light); }
   .btn-primary:hover { background: var(--gb-darkest); }
-  .btn-secondary {
-    background: var(--paper);
-    color: var(--ink);
-  }
+  .btn-secondary { background: var(--paper); color: var(--ink); }
   .btn-secondary:hover { background: var(--gb-lightest); }
 
-  /* ========== Email Signup (Village Gate) ========== */
-  .gate {
-    margin-top: 40px;
-    padding: 28px 20px;
-    background: var(--paper-light);
-    border: 3px solid var(--gb-darkest);
-    box-shadow: 5px 5px 0 var(--paper-edge);
-    text-align: center;
-    position: relative;
-  }
-  .gate::before {
-    content: "";
-    position: absolute;
-    top: -14px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 28px;
-    height: 28px;
-    background: var(--gb-light);
-    border: 3px solid var(--gb-darkest);
-    image-rendering: pixelated;
-  }
-  .gate .gate-title {
-    font-family: "Press Start 2P", monospace;
-    font-size: 12px;
-    color: var(--gb-darkest);
-    letter-spacing: 2px;
-    margin: 4px 0 12px;
-  }
-  .gate .gate-sub {
-    font-size: 13px;
-    color: var(--ink-soft);
-    margin: 0 0 8px;
-    letter-spacing: 1px;
-  }
-  .gate .gate-note {
-    font-size: 11px;
-    color: var(--ink-soft);
-    margin: 0 0 18px;
-    font-style: italic;
-    letter-spacing: 0.5px;
-  }
-  .gate .gate-form {
-    display: flex;
-    gap: 8px;
-    max-width: 440px;
-    margin: 0 auto;
-  }
-  .gate input[type="email"] {
-    flex: 1;
-    padding: 10px 12px;
-    font-family: "VT323", monospace;
-    font-size: 18px;
-    background: var(--paper);
-    border: 2px solid var(--gb-darkest);
-    color: var(--ink);
-    min-width: 0;
-  }
-  .gate input[type="email"]:focus {
-    outline: none;
-    background: var(--gb-lightest);
-  }
-  .gate button.gate-submit {
-    padding: 10px 18px;
-    font-family: "Press Start 2P", monospace;
-    font-size: 10px;
-    background: var(--gb-darkest);
-    color: var(--gb-lightest);
-    border: 2px solid var(--gb-darkest);
-    cursor: pointer;
-    letter-spacing: 1px;
-    white-space: nowrap;
-  }
-  .gate button.gate-submit:hover { background: var(--gb-dark); }
-
-  .gate .success {
-    display: none;
-    padding: 12px;
-    background: var(--gb-lightest);
-    border: 2px solid var(--gb-dark);
-    color: var(--gb-darkest);
-    font-family: "VT323", monospace;
-    font-size: 18px;
-    margin-top: 12px;
-    letter-spacing: 1px;
-  }
-  .gate .success.show { display: block; }
-
-  /* ========== Toast ========== */
+  /* Toast */
   .toast {
     position: fixed;
     bottom: 28px;
@@ -706,7 +726,6 @@
     padding: 12px 20px;
     font-family: "VT323", monospace;
     font-size: 18px;
-    letter-spacing: 1px;
     border: 2px solid var(--gb-light);
     box-shadow: 3px 3px 0 var(--gb-dark);
     z-index: 200;
@@ -716,49 +735,35 @@
     max-width: 90%;
     text-align: center;
   }
-  .toast.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-  /* ========== Footer ========== */
-  footer {
-    margin-top: 56px;
-    padding-top: 28px;
-    border-top: 1px dashed var(--paper-edge);
-    text-align: center;
-    color: var(--ink-soft);
-    font-size: 11px;
-    letter-spacing: 2px;
-  }
-  footer a {
-    color: var(--gold-deep);
-    text-decoration: none;
-    border-bottom: 1px solid var(--gold);
-  }
-  footer .credits {
+  /* Tiny admin link */
+  .admin-link {
+    position: fixed;
+    bottom: 8px;
+    right: 10px;
     font-family: "Press Start 2P", monospace;
     font-size: 8px;
-    margin-top: 14px;
-    letter-spacing: 2px;
     color: var(--paper-edge);
+    text-decoration: none;
+    z-index: 5;
+    opacity: 0.4;
+    letter-spacing: 1px;
   }
+  .admin-link:hover { opacity: 1; color: var(--gold-deep); }
 
-  /* ========== Mobile ========== */
   @media (max-width: 600px) {
-    main { padding: 20px 14px 80px; }
-    .header .pixel-title { font-size: 12px; }
-    .gb-dialog .text { font-size: 18px; }
+    .wrap { padding: 22px 14px 80px; }
+    .map-header .pixel-title { font-size: 12px; }
+    .gb-dialog .text { font-size: 20px; }
     .node-title { font-size: 14px; }
     .node-icon { width: 38px; height: 38px; font-size: 10px; }
-    .modal { padding: 24px 18px 20px; }
-    .modal h2 { font-size: 18px; }
+    .level-body { padding: 20px 14px 80px; }
+    .level-body h2 { font-size: 19px; }
     .branch-block .choices { grid-template-columns: 1fr; }
     .gate .gate-form { flex-direction: column; }
-    .gate .gate-title { font-size: 10px; }
   }
 
-  /* Reduced motion */
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
       animation-duration: 0.01ms !important;
@@ -769,36 +774,45 @@
 </style>
 </head>
 <body>
-<main>
 
-  <!-- ===== Artist Intro Dialog (Gameboy) ===== -->
-  <div class="gb-dialog" id="introDialog">
-    <button class="skip" id="skipIntro">SKIP ▶</button>
-    <div class="speaker">HAO · 陳則皞</div>
-    <div class="text"><span id="typedText"></span><span class="cursor"></span></div>
-    <div class="next">▼</div>
-  </div>
-
-  <!-- ===== Header ===== -->
-  <header class="header">
-    <h1 class="pixel-title">CHEN TSE-HAO</h1>
-    <p class="sub">H A O · の 世 界</p>
-    <div class="status" id="playerStatus">
-      目前身份<span class="class-tag" id="classTag">遊客</span>
+<!-- ============ SCENE 1: INTRO ============ -->
+<section class="scene scene-intro" data-scene="intro">
+  <div class="intro-card">
+    <div class="intro-speaker-row">
+      <div class="avatar-pixel"></div>
+      <span class="intro-name" id="introSpeaker">HAO</span>
     </div>
-  </header>
 
-  <!-- ===== World Map ===== -->
-  <section>
-    <h2 class="map-title">▸ 世界地圖</h2>
-    <p class="map-note">每個節點是一首歌、一個章節、或一個企劃。點進去看關卡細節。</p>
+    <div class="gb-dialog" id="introDialog">
+      <div class="text"><span id="typedText"></span><span class="cursor"></span></div>
+      <div class="next-indicator">▼</div>
+    </div>
+
+    <div class="intro-progress" id="introProgress"></div>
+
+    <div class="intro-actions">
+      <button id="btnSkip">SKIP ▶</button>
+      <button id="btnEnter" class="btn-enter">▶ 進入世界</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SCENE 2: MAP ============ -->
+<section class="scene scene-map" data-scene="map">
+  <div class="wrap">
+    <header class="map-header">
+      <h1 class="pixel-title" id="pixelTitle">CHEN TSE-HAO</h1>
+      <p class="sub" id="subtitle">H A O · の 世 界</p>
+      <div class="status">
+        目前身份<span class="class-tag" id="classTag">遊客</span>
+      </div>
+    </header>
+
+    <h2 class="map-section-title" id="mapTitleEl">▸ 世界地圖</h2>
+    <p class="map-section-note" id="mapNoteEl">—</p>
 
     <div class="world-map">
-      <svg class="path-svg" id="pathSvg" preserveAspectRatio="none"></svg>
-      <div class="nodes" id="nodes">
-        <!-- rendered by JS -->
-      </div>
-
+      <div id="nodes"></div>
       <div class="progress-wrap">
         <div class="progress-label">
           <span>世界推進度</span>
@@ -809,34 +823,33 @@
         </div>
       </div>
     </div>
-  </section>
 
-  <!-- ===== Village Gate (Free Email Signup) ===== -->
-  <section class="gate">
-    <h2 class="gate-title">加入村民</h2>
-    <p class="gate-sub">免費。我會不定期寄一些手寫信、碎念、或發行前的 Demo。</p>
-    <p class="gate-note">你也可以把生活垃圾丟回來。我不一定會回,但我在。</p>
-    <form class="gate-form" id="gateForm">
-      <input type="email" id="gateEmail" placeholder="your@email.com" required autocomplete="email">
-      <button type="submit" class="gate-submit">REGISTER ▶</button>
-    </form>
-    <div class="success" id="gateSuccess">
-      ✓ 你已進入村莊。身份升級為「村民」。往下走,找找隱藏節點。
-    </div>
-  </section>
+    <section class="gate">
+      <h2 class="gate-title" id="gateTitle">加入村民</h2>
+      <p class="gate-sub" id="gateSub">—</p>
+      <p class="gate-note" id="gateNote">—</p>
+      <form class="gate-form" id="gateForm">
+        <input type="email" id="gateEmail" placeholder="your@email.com" required autocomplete="email">
+        <button type="submit" class="gate-submit">REGISTER ▶</button>
+      </form>
+      <div class="success" id="gateSuccess">—</div>
+    </section>
 
-  <footer>
-    <p>Artist IG · <a href="https://instagram.com/mr.alleys" target="_blank" rel="noopener">@mr.alleys</a></p>
-    <p class="credits">MVP BUILD 0.1 · MADE WITH ♥ &amp; PIXELS</p>
-  </footer>
+    <footer>
+      <p>Artist IG · <a href="https://instagram.com/mr.alleys" target="_blank" rel="noopener">@mr.alleys</a></p>
+      <p class="credits">MVP BUILD 0.2 · MADE WITH ♥ &amp; PIXELS</p>
+    </footer>
+  </div>
+</section>
 
-</main>
-
-<!-- ===== Modal (Level Page) ===== -->
-<div class="modal-bg" id="modalBg">
-  <div class="modal" id="modal">
-    <button class="close" id="modalClose">×</button>
-    <div class="level-tag" id="levelTag">LEVEL 01</div>
+<!-- ============ SCENE 3: LEVEL ============ -->
+<section class="scene scene-level" data-scene="level">
+  <div class="level-topbar">
+    <button class="back-btn" id="btnBack">← 回地圖</button>
+    <span class="topbar-title" id="topbarTitle">—</span>
+  </div>
+  <div class="level-body">
+    <div class="level-tag" id="levelTag">LEVEL —</div>
     <h2 id="levelTitle">—</h2>
     <p class="level-sub" id="levelSub">—</p>
 
@@ -851,41 +864,53 @@
     </div>
 
     <div class="missing-piece" id="missingPiece">
-      <p class="mp-caption" id="mpCaption">這首歌的 MV 裡有一個畫面還空著。付費玩家可以把自己的筆跡 / 手寫字 / 貓的照片填進去。</p>
+      <p class="mp-caption" id="mpCaption">—</p>
     </div>
 
     <div class="branch-block" id="branchBlock">
       <div class="branch-title">◆ 分支決策(下一首走哪條路)</div>
-      <div class="branch-locked" id="branchLocked">
-        <span class="key-icon">🔒</span>需要「初代 Demo 鑰匙」才能投票
-      </div>
-      <div class="choices" id="branchChoices" style="display:none;">
-        <!-- filled by JS -->
-      </div>
-    </div>
-
-    <div class="actions">
-      <button class="btn-primary" id="actClear">標記「我已聽過」</button>
-      <button class="btn-secondary" id="actKey">取得 Demo 鑰匙</button>
+      <div class="branch-locked" id="branchLocked">🔒 需要先進村莊(填 email)才能投票</div>
+      <div class="choices" id="branchChoices" style="display:none;"></div>
     </div>
   </div>
-</div>
+</section>
 
-<!-- ===== Toast ===== -->
 <div class="toast" id="toast">—</div>
+<a href="admin.html" class="admin-link">關主登入</a>
 
 <script>
 // ============================================================
-// STATE (localStorage)
+// FALLBACK CONTENT (used if fetch fails)
 // ============================================================
-const STORAGE_KEY = 'hao-rpg-v1';
+const DEFAULT_CONTENT = {
+  meta: { pixelTitle: "CHEN TSE-HAO", subtitle: "H A O · の 世 界" },
+  speaker: "HAO · 陳則皞",
+  intro: [
+    "嘿,好久沒聯絡。",
+    "這不是一張 EP,是一款遊戲。",
+    "五個關卡、一張世界地圖 — 陪我把歌搬出來。",
+    "不用付費,也能看;想決定走向,就拿鑰匙。",
+    "點「進入世界」往下走。"
+  ],
+  mapTitle: "▸ 世界地圖",
+  mapNote: "每個節點是一首歌、一個章節、或一個企劃。點進去看關卡細節。",
+  gate: {
+    title: "加入村民",
+    sub: "免費。我會不定期寄一些手寫信、碎念、或發行前的 Demo。",
+    note: "你也可以把生活垃圾丟回來。我不一定會回,但我在。",
+    successText: "✓ 你已進入村莊。身份升級為「村民」。"
+  },
+  classes: { guest: "訪客", villager: "村民" },
+  levels: []
+};
+
+// ============================================================
+// STATE
+// ============================================================
+const STORAGE_KEY = 'hao-rpg-v2';
 const defaultState = {
-  cleared: [],          // level ids
-  filled: [],           // missing-piece ids filled
-  hasKey: false,        // branching decision key
-  picks: {},            // level id -> choice id
-  email: null,          // village member email
-  class: 'guest',       // guest | villager | merchant | patron
+  cleared: [], filled: [], hasKey: false, picks: {},
+  email: null, class: 'guest', introSeen: false,
 };
 function loadState() {
   try {
@@ -896,235 +921,269 @@ function loadState() {
 }
 function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
 let state = loadState();
+let CONTENT = DEFAULT_CONTENT;
 
 // ============================================================
-// LEVELS — 3/23 RPG 設計落地:填空式資產 / 分支決策 / NPC 階級 / 傭兵
+// CONTENT LOADER
 // ============================================================
-const LEVELS = [
-  {
-    id: 'L0',
-    num: '00',
-    title: '新手村:歸隊信',
-    desc: '半年沒講話,先把門重新打開。',
-    tag: 'main',
-    story: '我消失了半年。不是沒在寫歌 — 是把這半年的碎片整理成一張地圖。你現在站在村口,這封信是我遞給你的。不用付費,也不用回信。你可以只是站在這裡,看我把歌一首一首搬出來。',
-    tone: { note: 'C4', bpm: 72, mood: 'warm reset · lo-fi keys' },
-    mpCaption: '(這一關沒有填空 — 歸隊信本來就不該賣任何東西)',
-    branches: null,
-    hasMissingPiece: false,
-    defaultUnlocked: true,
-  },
-  {
-    id: 'L1',
-    num: '01',
-    title: '第一首單曲:???',
-    desc: '回歸後第一首。MV 裡有個畫面,還沒填。',
-    tag: 'main',
-    story: '這首歌講一個半夜醒來,發現自己還在原地的時刻。MV 腳本裡,主角會路過一面牆,上面貼著一張「不認識的人手寫的一句話」。那面牆現在是空的。如果沒有人填,它就會是空的上架。',
-    tone: { note: 'A3', bpm: 88, mood: '慢板 · 木吉他 + bitcrush' },
-    mpCaption: '這面牆上的那句話,由付費玩家寫。衛生紙、便條紙、筆跡都可以。寫完拍照回傳,它會進 MV 的 0:47 那個 cut。',
-    branches: null,
-    hasMissingPiece: true,
-    defaultUnlocked: true,
-  },
-  {
-    id: 'L2',
-    num: '02',
-    title: '分岔路:悲 or 爆',
-    desc: '下一首走哪條路,由拿到鑰匙的人決定。',
-    tag: 'main',
-    story: '走到這裡,地圖分岔了。A 是繼續往深處走的慢歌,B 是把情緒撕開的節奏歌。我都寫了一半。拿到「初代 Demo 鑰匙」的人可以投票決定我先把哪一首錄完。免費玩家只能看著他們投。',
-    tone: { note: 'E3', bpm: 104, mood: '岔路 · 雙版本 Demo' },
-    mpCaption: null,
-    hasMissingPiece: false,
-    branches: [
-      { id: 'A', label: 'A · 繼續往下沉(ballad)' },
-      { id: 'B', label: 'B · 把它撕開(upbeat)' },
-    ],
-    defaultUnlocked: false,
-    unlockedBy: 'L1',
-  },
-  {
-    id: 'L3',
-    num: '03',
-    title: '章節式 EP:第一章',
-    desc: '五首歌的小地圖,慢慢解鎖。',
-    tag: 'side',
-    story: '這不是單張 EP。是「章節式 EP」— 每一首都是獨立上架的單曲,但五首連起來是一個故事。第一章會先放鑰匙在村裡某處。村民可以撿,不用付費。',
-    tone: { note: 'G3', bpm: 96, mood: '章節式 · 五首組合' },
-    mpCaption: '章節封面需要一張「影響過你的歌詞」截圖。截圖本身會變成章節首頁的底圖。',
-    branches: null,
-    hasMissingPiece: true,
-    defaultUnlocked: false,
-    unlockedBy: 'L2',
-  },
-  {
-    id: 'L4',
-    num: '??',
-    title: '傭兵召喚陣',
-    desc: '累積貢獻到門檻,聘請客座 NPC。',
-    tag: 'hidden',
-    story: '這一關是隱藏的。當村民總數達到某個門檻,會觸發「召喚陣」— 我會花錢請一位現在還在 cover 的歌手翻唱這一首。不是偷偷業配,是公開的「任務發包」。歌手拿錢,玩家拿流量,我拿市場驗證。',
-    tone: { note: 'F4', bpm: 120, mood: '召喚陣 · 客座 NPC' },
-    mpCaption: '召喚陣需要 30 個村民才會啟動。每一個 email 都是一個符文。',
-    branches: null,
-    hasMissingPiece: false,
-    defaultUnlocked: false,
-    unlockedBy: '__village_30__',
-  },
-];
+async function loadContent() {
+  try {
+    const res = await fetch('content.json?' + Date.now());
+    if (!res.ok) throw new Error('fetch failed');
+    CONTENT = await res.json();
+  } catch (e) {
+    console.warn('Using default content:', e);
+    CONTENT = DEFAULT_CONTENT;
+  }
+  applyContent();
+}
+
+function applyContent() {
+  document.getElementById('pixelTitle').textContent = CONTENT.meta?.pixelTitle || 'CHEN TSE-HAO';
+  document.getElementById('subtitle').textContent = CONTENT.meta?.subtitle || '';
+  document.getElementById('introSpeaker').textContent = (CONTENT.speaker || 'HAO').split(' ')[0];
+  document.getElementById('mapTitleEl').textContent = CONTENT.mapTitle || '▸ 世界地圖';
+  document.getElementById('mapNoteEl').textContent = CONTENT.mapNote || '';
+  document.getElementById('gateTitle').textContent = CONTENT.gate?.title || '加入村民';
+  document.getElementById('gateSub').textContent = CONTENT.gate?.sub || '';
+  document.getElementById('gateNote').textContent = CONTENT.gate?.note || '';
+  document.getElementById('gateSuccess').textContent = CONTENT.gate?.successText || '✓';
+  renderIntroProgress();
+  renderNodes();
+  updateClass();
+}
 
 // ============================================================
-// INTRO DIALOG (typewriter)
+// SCENE ROUTER (hash-based)
 // ============================================================
-const introLines = [
-  '嘿,好久沒聯絡。',
-  '這不是一張 EP,是一款遊戲。',
-  '五個關卡、一張世界地圖 — 陪我把歌搬出來。',
-  '不用付費,也能看;想決定走向,就拿鑰匙。',
-  '往下滑,先看看地圖。',
-];
+function parseHash() {
+  const h = (location.hash || '').replace(/^#/, '');
+  if (!h) return { scene: 'intro' };
+  if (h === 'map') return { scene: 'map' };
+  if (h.startsWith('level/')) return { scene: 'level', levelId: h.split('/')[1] };
+  // Short form: #L1
+  if (/^L\d+$/i.test(h)) return { scene: 'level', levelId: h };
+  return { scene: 'intro' };
+}
+
+function switchScene(to, params = {}) {
+  const current = document.querySelector('.scene.active');
+  const next = document.querySelector(`.scene[data-scene="${to}"]`);
+  if (!next) return;
+  if (current === next) {
+    if (to === 'level') renderLevel(params.levelId);
+    return;
+  }
+  if (to === 'level') renderLevel(params.levelId);
+  if (to === 'map') renderNodes();
+
+  if (current) {
+    current.classList.add('leaving');
+    current.classList.remove('active');
+    setTimeout(() => current.classList.remove('leaving'), 350);
+  }
+  next.classList.add('active');
+  next.scrollTop = 0;
+}
+
+function navigate(hash) {
+  if (location.hash === hash) {
+    handleHashChange();
+  } else {
+    location.hash = hash;
+  }
+}
+
+function handleHashChange() {
+  const { scene, levelId } = parseHash();
+  if (scene === 'intro' && state.introSeen) {
+    // If they've seen intro, default land on map
+    location.hash = 'map';
+    return;
+  }
+  switchScene(scene, { levelId });
+}
+
+window.addEventListener('hashchange', handleHashChange);
+
+// ============================================================
+// INTRO (typewriter)
+// ============================================================
 let introIndex = 0;
 let introTyping = false;
-const typedEl = document.getElementById('typedText');
-const introEl = document.getElementById('introDialog');
-const skipBtn = document.getElementById('skipIntro');
+let currentTypeIv = null;
+
+function renderIntroProgress() {
+  const box = document.getElementById('introProgress');
+  box.innerHTML = '';
+  const total = (CONTENT.intro || []).length;
+  for (let i = 0; i < total; i++) {
+    const dot = document.createElement('span');
+    dot.className = 'dot' + (i <= introIndex ? ' done' : '');
+    box.appendChild(dot);
+  }
+}
 
 function typeLine(line, cb) {
+  const typedEl = document.getElementById('typedText');
+  const dialog = document.getElementById('introDialog');
   introTyping = true;
-  introEl.classList.remove('typed');
+  dialog.classList.remove('typed');
   typedEl.textContent = '';
   let i = 0;
-  const iv = setInterval(() => {
+  currentTypeIv = setInterval(() => {
     typedEl.textContent += line[i];
     i++;
     if (i >= line.length) {
-      clearInterval(iv);
+      clearInterval(currentTypeIv);
+      currentTypeIv = null;
       introTyping = false;
-      introEl.classList.add('typed');
+      dialog.classList.add('typed');
       cb && cb();
     }
   }, 45);
-  return iv;
 }
-let currentIv = null;
+
 function advanceIntro() {
-  if (introTyping && currentIv) {
-    clearInterval(currentIv);
-    typedEl.textContent = introLines[introIndex];
-    introEl.classList.add('typed');
+  const lines = CONTENT.intro || [];
+  const dialog = document.getElementById('introDialog');
+  const typedEl = document.getElementById('typedText');
+
+  if (introTyping && currentTypeIv) {
+    clearInterval(currentTypeIv);
+    typedEl.textContent = lines[introIndex];
+    dialog.classList.add('typed');
     introTyping = false;
     return;
   }
   introIndex++;
-  if (introIndex >= introLines.length) {
-    // collapse dialog
-    introEl.style.transition = 'opacity 0.4s, max-height 0.4s';
-    introEl.style.maxHeight = introEl.offsetHeight + 'px';
-    requestAnimationFrame(() => {
-      introEl.style.opacity = '0.6';
-    });
+  if (introIndex >= lines.length) {
+    introIndex = lines.length - 1;
+    dialog.classList.add('last');
+    document.getElementById('btnEnter').classList.add('show');
+    renderIntroProgress();
     return;
   }
-  currentIv = typeLine(introLines[introIndex]);
+  renderIntroProgress();
+  typeLine(lines[introIndex]);
 }
-introEl.addEventListener('click', (e) => {
-  if (e.target === skipBtn) return;
-  advanceIntro();
+
+function restartIntro() {
+  introIndex = 0;
+  document.getElementById('introDialog').classList.remove('last');
+  document.getElementById('btnEnter').classList.remove('show');
+  renderIntroProgress();
+  if (currentTypeIv) clearInterval(currentTypeIv);
+  const lines = CONTENT.intro || [];
+  if (lines.length) typeLine(lines[0]);
+}
+
+document.getElementById('introDialog').addEventListener('click', advanceIntro);
+document.getElementById('btnSkip').addEventListener('click', () => {
+  state.introSeen = true; saveState();
+  navigate('#map');
 });
-skipBtn.addEventListener('click', (e) => {
-  e.stopPropagation();
-  introIndex = introLines.length - 1;
-  if (currentIv) clearInterval(currentIv);
-  typedEl.textContent = introLines[introLines.length - 1];
-  introEl.classList.add('typed');
-  introTyping = false;
+document.getElementById('btnEnter').addEventListener('click', () => {
+  state.introSeen = true; saveState();
+  navigate('#map');
 });
-currentIv = typeLine(introLines[0]);
 
 // ============================================================
-// RENDER WORLD MAP
+// MAP / NODES
 // ============================================================
-const nodesEl = document.getElementById('nodes');
-
 function isUnlocked(level) {
   if (level.defaultUnlocked) return true;
   if (!level.unlockedBy) return false;
-  if (level.unlockedBy === '__village_30__') {
-    // Hidden lvl demo: unlock when email registered (MVP stub)
-    return !!state.email;
-  }
+  if (level.unlockedBy === '__village__') return !!state.email;
   return state.cleared.includes(level.unlockedBy);
 }
 
 function renderNodes() {
-  nodesEl.innerHTML = '';
-  LEVELS.forEach((lv) => {
+  const el = document.getElementById('nodes');
+  if (!el) return;
+  el.innerHTML = '';
+  const levels = CONTENT.levels || [];
+  levels.forEach((lv) => {
     const unlocked = isUnlocked(lv);
     const cleared = state.cleared.includes(lv.id);
-    const el = document.createElement('div');
-    el.className = 'node' + (unlocked ? '' : ' locked') + (cleared ? ' cleared' : '');
-    el.dataset.id = lv.id;
-    el.innerHTML = `
-      <div class="node-icon">${unlocked ? lv.num : '?'}</div>
+    const n = document.createElement('div');
+    n.className = 'node' + (unlocked ? '' : ' locked') + (cleared ? ' cleared' : '');
+    n.dataset.id = lv.id;
+    n.innerHTML = `
+      <div class="node-icon">${unlocked ? escapeHtml(lv.num) : '?'}</div>
       <div class="node-body">
-        <p class="node-title"><span class="num">${lv.num}</span>${unlocked ? escapeHtml(lv.title) : '???'}</p>
+        <p class="node-title"><span class="num">${escapeHtml(lv.num)}</span>${unlocked ? escapeHtml(lv.title) : '???'}</p>
         <p class="node-desc">${unlocked ? escapeHtml(lv.desc) : '尚未解鎖。完成前一關才看得到這裡。'}</p>
       </div>
-      <span class="node-badge ${lv.tag}">${lv.tag === 'main' ? 'MAIN' : lv.tag === 'side' ? 'SIDE' : 'HIDDEN'}</span>
+      <span class="node-badge ${lv.tag || 'main'}">${(lv.tag || 'main').toUpperCase()}</span>
     `;
     if (unlocked) {
-      el.addEventListener('click', () => openLevel(lv));
+      n.addEventListener('click', () => navigate('#' + lv.id));
     } else {
-      el.addEventListener('click', () => toast('這裡還沒開 — 先往前推進。'));
+      n.addEventListener('click', () => toast('這裡還沒開 — 先往前推進。'));
     }
-    nodesEl.appendChild(el);
+    el.appendChild(n);
   });
-  // progress
   const cleared = state.cleared.length;
-  const total = LEVELS.length;
-  document.getElementById('progressText').textContent = `${cleared} / ${total}`;
-  document.getElementById('progressFill').style.width = `${(cleared / total) * 100}%`;
+  const total = levels.length;
+  const pt = document.getElementById('progressText');
+  const pf = document.getElementById('progressFill');
+  if (pt) pt.textContent = `${cleared} / ${total}`;
+  if (pf) pf.style.width = total ? `${(cleared / total) * 100}%` : '0%';
 }
 
 function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
 // ============================================================
-// MODAL (Level page)
+// LEVEL SCENE
 // ============================================================
-const modalBg = document.getElementById('modalBg');
-const modalClose = document.getElementById('modalClose');
 let activeLevel = null;
 
-function openLevel(lv) {
+function renderLevel(levelId) {
+  const lv = (CONTENT.levels || []).find(l => l.id === levelId);
+  if (!lv) {
+    navigate('#map');
+    return;
+  }
+  if (!isUnlocked(lv)) {
+    toast('這關還沒解鎖。');
+    navigate('#map');
+    return;
+  }
   activeLevel = lv;
+  // Auto-mark as cleared on entering (natural progression, no "mark as done" button)
+  if (!state.cleared.includes(lv.id)) {
+    state.cleared.push(lv.id);
+    if (lv.hasMissingPiece && !state.filled.includes(lv.id)) {
+      state.filled.push(lv.id);
+    }
+    saveState();
+  }
+  document.getElementById('topbarTitle').textContent = lv.title;
   document.getElementById('levelTag').textContent = `LEVEL ${lv.num}`;
   document.getElementById('levelTitle').textContent = lv.title;
   document.getElementById('levelSub').textContent = lv.desc;
   document.getElementById('levelStory').textContent = lv.story;
-  document.getElementById('toneMeta').textContent = `${lv.tone.note} · ${lv.tone.bpm} BPM · ${lv.tone.mood}`;
+  document.getElementById('toneMeta').textContent = `${lv.toneNote} · ${lv.toneBpm} BPM · ${lv.toneMood}`;
 
-  // Missing piece
   const mpEl = document.getElementById('missingPiece');
   const mpCap = document.getElementById('mpCaption');
   if (lv.hasMissingPiece && lv.mpCaption) {
     mpEl.style.display = 'block';
     mpCap.textContent = lv.mpCaption;
-    if (state.filled.includes(lv.id)) mpEl.classList.add('filled');
-    else mpEl.classList.remove('filled');
+    mpEl.classList.toggle('filled', state.filled.includes(lv.id));
   } else {
     mpEl.style.display = 'none';
   }
 
-  // Branches
   const branchBlock = document.getElementById('branchBlock');
   const branchLocked = document.getElementById('branchLocked');
   const branchChoices = document.getElementById('branchChoices');
-  if (lv.branches) {
+  if (lv.branches && lv.branches.length) {
     branchBlock.style.display = 'block';
-    if (state.hasKey) {
+    if (state.email) {
       branchLocked.style.display = 'none';
       branchChoices.style.display = 'grid';
       branchChoices.innerHTML = '';
@@ -1148,127 +1207,140 @@ function openLevel(lv) {
   } else {
     branchBlock.style.display = 'none';
   }
-
-  modalBg.classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeLevel() {
-  modalBg.classList.remove('open');
-  document.body.style.overflow = '';
-  activeLevel = null;
   stopTone();
 }
 
-modalClose.addEventListener('click', closeLevel);
-modalBg.addEventListener('click', (e) => { if (e.target === modalBg) closeLevel(); });
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && modalBg.classList.contains('open')) closeLevel();
-});
-
-// Clear + Key actions
-document.getElementById('actClear').addEventListener('click', () => {
-  if (!activeLevel) return;
-  if (!state.cleared.includes(activeLevel.id)) {
-    state.cleared.push(activeLevel.id);
-    // Also mark missing piece as filled for flavor (MVP: no real upload)
-    if (activeLevel.hasMissingPiece && !state.filled.includes(activeLevel.id)) {
-      state.filled.push(activeLevel.id);
-    }
-    saveState();
-    renderNodes();
-    toast(`✓ ${activeLevel.title} 已推進`);
-    const mpEl = document.getElementById('missingPiece');
-    if (activeLevel.hasMissingPiece) mpEl.classList.add('filled');
-  } else {
-    toast('這關已推進過了');
-  }
-});
-
-document.getElementById('actKey').addEventListener('click', () => {
-  if (state.hasKey) {
-    toast('鑰匙已在你身上。');
-    return;
-  }
-  state.hasKey = true;
-  // Promote class
-  if (state.class === 'villager' || state.class === 'guest') state.class = 'merchant';
-  saveState();
-  updateClass();
-  toast('✓ 取得「初代 Demo 鑰匙」— 你現在可以在分岔路投票。');
-  // Re-render branches
-  if (activeLevel && activeLevel.branches) openLevel(activeLevel);
+document.getElementById('btnBack').addEventListener('click', () => {
+  stopTone();
+  navigate('#map');
 });
 
 // ============================================================
-// TONE GENERATOR (Web Audio API · 8-bit placeholder)
+// TONE GENERATOR — renders to WAV + plays via <audio> so iOS
+// silent switch does NOT mute it (Web Audio API is muted by
+// silent switch, but <audio> media is not).
 // ============================================================
-let audioCtx = null;
-let activeOsc = null;
-let activeGain = null;
-let toneInterval = null;
-
 const NOTE_FREQ = {
-  'C3': 130.81, 'D3': 146.83, 'E3': 164.81, 'F3': 174.61, 'G3': 196.00, 'A3': 220.00, 'B3': 246.94,
-  'C4': 261.63, 'D4': 293.66, 'E4': 329.63, 'F4': 349.23, 'G4': 392.00, 'A4': 440.00,
+  'C3':130.81,'D3':146.83,'E3':164.81,'F3':174.61,'G3':196.00,'A3':220.00,'B3':246.94,
+  'C4':261.63,'D4':293.66,'E4':329.63,'F4':349.23,'G4':392.00,'A4':440.00,
 };
+let audioEl = null;
+let currentBlobUrl = null;
+let toneCache = {};
 
-function playTone() {
-  if (!activeLevel) return;
-  stopTone();
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  const baseFreq = NOTE_FREQ[activeLevel.tone.note] || 220;
-  const bpm = activeLevel.tone.bpm;
-  const stepMs = (60 / bpm) * 1000 / 2; // 8th notes
-  const melody = [0, 4, 7, 4, 0, 7, 4, 0]; // semitone offsets
-  let step = 0;
-  const btn = document.getElementById('playTone');
-  btn.textContent = '■ STOP';
-  const startTime = audioCtx.currentTime;
-  activeGain = audioCtx.createGain();
-  activeGain.gain.value = 0.08;
-  activeGain.connect(audioCtx.destination);
+function audioBufferToWavBlob(buffer) {
+  const sampleRate = buffer.sampleRate;
+  const samples = buffer.getChannelData(0);
+  const len = samples.length;
+  const bufferSize = 44 + len * 2;
+  const arr = new ArrayBuffer(bufferSize);
+  const view = new DataView(arr);
+  const writeStr = (o, s) => { for (let i=0;i<s.length;i++) view.setUint8(o+i, s.charCodeAt(i)); };
+  writeStr(0, 'RIFF');
+  view.setUint32(4, bufferSize - 8, true);
+  writeStr(8, 'WAVE');
+  writeStr(12, 'fmt ');
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true);
+  view.setUint16(22, 1, true);
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * 2, true);
+  view.setUint16(32, 2, true);
+  view.setUint16(34, 16, true);
+  writeStr(36, 'data');
+  view.setUint32(40, len * 2, true);
+  let o = 44;
+  for (let i = 0; i < len; i++) {
+    const s = Math.max(-1, Math.min(1, samples[i]));
+    view.setInt16(o, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+    o += 2;
+  }
+  return new Blob([arr], { type: 'audio/wav' });
+}
 
-  function playStep() {
-    const osc = audioCtx.createOscillator();
+async function renderToneBlob(level, durationSec) {
+  const cacheKey = `${level.id}-${durationSec}`;
+  if (toneCache[cacheKey]) return toneCache[cacheKey];
+  const sampleRate = 22050;
+  const totalSamples = Math.floor(sampleRate * durationSec);
+  const OfflineCtx = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+  const ctx = new OfflineCtx(1, totalSamples, sampleRate);
+  const baseFreq = NOTE_FREQ[level.toneNote] || 220;
+  const stepSec = (60 / level.toneBpm) / 2;
+  const melody = [0, 4, 7, 4, 0, 7, 4, 0];
+  let t = 0, step = 0;
+  while (t < durationSec - stepSec) {
+    const osc = ctx.createOscillator();
     osc.type = 'square';
     const offset = melody[step % melody.length];
-    const freq = baseFreq * Math.pow(2, offset / 12);
-    osc.frequency.value = freq;
-    const g = audioCtx.createGain();
-    g.gain.setValueAtTime(0.15, audioCtx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + stepMs / 1000 * 0.9);
+    osc.frequency.value = baseFreq * Math.pow(2, offset / 12);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.15, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + stepSec * 0.9);
     osc.connect(g);
-    g.connect(audioCtx.destination);
-    osc.start();
-    osc.stop(audioCtx.currentTime + stepMs / 1000);
+    g.connect(ctx.destination);
+    osc.start(t);
+    osc.stop(t + stepSec);
+    t += stepSec;
     step++;
   }
-  playStep();
-  toneInterval = setInterval(playStep, stepMs);
-  // Auto-stop after 30s
-  setTimeout(stopTone, 30000);
+  const buffer = await ctx.startRendering();
+  const blob = audioBufferToWavBlob(buffer);
+  const url = URL.createObjectURL(blob);
+  toneCache[cacheKey] = url;
+  return url;
 }
-function stopTone() {
-  if (toneInterval) { clearInterval(toneInterval); toneInterval = null; }
+
+function ensureAudioEl() {
+  if (audioEl) return audioEl;
+  audioEl = document.createElement('audio');
+  audioEl.setAttribute('playsinline', '');
+  audioEl.setAttribute('webkit-playsinline', '');
+  audioEl.preload = 'auto';
+  audioEl.addEventListener('ended', stopTone);
+  document.body.appendChild(audioEl);
+  return audioEl;
+}
+
+async function playTone() {
+  if (!activeLevel) return;
+  stopTone();
   const btn = document.getElementById('playTone');
-  btn.textContent = '▶ PLAY';
+  btn.textContent = '⏳ …';
+  try {
+    const url = await renderToneBlob(activeLevel, 30);
+    const el = ensureAudioEl();
+    el.src = url;
+    el.currentTime = 0;
+    await el.play();
+    btn.textContent = '■ STOP';
+  } catch (e) {
+    console.error(e);
+    btn.textContent = '▶ PLAY';
+    toast('播放失敗,再試一次');
+  }
 }
+
+function stopTone() {
+  if (audioEl) {
+    audioEl.pause();
+    try { audioEl.currentTime = 0; } catch {}
+  }
+  const btn = document.getElementById('playTone');
+  if (btn) btn.textContent = '▶ PLAY';
+}
+
 document.getElementById('playTone').addEventListener('click', () => {
-  if (toneInterval) stopTone();
+  if (audioEl && !audioEl.paused) stopTone();
   else playTone();
 });
 
 // ============================================================
-// EMAIL GATE (Village Registration)
+// GATE (Email)
 // ============================================================
-const gateForm = document.getElementById('gateForm');
-const gateSuccess = document.getElementById('gateSuccess');
-const gateEmail = document.getElementById('gateEmail');
-
-gateForm.addEventListener('submit', (e) => {
+document.getElementById('gateForm').addEventListener('submit', (e) => {
   e.preventDefault();
-  const email = gateEmail.value.trim();
+  const email = document.getElementById('gateEmail').value.trim();
   if (!email || !email.includes('@')) {
     toast('email 格式怪怪的,再檢查一下');
     return;
@@ -1276,20 +1348,18 @@ gateForm.addEventListener('submit', (e) => {
   state.email = email;
   if (state.class === 'guest') state.class = 'villager';
   saveState();
-  gateSuccess.classList.add('show');
-  gateEmail.value = '';
+  document.getElementById('gateSuccess').classList.add('show');
+  document.getElementById('gateEmail').value = '';
   updateClass();
-  renderNodes(); // may unlock hidden lvl
+  renderNodes();
   toast('✓ 歡迎來到村莊,' + email.split('@')[0]);
 });
 
 function updateClass() {
   const tag = document.getElementById('classTag');
-  const labels = { guest: '遊客', villager: '村民', merchant: '商人', patron: '金主媽媽' };
-  tag.textContent = labels[state.class] || '遊客';
-  if (state.email) {
-    gateSuccess.classList.add('show');
-  }
+  const labels = (CONTENT.classes) || defaultState;
+  tag.textContent = (labels[state.class]) || '遊客';
+  if (state.email) document.getElementById('gateSuccess').classList.add('show');
 }
 
 // ============================================================
@@ -1307,19 +1377,14 @@ function toast(msg) {
 // ============================================================
 // INIT
 // ============================================================
-renderNodes();
-updateClass();
-
-// Easter egg: if player clears 3 levels, promote to patron
-setInterval(() => {
-  if (state.cleared.length >= 3 && state.class !== 'patron') {
-    state.class = 'patron';
-    saveState();
-    updateClass();
-    toast('身份升級:金主媽媽 — 解鎖後續支線。');
-  }
-}, 1000);
-
+(async () => {
+  await loadContent();
+  // Start intro typing
+  const lines = CONTENT.intro || [];
+  if (lines.length) typeLine(lines[0]);
+  // Route to initial scene
+  handleHashChange();
+})();
 </script>
 </body>
 </html>

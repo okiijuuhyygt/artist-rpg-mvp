@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>關主登入 · Admin</title>
+<meta name="robots" content="noindex">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --gb-darkest: #0f380f;
+    --gb-dark: #306230;
+    --gb-mid: #8bac0f;
+    --gb-light: #9bbc0f;
+    --gb-lightest: #d0d88c;
+    --paper: #efe9de;
+    --paper-light: #fdfaf3;
+    --paper-edge: #cbc0ae;
+    --ink: #2a2624;
+    --ink-soft: #7a6d5c;
+    --gold: #b39a78;
+    --gold-deep: #6a4e32;
+    --danger: #a33;
+    --success: #306230;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "PingFang TC", "Noto Sans TC", -apple-system, sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.7;
+    min-height: 100vh;
+    background-image: radial-gradient(rgba(15, 56, 15, 0.05) 1px, transparent 1px);
+    background-size: 4px 4px;
+  }
+  .wrap {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 32px 20px 80px;
+  }
+  .topbar {
+    background: var(--gb-darkest);
+    color: var(--gb-lightest);
+    padding: 14px 20px;
+    font-family: "Press Start 2P", monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .topbar .tb-left { display: flex; align-items: center; gap: 10px; }
+  .topbar .badge {
+    background: var(--gb-light);
+    color: var(--gb-darkest);
+    padding: 3px 8px;
+    font-size: 9px;
+    letter-spacing: 1px;
+  }
+  .topbar a {
+    color: var(--gb-lightest);
+    text-decoration: none;
+    font-size: 10px;
+    opacity: 0.8;
+  }
+  .topbar a:hover { opacity: 1; }
+
+  h1.page-title {
+    font-family: "Press Start 2P", monospace;
+    font-size: 16px;
+    letter-spacing: 2px;
+    color: var(--gb-darkest);
+    margin: 0 0 8px;
+  }
+  .page-sub {
+    font-size: 14px;
+    color: var(--ink-soft);
+    margin: 0 0 28px;
+  }
+
+  /* Panel card */
+  .panel {
+    background: var(--paper-light);
+    border: 3px solid var(--gb-darkest);
+    box-shadow: 5px 5px 0 var(--paper-edge);
+    padding: 26px 22px;
+    margin-bottom: 20px;
+  }
+  .panel .panel-title {
+    font-family: "Press Start 2P", monospace;
+    font-size: 11px;
+    color: var(--gb-darkest);
+    letter-spacing: 2px;
+    margin: 0 0 14px;
+  }
+  .panel .panel-desc {
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin: 0 0 18px;
+  }
+
+  /* Steps */
+  .steps { display: flex; flex-direction: column; gap: 16px; }
+  .step {
+    padding: 18px;
+    background: var(--paper);
+    border-left: 4px solid var(--gold);
+  }
+  .step.active { border-left-color: var(--gb-dark); background: var(--gb-lightest); }
+  .step.done { border-left-color: var(--gb-mid); opacity: 0.7; }
+  .step .step-num {
+    font-family: "Press Start 2P", monospace;
+    font-size: 10px;
+    color: var(--gold-deep);
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+  }
+  .step .step-title {
+    font-size: 15px;
+    font-weight: 500;
+    margin: 0 0 8px;
+    letter-spacing: 1px;
+  }
+  .step .step-body {
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.8;
+  }
+  .step .step-body p { margin: 0 0 10px; }
+  .step .step-body b { color: var(--ink); }
+
+  /* Inputs */
+  input[type="password"],
+  input[type="text"],
+  input[type="number"],
+  input[type="email"],
+  textarea,
+  select {
+    width: 100%;
+    padding: 10px 12px;
+    font-family: "VT323", monospace;
+    font-size: 17px;
+    background: var(--paper);
+    border: 2px solid var(--gb-darkest);
+    color: var(--ink);
+    resize: vertical;
+  }
+  input:focus, textarea:focus, select:focus { outline: none; background: var(--gb-lightest); }
+  textarea { min-height: 70px; line-height: 1.5; }
+  label.field {
+    display: block;
+    margin-bottom: 14px;
+  }
+  label.field .label-text {
+    font-family: "Press Start 2P", monospace;
+    font-size: 9px;
+    color: var(--gb-dark);
+    letter-spacing: 1.5px;
+    display: block;
+    margin-bottom: 5px;
+  }
+  label.field .hint {
+    font-size: 11px;
+    color: var(--ink-soft);
+    margin-top: 4px;
+    font-style: italic;
+  }
+
+  /* Buttons */
+  button, .btn {
+    font-family: "PingFang TC", sans-serif;
+    font-size: 13px;
+    padding: 12px 18px;
+    border: 2px solid var(--gb-darkest);
+    cursor: pointer;
+    letter-spacing: 2px;
+    transition: all 0.15s;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+  }
+  .btn-primary, button.primary {
+    background: var(--gb-dark);
+    color: var(--paper-light);
+  }
+  .btn-primary:hover, button.primary:hover {
+    background: var(--gb-darkest);
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0 var(--paper-edge);
+  }
+  .btn-secondary, button.secondary {
+    background: var(--paper-light);
+    color: var(--ink);
+  }
+  .btn-secondary:hover, button.secondary:hover { background: var(--gb-lightest); }
+  .btn-danger {
+    background: transparent;
+    color: var(--danger);
+    border-color: var(--danger);
+  }
+  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+
+  /* Open GitHub button (big, visual) */
+  .big-action {
+    display: block;
+    width: 100%;
+    padding: 20px;
+    background: var(--gb-darkest);
+    color: var(--gb-lightest);
+    text-align: center;
+    font-family: "Press Start 2P", monospace;
+    font-size: 12px;
+    letter-spacing: 2px;
+    border: 3px solid var(--gb-darkest);
+    text-decoration: none;
+    transition: all 0.15s;
+    margin: 10px 0;
+  }
+  .big-action:hover {
+    background: var(--gb-dark);
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0 var(--gold);
+  }
+  .big-action .big-sub {
+    display: block;
+    font-family: "VT323", monospace;
+    font-size: 14px;
+    letter-spacing: 1px;
+    margin-top: 8px;
+    opacity: 0.8;
+  }
+
+  /* Alerts */
+  .alert {
+    padding: 12px 14px;
+    margin: 12px 0;
+    font-size: 13px;
+    font-family: "VT323", monospace;
+    font-size: 16px;
+    letter-spacing: 0.5px;
+  }
+  .alert-error { background: #fdecec; border: 2px solid var(--danger); color: var(--danger); }
+  .alert-ok { background: var(--gb-lightest); border: 2px solid var(--gb-dark); color: var(--gb-darkest); }
+  .alert-info { background: var(--paper-light); border: 2px solid var(--gold); color: var(--gold-deep); }
+
+  /* Editor sections */
+  .editor-section {
+    background: var(--paper);
+    border: 2px solid var(--paper-edge);
+    padding: 18px;
+    margin-bottom: 14px;
+  }
+  .editor-section summary {
+    cursor: pointer;
+    font-family: "Press Start 2P", monospace;
+    font-size: 11px;
+    color: var(--gb-darkest);
+    letter-spacing: 1.5px;
+    padding: 4px 0;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .editor-section summary::after {
+    content: "▶";
+    font-size: 10px;
+    color: var(--gold);
+    transition: transform 0.2s;
+  }
+  .editor-section[open] summary::after { transform: rotate(90deg); }
+  .editor-section .section-body { padding-top: 16px; }
+
+  .intro-lines { display: flex; flex-direction: column; gap: 10px; }
+  .intro-line-row {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+  }
+  .intro-line-row .row-num {
+    font-family: "VT323", monospace;
+    font-size: 16px;
+    color: var(--gold-deep);
+    padding-top: 10px;
+    width: 20px;
+    flex-shrink: 0;
+  }
+  .intro-line-row input { flex: 1; }
+  .intro-line-row .remove-btn {
+    padding: 8px 12px;
+    background: transparent;
+    color: var(--danger);
+    border: 1px solid var(--danger);
+    font-size: 11px;
+    letter-spacing: 1px;
+    cursor: pointer;
+  }
+  .add-row-btn {
+    padding: 8px 14px;
+    background: var(--paper-light);
+    border: 2px dashed var(--gb-dark);
+    color: var(--gb-dark);
+    font-family: "VT323", monospace;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 6px;
+  }
+
+  /* Sticky save bar */
+  .save-bar {
+    position: sticky;
+    bottom: 0;
+    background: var(--gb-darkest);
+    margin: 24px -20px -80px;
+    padding: 14px 20px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 50;
+    border-top: 3px solid var(--gb-light);
+  }
+  .save-bar .save-info {
+    font-family: "VT323", monospace;
+    font-size: 16px;
+    color: var(--gb-lightest);
+    flex: 1;
+  }
+  .save-bar .save-btn {
+    padding: 12px 20px;
+    font-family: "Press Start 2P", monospace;
+    font-size: 11px;
+    background: var(--gb-light);
+    color: var(--gb-darkest);
+    border: 2px solid var(--gb-light);
+    letter-spacing: 2px;
+    cursor: pointer;
+  }
+  .save-bar .save-btn:hover:not(:disabled) { background: var(--gb-mid); }
+  .save-bar .save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .hidden { display: none !important; }
+  .mono { font-family: "VT323", monospace; font-size: 15px; }
+
+  @media (max-width: 600px) {
+    .wrap { padding: 22px 14px 80px; }
+    .topbar { font-size: 10px; padding: 12px 14px; }
+    .panel { padding: 20px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="tb-left">
+    <span>關主後台</span>
+    <span class="badge" id="statusBadge">未登入</span>
+  </div>
+  <a href="index.html">← 回世界</a>
+</div>
+
+<div class="wrap">
+
+<!-- ====================== SCENE: Login (first time + returning) ====================== -->
+<section id="sceneLogin">
+  <h1 class="page-title">關主登入</h1>
+  <p class="page-sub">這裡只有陳則皞進得來。先設一個關主密碼,之後就用這組密碼登入。</p>
+
+  <div class="panel">
+    <div id="loginFirstTime">
+      <h2 class="panel-title">首次進來:設定關主密碼</h2>
+      <p class="panel-desc">這組密碼只存在你的瀏覽器(不上傳任何地方)。換裝置要重新設。</p>
+      <label class="field">
+        <span class="label-text">NEW PASSWORD</span>
+        <input type="password" id="newPass" placeholder="至少 6 個字">
+      </label>
+      <label class="field">
+        <span class="label-text">CONFIRM</span>
+        <input type="password" id="newPass2" placeholder="再打一次">
+      </label>
+      <div class="btn-row">
+        <button class="primary" id="btnSetPass">設定密碼</button>
+      </div>
+      <div class="alert alert-error hidden" id="loginFirstErr"></div>
+    </div>
+
+    <div id="loginReturn" class="hidden">
+      <h2 class="panel-title">輸入關主密碼</h2>
+      <label class="field">
+        <span class="label-text">PASSWORD</span>
+        <input type="password" id="returnPass" autocomplete="current-password">
+      </label>
+      <div class="btn-row">
+        <button class="primary" id="btnLogin">登入</button>
+        <button class="btn-danger" id="btnResetPass">忘記密碼(重設)</button>
+      </div>
+      <div class="alert alert-error hidden" id="loginReturnErr"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== SCENE: Token Setup Wizard ====================== -->
+<section id="sceneTokenSetup" class="hidden">
+  <h1 class="page-title">連線 GitHub</h1>
+  <p class="page-sub">
+    後台要能「存檔」回網站,就要用你的 GitHub 帳號發一張「鑰匙(Token)」。
+    下面三步,跟著按就好。<b>這張鑰匙只存在你的瀏覽器。</b>
+  </p>
+
+  <div class="panel">
+    <div class="steps">
+
+      <div class="step active" id="stepOpenGithub">
+        <div class="step-num">STEP 1 / 3</div>
+        <div class="step-title">去 GitHub 產生一張 Token</div>
+        <div class="step-body">
+          <p>點下面這個大按鈕,會跳到 GitHub 網頁。我已經幫你把設定都預填好了:</p>
+          <p>
+            <b>① 名字</b> 會自動填成 <span class="mono">artist-rpg-mvp-cms</span><br>
+            <b>② 權限</b> 會自動勾 <span class="mono">public_repo</span>(只能改你的公開 repo)<br>
+            <b>③ 到期日</b> 建議選 <b>90 天</b> 或 <b>No expiration</b>(永久)
+          </p>
+          <a href="https://github.com/settings/tokens/new?description=artist-rpg-mvp-cms&scopes=public_repo" target="_blank" rel="noopener" class="big-action" id="openGithubBtn">
+            ▶ 打開 GitHub 產生 Token
+            <span class="big-sub">會開新分頁 · 結束滑到最底按綠色「Generate token」</span>
+          </a>
+          <p class="alert alert-info">
+            產生完成後,GitHub 會顯示一串 <span class="mono">ghp_xxxxxxxxxxxxxxxxxxx</span> 的字,按旁邊的複製圖示,然後回來這頁。
+          </p>
+        </div>
+      </div>
+
+      <div class="step" id="stepPasteToken">
+        <div class="step-num">STEP 2 / 3</div>
+        <div class="step-title">把那串字貼進來</div>
+        <div class="step-body">
+          <label class="field">
+            <span class="label-text">GITHUB TOKEN</span>
+            <input type="password" id="tokenInput" placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
+            <span class="hint">貼上後按下面的「驗證並儲存」</span>
+          </label>
+          <div class="btn-row">
+            <button class="primary" id="btnVerifyToken">驗證並儲存</button>
+          </div>
+          <div class="alert alert-error hidden" id="tokenErr"></div>
+          <div class="alert alert-ok hidden" id="tokenOk"></div>
+        </div>
+      </div>
+
+      <div class="step" id="stepDone">
+        <div class="step-num">STEP 3 / 3</div>
+        <div class="step-title">完成!</div>
+        <div class="step-body">
+          <p>✓ Token 已存好,接下來可以開始改內容了。</p>
+          <div class="btn-row">
+            <button class="primary" id="btnGoEditor">▶ 進入編輯器</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">我不想設 Token,可以改用別的方式嗎?</div>
+    <p class="panel-desc">
+      可以,但就要**手動**把檔案上傳回 GitHub,比較慢。點下面那顆「下載模式」,編輯後會給你一個 content.json 下載,
+      你要自己去 <a href="https://github.com/okiijuuhyygt/artist-rpg-mvp" target="_blank">GitHub 的 repo 頁面</a>
+      點「Add file → Upload files」把檔案拖上去。
+    </p>
+    <div class="btn-row">
+      <button class="secondary" id="btnDownloadMode">改用下載模式</button>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== SCENE: Editor ====================== -->
+<section id="sceneEditor" class="hidden">
+  <h1 class="page-title">內容編輯</h1>
+  <p class="page-sub">
+    改完下面任一個欄位,按底部的「儲存到網站」。
+    按了之後 GitHub 會收到新版 <span class="mono">content.json</span>,
+    網站會在 30 秒 - 2 分鐘之內自動更新。
+  </p>
+
+  <div id="loadingContent" class="alert alert-info">讀取中...</div>
+  <div id="editorBody" class="hidden">
+
+    <!-- Meta -->
+    <details class="editor-section" open>
+      <summary>世界設定(標題 / 副標 / 說話人)</summary>
+      <div class="section-body">
+        <label class="field">
+          <span class="label-text">PIXEL TITLE(頂部英文大字)</span>
+          <input type="text" data-path="meta.pixelTitle">
+        </label>
+        <label class="field">
+          <span class="label-text">SUBTITLE(副標)</span>
+          <input type="text" data-path="meta.subtitle">
+        </label>
+        <label class="field">
+          <span class="label-text">SPEAKER NAME(開場對話框上方的名字)</span>
+          <input type="text" data-path="speaker">
+        </label>
+      </div>
+    </details>
+
+    <!-- Intro -->
+    <details class="editor-section" open>
+      <summary>開場對話(打字機一行一行跳的文字)</summary>
+      <div class="section-body">
+        <div class="intro-lines" id="introLinesEditor"></div>
+        <button class="add-row-btn" id="addIntroLine">+ 加一行</button>
+      </div>
+    </details>
+
+    <!-- Map -->
+    <details class="editor-section">
+      <summary>世界地圖標題 / 說明</summary>
+      <div class="section-body">
+        <label class="field">
+          <span class="label-text">MAP TITLE</span>
+          <input type="text" data-path="mapTitle">
+        </label>
+        <label class="field">
+          <span class="label-text">MAP NOTE</span>
+          <input type="text" data-path="mapNote">
+        </label>
+      </div>
+    </details>
+
+    <!-- Gate -->
+    <details class="editor-section">
+      <summary>加入村民區塊(email 註冊)</summary>
+      <div class="section-body">
+        <label class="field">
+          <span class="label-text">GATE TITLE</span>
+          <input type="text" data-path="gate.title">
+        </label>
+        <label class="field">
+          <span class="label-text">GATE SUB</span>
+          <input type="text" data-path="gate.sub">
+        </label>
+        <label class="field">
+          <span class="label-text">GATE NOTE(小字斜體)</span>
+          <input type="text" data-path="gate.note">
+        </label>
+        <label class="field">
+          <span class="label-text">SUCCESS TEXT(填完 email 後出現的訊息)</span>
+          <input type="text" data-path="gate.successText">
+        </label>
+      </div>
+    </details>
+
+    <!-- Levels -->
+    <h2 class="page-title" style="font-size: 13px; margin-top: 28px;">▸ 關卡</h2>
+    <div id="levelsEditor"></div>
+
+  </div>
+
+  <div class="save-bar" id="saveBar">
+    <div class="save-info" id="saveInfo">就緒</div>
+    <button class="save-btn" id="btnSave">儲存到網站</button>
+  </div>
+
+  <div class="btn-row" style="margin-top: 20px;">
+    <button class="btn-danger" id="btnLogout">登出 + 清除 Token</button>
+  </div>
+</section>
+
+</div>
+
+<script>
+// =======================================================
+// CONFIG
+// =======================================================
+const REPO_OWNER = 'okiijuuhyygt';
+const REPO_NAME  = 'artist-rpg-mvp';
+const CONTENT_PATH = 'content.json';
+
+const LS_PASS = 'hao-admin-pass-v1';
+const LS_TOKEN = 'hao-admin-token-v1';
+const LS_SESSION = 'hao-admin-session-v1';
+const LS_DOWNLOAD_MODE = 'hao-admin-download-v1';
+
+// =======================================================
+// UTILS
+// =======================================================
+const $ = (id) => document.getElementById(id);
+function show(id) { $(id).classList.remove('hidden'); }
+function hide(id) { $(id).classList.add('hidden'); }
+function setStatus(text) { $('statusBadge').textContent = text; }
+
+async function sha256(str) {
+  const buf = new TextEncoder().encode(str);
+  const hash = await crypto.subtle.digest('SHA-256', buf);
+  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function showScene(name) {
+  ['sceneLogin', 'sceneTokenSetup', 'sceneEditor'].forEach(s => {
+    $(s).classList.add('hidden');
+  });
+  $(name).classList.remove('hidden');
+}
+
+function getPath(obj, path) {
+  return path.split('.').reduce((o, k) => (o == null ? o : o[k]), obj);
+}
+function setPath(obj, path, value) {
+  const keys = path.split('.');
+  const last = keys.pop();
+  const target = keys.reduce((o, k) => (o[k] = o[k] || {}), obj);
+  target[last] = value;
+}
+
+// =======================================================
+// LOGIN SCENE
+// =======================================================
+async function initLogin() {
+  const hasPass = !!localStorage.getItem(LS_PASS);
+  if (hasPass) {
+    hide('loginFirstTime');
+    show('loginReturn');
+    $('returnPass').focus();
+  } else {
+    show('loginFirstTime');
+    hide('loginReturn');
+    $('newPass').focus();
+  }
+}
+
+$('btnSetPass').addEventListener('click', async () => {
+  const p = $('newPass').value;
+  const p2 = $('newPass2').value;
+  const errEl = $('loginFirstErr');
+  errEl.classList.add('hidden');
+  if (p.length < 6) {
+    errEl.textContent = '密碼至少 6 個字';
+    errEl.classList.remove('hidden');
+    return;
+  }
+  if (p !== p2) {
+    errEl.textContent = '兩次密碼不一樣';
+    errEl.classList.remove('hidden');
+    return;
+  }
+  const hash = await sha256(p);
+  localStorage.setItem(LS_PASS, hash);
+  sessionStorage.setItem(LS_SESSION, '1');
+  setStatus('已登入');
+  routeAfterLogin();
+});
+
+$('btnLogin').addEventListener('click', async () => {
+  const p = $('returnPass').value;
+  const errEl = $('loginReturnErr');
+  errEl.classList.add('hidden');
+  const stored = localStorage.getItem(LS_PASS);
+  const hash = await sha256(p);
+  if (hash !== stored) {
+    errEl.textContent = '密碼不對';
+    errEl.classList.remove('hidden');
+    return;
+  }
+  sessionStorage.setItem(LS_SESSION, '1');
+  setStatus('已登入');
+  routeAfterLogin();
+});
+
+$('btnResetPass').addEventListener('click', () => {
+  if (!confirm('真的要清掉密碼重設嗎?(Token 也會一起清掉)')) return;
+  localStorage.removeItem(LS_PASS);
+  localStorage.removeItem(LS_TOKEN);
+  sessionStorage.removeItem(LS_SESSION);
+  initLogin();
+});
+
+function routeAfterLogin() {
+  const token = localStorage.getItem(LS_TOKEN);
+  const downloadMode = localStorage.getItem(LS_DOWNLOAD_MODE) === '1';
+  if (token || downloadMode) {
+    showScene('sceneEditor');
+    initEditor();
+  } else {
+    showScene('sceneTokenSetup');
+  }
+}
+
+// =======================================================
+// TOKEN SETUP SCENE
+// =======================================================
+$('openGithubBtn').addEventListener('click', () => {
+  // mark step 1 done when they click
+  setTimeout(() => {
+    $('stepOpenGithub').classList.remove('active');
+    $('stepOpenGithub').classList.add('done');
+    $('stepPasteToken').classList.add('active');
+    $('tokenInput').focus();
+  }, 500);
+});
+
+$('btnVerifyToken').addEventListener('click', async () => {
+  const tok = $('tokenInput').value.trim();
+  const errEl = $('tokenErr');
+  const okEl = $('tokenOk');
+  errEl.classList.add('hidden');
+  okEl.classList.add('hidden');
+  if (!tok || tok.length < 30) {
+    errEl.textContent = 'Token 格式看起來不對,應該是 ghp_ 開頭的一長串字。';
+    errEl.classList.remove('hidden');
+    return;
+  }
+  $('btnVerifyToken').disabled = true;
+  $('btnVerifyToken').textContent = '驗證中...';
+  try {
+    // Test: try to read content.json
+    const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${CONTENT_PATH}`, {
+      headers: { 'Authorization': `Bearer ${tok}`, 'Accept': 'application/vnd.github+json' }
+    });
+    if (!res.ok) {
+      const txt = await res.text();
+      throw new Error(`GitHub 回 ${res.status}: ${txt.slice(0, 200)}`);
+    }
+    localStorage.setItem(LS_TOKEN, tok);
+    okEl.textContent = '✓ Token 沒問題,已儲存。';
+    okEl.classList.remove('hidden');
+    $('stepPasteToken').classList.remove('active');
+    $('stepPasteToken').classList.add('done');
+    $('stepDone').classList.add('active');
+  } catch (e) {
+    errEl.textContent = '驗證失敗:' + e.message;
+    errEl.classList.remove('hidden');
+  } finally {
+    $('btnVerifyToken').disabled = false;
+    $('btnVerifyToken').textContent = '驗證並儲存';
+  }
+});
+
+$('btnGoEditor').addEventListener('click', () => {
+  showScene('sceneEditor');
+  initEditor();
+});
+
+$('btnDownloadMode').addEventListener('click', () => {
+  localStorage.setItem(LS_DOWNLOAD_MODE, '1');
+  showScene('sceneEditor');
+  initEditor();
+});
+
+// =======================================================
+// EDITOR SCENE
+// =======================================================
+let contentData = null;
+let contentSha = null;
+let originalContent = null;
+
+async function initEditor() {
+  $('loadingContent').classList.remove('hidden');
+  $('editorBody').classList.add('hidden');
+  try {
+    const res = await fetch(`content.json?t=${Date.now()}`);
+    if (!res.ok) throw new Error('找不到 content.json');
+    contentData = await res.json();
+    originalContent = JSON.stringify(contentData);
+    // Try to get SHA if we have a token
+    const tok = localStorage.getItem(LS_TOKEN);
+    if (tok) {
+      try {
+        const apiRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${CONTENT_PATH}`, {
+          headers: { 'Authorization': `Bearer ${tok}`, 'Accept': 'application/vnd.github+json' }
+        });
+        if (apiRes.ok) {
+          const data = await apiRes.json();
+          contentSha = data.sha;
+        }
+      } catch {}
+    }
+    renderEditor();
+    $('loadingContent').classList.add('hidden');
+    $('editorBody').classList.remove('hidden');
+  } catch (e) {
+    $('loadingContent').textContent = '讀取失敗:' + e.message;
+  }
+  updateSaveBar();
+}
+
+function renderEditor() {
+  // Simple text fields via data-path
+  document.querySelectorAll('[data-path]').forEach(inp => {
+    const path = inp.dataset.path;
+    inp.value = getPath(contentData, path) || '';
+    inp.addEventListener('input', () => {
+      setPath(contentData, path, inp.value);
+      updateSaveBar();
+    });
+  });
+  // Intro lines
+  renderIntroLines();
+  // Levels
+  renderLevels();
+}
+
+function renderIntroLines() {
+  const box = $('introLinesEditor');
+  box.innerHTML = '';
+  (contentData.intro || []).forEach((line, idx) => {
+    const row = document.createElement('div');
+    row.className = 'intro-line-row';
+    row.innerHTML = `
+      <span class="row-num">${idx + 1}.</span>
+      <input type="text" value="" />
+      <button class="remove-btn" title="刪除此行">✕</button>
+    `;
+    const inp = row.querySelector('input');
+    inp.value = line;
+    inp.addEventListener('input', () => {
+      contentData.intro[idx] = inp.value;
+      updateSaveBar();
+    });
+    row.querySelector('.remove-btn').addEventListener('click', () => {
+      if (!confirm(`刪掉這一行?「${line}」`)) return;
+      contentData.intro.splice(idx, 1);
+      renderIntroLines();
+      updateSaveBar();
+    });
+    box.appendChild(row);
+  });
+}
+
+$('addIntroLine').addEventListener('click', () => {
+  contentData.intro = contentData.intro || [];
+  contentData.intro.push('新的一行...');
+  renderIntroLines();
+  updateSaveBar();
+});
+
+function renderLevels() {
+  const box = $('levelsEditor');
+  box.innerHTML = '';
+  (contentData.levels || []).forEach((lv, idx) => {
+    const sec = document.createElement('details');
+    sec.className = 'editor-section';
+    sec.innerHTML = `
+      <summary>${escapeHtml(lv.num || '??')} · ${escapeHtml(lv.title || '(未命名)')}</summary>
+      <div class="section-body">
+        <label class="field">
+          <span class="label-text">關卡編號(顯示在地圖小方塊)</span>
+          <input type="text" data-lv="${idx}" data-k="num">
+        </label>
+        <label class="field">
+          <span class="label-text">標題</span>
+          <input type="text" data-lv="${idx}" data-k="title">
+        </label>
+        <label class="field">
+          <span class="label-text">副標(地圖上的一句話)</span>
+          <input type="text" data-lv="${idx}" data-k="desc">
+        </label>
+        <label class="field">
+          <span class="label-text">劇情(進關卡後的大段文字)</span>
+          <textarea data-lv="${idx}" data-k="story" rows="5"></textarea>
+        </label>
+        <label class="field">
+          <span class="label-text">標籤(main / side / hidden)</span>
+          <select data-lv="${idx}" data-k="tag">
+            <option value="main">main(主線)</option>
+            <option value="side">side(支線)</option>
+            <option value="hidden">hidden(隱藏)</option>
+          </select>
+        </label>
+        <label class="field">
+          <span class="label-text">試聽 · 音符(C3 D3 E3 F3 G3 A3 B3 C4...)</span>
+          <input type="text" data-lv="${idx}" data-k="toneNote">
+        </label>
+        <label class="field">
+          <span class="label-text">試聽 · BPM</span>
+          <input type="number" data-lv="${idx}" data-k="toneBpm">
+        </label>
+        <label class="field">
+          <span class="label-text">試聽 · 風格描述</span>
+          <input type="text" data-lv="${idx}" data-k="toneMood">
+        </label>
+        <label class="field">
+          <span class="label-text">
+            <input type="checkbox" data-lv="${idx}" data-k="hasMissingPiece" style="width:auto; margin-right:6px;">
+            有「???填空區」
+          </span>
+        </label>
+        <label class="field">
+          <span class="label-text">填空區說明文</span>
+          <textarea data-lv="${idx}" data-k="mpCaption" rows="3"></textarea>
+        </label>
+      </div>
+    `;
+    box.appendChild(sec);
+
+    // wire up
+    sec.querySelectorAll('[data-lv]').forEach(inp => {
+      const k = inp.dataset.k;
+      const val = lv[k];
+      if (inp.type === 'checkbox') {
+        inp.checked = !!val;
+        inp.addEventListener('change', () => {
+          contentData.levels[idx][k] = inp.checked;
+          updateSaveBar();
+        });
+      } else if (inp.tagName === 'SELECT') {
+        inp.value = val || 'main';
+        inp.addEventListener('change', () => {
+          contentData.levels[idx][k] = inp.value;
+          updateSaveBar();
+        });
+      } else {
+        inp.value = val == null ? '' : val;
+        inp.addEventListener('input', () => {
+          const v = inp.type === 'number' ? Number(inp.value) : inp.value;
+          contentData.levels[idx][k] = v;
+          if (k === 'title' || k === 'num') {
+            sec.querySelector('summary').textContent =
+              `${contentData.levels[idx].num || '??'} · ${contentData.levels[idx].title || '(未命名)'}`;
+          }
+          updateSaveBar();
+        });
+      }
+    });
+  });
+}
+
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function updateSaveBar() {
+  const changed = JSON.stringify(contentData) !== originalContent;
+  const downloadMode = localStorage.getItem(LS_DOWNLOAD_MODE) === '1';
+  $('btnSave').disabled = !changed;
+  if (!changed) {
+    $('saveInfo').textContent = '沒有變更';
+  } else if (downloadMode) {
+    $('saveInfo').textContent = '有未儲存的變更(下載模式)';
+    $('btnSave').textContent = '下載 content.json';
+  } else {
+    $('saveInfo').textContent = '有未儲存的變更';
+    $('btnSave').textContent = '儲存到網站';
+  }
+}
+
+// =======================================================
+// SAVE
+// =======================================================
+$('btnSave').addEventListener('click', async () => {
+  const downloadMode = localStorage.getItem(LS_DOWNLOAD_MODE) === '1';
+  if (downloadMode) {
+    // Download mode: just offer the JSON file
+    const blob = new Blob([JSON.stringify(contentData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'content.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    originalContent = JSON.stringify(contentData);
+    $('saveInfo').textContent = '✓ 已下載 content.json — 記得上傳回 GitHub';
+    return;
+  }
+  const tok = localStorage.getItem(LS_TOKEN);
+  if (!tok) {
+    alert('Token 不見了,請重新設定');
+    showScene('sceneTokenSetup');
+    return;
+  }
+  $('btnSave').disabled = true;
+  $('saveInfo').textContent = '儲存中...';
+  try {
+    // Re-fetch SHA in case it changed
+    const shaRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${CONTENT_PATH}`, {
+      headers: { 'Authorization': `Bearer ${tok}`, 'Accept': 'application/vnd.github+json' }
+    });
+    if (!shaRes.ok) throw new Error('讀取舊檔失敗:' + shaRes.status);
+    const shaData = await shaRes.json();
+    const currentSha = shaData.sha;
+
+    // Base64 encode (handle utf-8)
+    const json = JSON.stringify(contentData, null, 2);
+    const b64 = btoa(unescape(encodeURIComponent(json)));
+
+    const putRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${CONTENT_PATH}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${tok}`,
+        'Accept': 'application/vnd.github+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: 'admin: update content.json',
+        content: b64,
+        sha: currentSha
+      })
+    });
+    if (!putRes.ok) {
+      const txt = await putRes.text();
+      throw new Error('寫入失敗:' + putRes.status + ' ' + txt.slice(0, 200));
+    }
+    originalContent = JSON.stringify(contentData);
+    $('saveInfo').textContent = '✓ 已儲存!30 秒 - 2 分鐘內網站會更新。';
+    $('btnSave').textContent = '儲存到網站';
+  } catch (e) {
+    $('saveInfo').textContent = '✗ ' + e.message;
+  } finally {
+    updateSaveBar();
+  }
+});
+
+$('btnLogout').addEventListener('click', () => {
+  if (!confirm('登出會清掉 Token,下次要重新設。確定?')) return;
+  localStorage.removeItem(LS_TOKEN);
+  localStorage.removeItem(LS_DOWNLOAD_MODE);
+  sessionStorage.removeItem(LS_SESSION);
+  location.reload();
+});
+
+// =======================================================
+// BOOT
+// =======================================================
+(function boot() {
+  const loggedIn = sessionStorage.getItem(LS_SESSION) === '1';
+  if (loggedIn) {
+    setStatus('已登入');
+    routeAfterLogin();
+  } else {
+    setStatus('未登入');
+    showScene('sceneLogin');
+    initLogin();
+  }
+})();
+</script>
+</body>
+</html>
