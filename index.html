@@ -315,6 +315,19 @@
     letter-spacing: 1px;
     margin-left: 6px;
   }
+  .map-header .class-tag.gold {
+    background: linear-gradient(135deg, #ffd76b 0%, #d6a01a 55%, #8f6a16 100%);
+    border-color: #5a4010;
+    color: #2a1d04;
+    box-shadow: 0 0 0 1px #fff0a8 inset, 2px 2px 0 var(--gold-deep);
+    letter-spacing: 2px;
+    font-weight: 600;
+    animation: goldShimmer 2.4s ease-in-out infinite;
+  }
+  @keyframes goldShimmer {
+    0%, 100% { filter: brightness(1) drop-shadow(0 0 0 #ffd76b); }
+    50% { filter: brightness(1.12) drop-shadow(0 0 4px rgba(255, 215, 107, 0.6)); }
+  }
 
   .map-section-title {
     font-family: "Press Start 2P", monospace;
@@ -1807,8 +1820,17 @@ document.getElementById('gateForm').addEventListener('submit', (e) => {
 
 function updateClass() {
   const tag = document.getElementById('classTag');
-  const labels = (CONTENT.classes) || defaultState;
-  tag.textContent = (labels[state.class]) || '遊客';
+  const labels = (CONTENT.classes) || {};
+  // If this browser has an admin token stored, the user IS the Game Master.
+  // Show a gold '關主' tag regardless of guest/villager state.
+  const isHao = !!localStorage.getItem('hao-admin-token-v1');
+  if (isHao) {
+    tag.textContent = labels.hao || '關主';
+    tag.classList.add('gold');
+  } else {
+    tag.textContent = labels[state.class] || '訪客';
+    tag.classList.remove('gold');
+  }
   if (state.email) document.getElementById('gateSuccess').classList.add('show');
 }
 
