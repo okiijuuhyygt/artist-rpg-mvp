@@ -12,14 +12,14 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build-version" content="0.9">
+<meta name="build-version" content="1.0">
 <script>
   // iOS Safari aggressive cache buster.
   // On load, compare the version this page thinks it is vs the last version
   // stored locally. If they differ on a CACHED page (i.e. localStorage has
   // newer version than current HTML), force a hard reload with fresh query.
   (function() {
-    const CURRENT = '0.9';
+    const CURRENT = '1.0';
     const LAST = localStorage.getItem('hao-rpg-build');
     if (LAST && LAST !== CURRENT && !location.search.includes('_nocache=')) {
       const sep = location.search ? '&' : '?';
@@ -732,6 +732,98 @@
     color: var(--gb-darkest);
   }
 
+  /* Action block — per-level completion task */
+  .action-block {
+    padding: 18px;
+    margin-bottom: 22px;
+    background: var(--paper-light);
+    border: 2px solid var(--gold);
+    box-shadow: 3px 3px 0 var(--paper-edge);
+  }
+  .action-block .action-title {
+    font-family: "Press Start 2P", monospace;
+    font-size: 9px;
+    color: var(--gold-deep);
+    margin-bottom: 12px;
+    letter-spacing: 1.5px;
+  }
+  .action-block.cleared {
+    background: var(--gb-lightest);
+    border-color: var(--gb-dark);
+  }
+  .action-block.cleared .action-title {
+    color: var(--gb-dark);
+  }
+  .action-prompt {
+    font-family: "VT323", monospace;
+    font-size: 17px;
+    color: var(--ink);
+    line-height: 1.6;
+    margin: 0 0 12px;
+  }
+  .action-cleared-msg {
+    font-family: "VT323", monospace;
+    font-size: 18px;
+    color: var(--gb-dark);
+    margin: 0;
+    line-height: 1.6;
+  }
+  .action-btn {
+    font-family: "Press Start 2P", monospace;
+    font-size: 11px;
+    padding: 14px 18px;
+    background: var(--gb-dark);
+    color: var(--paper-light);
+    border: 2px solid var(--gb-darkest);
+    cursor: pointer;
+    letter-spacing: 2px;
+    transition: all 0.15s;
+    width: 100%;
+  }
+  .action-btn:hover {
+    background: var(--gb-darkest);
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0 var(--paper-edge);
+  }
+  .action-text {
+    width: 100%;
+    padding: 10px 12px;
+    font-family: "VT323", monospace;
+    font-size: 17px;
+    background: var(--paper);
+    border: 2px solid var(--gb-darkest);
+    color: var(--ink);
+    margin-bottom: 10px;
+    resize: vertical;
+    min-height: 70px;
+  }
+  .action-text:focus { outline: none; background: var(--gb-lightest); }
+  .listen-meter {
+    height: 22px;
+    background: var(--paper);
+    border: 2px solid var(--gb-darkest);
+    padding: 2px;
+    position: relative;
+    margin-top: 8px;
+  }
+  .listen-meter .listen-bar {
+    height: 100%;
+    background-image: linear-gradient(90deg, var(--gb-dark) 50%, var(--gb-mid) 50%);
+    background-size: 8px 100%;
+    transition: width 0.4s ease;
+  }
+  .listen-meter .listen-label {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "VT323", monospace;
+    font-size: 14px;
+    color: var(--gb-darkest);
+    letter-spacing: 1px;
+  }
+
   .level-actions {
     display: flex;
     gap: 10px;
@@ -884,7 +976,7 @@
 
     <footer>
       <p>Artist IG · <a href="https://instagram.com/haohao.zip" target="_blank" rel="noopener">@haohao.zip</a></p>
-      <p class="credits">MVP BUILD 0.9 · KIT EMAIL + CACHE BUSTER</p>
+      <p class="credits">MVP BUILD 1.0 · LEVEL TASKS(主線任務制)</p>
       <p><a href="admin.html" class="admin-link-footer">關主登入 →</a></p>
     </footer>
   </div>
@@ -919,6 +1011,11 @@
       <div class="branch-title">◆ 分支決策(下一首走哪條路)</div>
       <div class="branch-locked" id="branchLocked">🔒 需要先進村莊(填 email)才能投票</div>
       <div class="choices" id="branchChoices" style="display:none;"></div>
+    </div>
+
+    <div class="action-block" id="actionBlock">
+      <div class="action-title" id="actionTitle">▸ 完成任務</div>
+      <div id="actionBody"></div>
     </div>
   </div>
 </section>
@@ -1201,6 +1298,128 @@ function escapeHtml(s) {
 // ============================================================
 let activeLevel = null;
 
+// Per-level completion task. Different levels demand different
+// actions — no generic "mark as done" button. Cleared only when
+// the action is actually performed.
+const LEVEL_ACTIONS = {
+  L0: {
+    type: 'button',
+    label: '收下這封信 ✓',
+    clearedMsg: '你收下了信。這張地圖就是接下來的走法。往下一關。',
+  },
+  L1: {
+    type: 'listen',
+    minSec: 15,
+    prompt: '按下面的 ▶ PLAY,聽至少 15 秒。聽夠了,那面空白的牆會亮起來。',
+    clearedMsg: '那面牆亮了。MV 的 0:47 等你把字寫上去。',
+  },
+  L2: {
+    type: 'vote',
+    prompt: '選一條路,下一首就走哪條。還沒填 email 的話看不到投票選項。',
+    clearedMsg: '你投下了一票,下一關解鎖了。',
+  },
+  L3: {
+    type: 'text',
+    prompt: '寫一句「影響過你的歌詞」(任何人、中外皆可)。這句話會進章節首頁的底圖。',
+    placeholder: '例如:\n「以前的事,今晚不再提」\n「我不是英雄,只是想陪你走一段」',
+    clearedMsg: '你寫的字已送達。這章的封面會用上。',
+  },
+  L4: {
+    type: 'button',
+    label: '🔥 啟動召喚陣',
+    clearedMsg: '召喚陣啟動。等村民人數到門檻,客座 NPC 會現身。',
+  },
+};
+
+function clearLevel(id, msg) {
+  if (state.cleared.includes(id)) return;
+  state.cleared.push(id);
+  const lv = (CONTENT.levels || []).find(l => l.id === id);
+  if (lv && lv.hasMissingPiece && !state.filled.includes(id)) {
+    state.filled.push(id);
+  }
+  saveState();
+  toast(msg || '✓ 已推進');
+  if (activeLevel && activeLevel.id === id) renderActionBlock(activeLevel);
+  renderNodes();
+}
+
+function renderActionBlock(lv) {
+  const ab = document.getElementById('actionBlock');
+  const body = document.getElementById('actionBody');
+  const titleEl = document.getElementById('actionTitle');
+  const action = LEVEL_ACTIONS[lv.id];
+  if (!action) { ab.style.display = 'none'; return; }
+  ab.style.display = 'block';
+  body.innerHTML = '';
+
+  const cleared = state.cleared.includes(lv.id);
+  ab.classList.toggle('cleared', cleared);
+  titleEl.textContent = cleared ? '✓ 任務完成' : '▸ 完成任務';
+
+  if (cleared) {
+    const p = document.createElement('p');
+    p.className = 'action-cleared-msg';
+    p.textContent = action.clearedMsg || '已完成。';
+    body.appendChild(p);
+    if (action.type === 'text' && state.texts && state.texts[lv.id]) {
+      const yours = document.createElement('p');
+      yours.className = 'action-prompt';
+      yours.style.marginTop = '12px';
+      yours.style.fontStyle = 'italic';
+      yours.textContent = '你寫的:「' + state.texts[lv.id] + '」';
+      body.appendChild(yours);
+    }
+    return;
+  }
+
+  if (action.type === 'button') {
+    const btn = document.createElement('button');
+    btn.className = 'action-btn';
+    btn.textContent = action.label;
+    btn.addEventListener('click', () => clearLevel(lv.id, action.clearedMsg));
+    body.appendChild(btn);
+  } else if (action.type === 'listen') {
+    const p = document.createElement('p');
+    p.className = 'action-prompt';
+    p.textContent = action.prompt;
+    body.appendChild(p);
+    const sec = Math.floor((state.listenSec && state.listenSec[lv.id]) || 0);
+    const meter = document.createElement('div');
+    meter.className = 'listen-meter';
+    meter.innerHTML = `<div class="listen-bar" style="width:${Math.min(100, sec/action.minSec*100)}%"></div><span class="listen-label">${sec} / ${action.minSec} 秒</span>`;
+    body.appendChild(meter);
+  } else if (action.type === 'vote') {
+    const p = document.createElement('p');
+    p.className = 'action-prompt';
+    p.textContent = state.email ? action.prompt.split('。')[0] + '。' : action.prompt;
+    body.appendChild(p);
+  } else if (action.type === 'text') {
+    const p = document.createElement('p');
+    p.className = 'action-prompt';
+    p.textContent = action.prompt;
+    body.appendChild(p);
+    const textarea = document.createElement('textarea');
+    textarea.className = 'action-text';
+    textarea.rows = 4;
+    textarea.placeholder = action.placeholder || '';
+    textarea.value = (state.texts && state.texts[lv.id]) || '';
+    body.appendChild(textarea);
+    const btn = document.createElement('button');
+    btn.className = 'action-btn';
+    btn.textContent = '送出';
+    btn.addEventListener('click', () => {
+      const v = textarea.value.trim();
+      if (v.length < 2) { toast('寫點什麼再送。'); return; }
+      state.texts = state.texts || {};
+      state.texts[lv.id] = v;
+      saveState();
+      clearLevel(lv.id, action.clearedMsg);
+    });
+    body.appendChild(btn);
+  }
+}
+
 function renderLevel(levelId) {
   const lv = (CONTENT.levels || []).find(l => l.id === levelId);
   if (!lv) {
@@ -1213,14 +1432,6 @@ function renderLevel(levelId) {
     return;
   }
   activeLevel = lv;
-  // Auto-mark as cleared on entering (natural progression, no "mark as done" button)
-  if (!state.cleared.includes(lv.id)) {
-    state.cleared.push(lv.id);
-    if (lv.hasMissingPiece && !state.filled.includes(lv.id)) {
-      state.filled.push(lv.id);
-    }
-    saveState();
-  }
   document.getElementById('topbarTitle').textContent = lv.title;
   document.getElementById('levelTag').textContent = `LEVEL ${lv.num}`;
   document.getElementById('levelTitle').textContent = lv.title;
@@ -1252,11 +1463,15 @@ function renderLevel(levelId) {
         c.className = 'choice' + (state.picks[lv.id] === ch.id ? ' picked' : '');
         c.textContent = ch.label;
         c.addEventListener('click', () => {
+          const firstPick = !state.picks[lv.id];
           state.picks[lv.id] = ch.id;
           saveState();
           branchChoices.querySelectorAll('.choice').forEach(x => x.classList.remove('picked'));
           c.classList.add('picked');
           toast(`已投票:${ch.label}`);
+          if (firstPick && !state.cleared.includes(lv.id)) {
+            clearLevel(lv.id, LEVEL_ACTIONS[lv.id]?.clearedMsg || '投票完成,下一關解鎖。');
+          }
         });
         branchChoices.appendChild(c);
       });
@@ -1267,6 +1482,7 @@ function renderLevel(levelId) {
   } else {
     branchBlock.style.display = 'none';
   }
+  renderActionBlock(lv);
   stopTone();
 }
 
@@ -1362,6 +1578,45 @@ function ensureAudioEl() {
   return audioEl;
 }
 
+// Listen-time tracker — accumulates seconds while tone is playing,
+// saves to state, auto-clears level when threshold hit.
+let listenTrackStart = null;
+let listenTrackInterval = null;
+let listenTrackLevelId = null;
+
+function startListenTracking(levelId) {
+  stopListenTracking();
+  listenTrackStart = Date.now();
+  listenTrackLevelId = levelId;
+  listenTrackInterval = setInterval(() => {
+    if (!listenTrackLevelId) return;
+    const delta = (Date.now() - listenTrackStart) / 1000;
+    listenTrackStart = Date.now();
+    state.listenSec = state.listenSec || {};
+    state.listenSec[listenTrackLevelId] = (state.listenSec[listenTrackLevelId] || 0) + delta;
+    const action = LEVEL_ACTIONS[listenTrackLevelId];
+    if (action && action.type === 'listen') {
+      const sec = Math.floor(state.listenSec[listenTrackLevelId]);
+      const meter = document.querySelector('.listen-bar');
+      const label = document.querySelector('.listen-label');
+      if (meter) meter.style.width = Math.min(100, sec / action.minSec * 100) + '%';
+      if (label) label.textContent = `${sec} / ${action.minSec} 秒`;
+      if (state.listenSec[listenTrackLevelId] >= action.minSec && !state.cleared.includes(listenTrackLevelId)) {
+        clearLevel(listenTrackLevelId, action.clearedMsg);
+      }
+    }
+  }, 500);
+}
+
+function stopListenTracking() {
+  if (listenTrackInterval) { clearInterval(listenTrackInterval); listenTrackInterval = null; }
+  if (listenTrackStart) {
+    saveState();
+    listenTrackStart = null;
+  }
+  listenTrackLevelId = null;
+}
+
 async function playTone() {
   if (!activeLevel) return;
   stopTone();
@@ -1374,6 +1629,7 @@ async function playTone() {
     el.currentTime = 0;
     await el.play();
     btn.textContent = '■ STOP';
+    startListenTracking(activeLevel.id);
   } catch (e) {
     console.error(e);
     btn.textContent = '▶ PLAY';
@@ -1388,6 +1644,7 @@ function stopTone() {
   }
   const btn = document.getElementById('playTone');
   if (btn) btn.textContent = '▶ PLAY';
+  stopListenTracking();
 }
 
 document.getElementById('playTone').addEventListener('click', () => {
