@@ -44,11 +44,31 @@
 | **Q2. MVP 定價 & 內容** | **199 / 299 TWD digital-only**:demo mp3 + 歌詞 PDF + podcast 連結 + MV credit |
 | **Q3. 付費流程** | 點 CTA → 跳綠界 → 付完綠界寄通知耗耗 → 耗耗手動 email delivery。遊戲內不分 tier、不做解鎖機制 |
 
-## 付費解鎖 · UX 流程(耗耗 2026-04-25 補充)
+## 付費解鎖 · 最終 spec(2026-04-25)
 
-**關卡頁底部 = 鎖頭圖示 + 「✦ 解鎖支線」入口。點進去 先揭露該關付費後能玩什麼,再出現結帳按鈕。**
+**✅ 確認的決策:**
+- 角色名:**製作委員會**
+- 價格:**150 TWD**(single tier)
+- 付費流程:綠界 hosted payment → 通知耗耗 → 耗耗手動 email 寄 demo/PDF/podcast
+- CTA 位置:每關 action-block 底下常駐「✦ 加入製作委員會」按鈕
 
-理由:peak-end rule — 玩家看到**這一關**特有的 value 才掏錢,不是 generic 「解鎖全部」。
+**Phase 1(v1.22 已做完):**
+- 付費 modal 有每關不同 teaser(peak-end rule)+ 統一 bundle 介紹 + 前往結帳
+- 綠界 URL 空時顯示「結帳系統建置中」+ 引導填 email
+
+**Phase 2(下一輪要做的 tier 差異):**
+付費玩家在遊戲內**看到更多**,不只是線下收 email:
+- L1 填空資產:真的可以**上傳照片**到 MV 0:47 空白牆(需 Cloudinary)
+- L2 分岔路:看到**完整投票結果 + 誰投了什麼**(需 Kit API 或 server)
+- L3 歌詞:看到**其他付費玩家寫的歌詞精選**
+- L4 召喚陣:看到**進度 + 誰已經 join 了**
+
+Phase 2 需要:
+1. Tier identification — 綠界付款後 Kit 打 `paid-ep1` tag → 前端查(需要 Worker 繞 CORS + 藏 API key)
+2. Cloudinary 帳號 + upload preset
+3. Kit API proxy(Cloudflare Worker 免費)
+
+**理由:** peak-end rule — 玩家看到**這一關**特有的 value 才掏錢,不是 generic 「解鎖全部」。
 
 | 關 | 該關的解鎖預告角度(全指向同一個 EP bundle) |
 |---|---|
