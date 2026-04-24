@@ -1365,6 +1365,16 @@ function clearLevel(id, msg) {
       const mpEl = document.getElementById('missingPiece');
       if (mpEl) mpEl.classList.toggle('filled', state.filled.includes(id));
     }
+    stopTone();
+    // Auto-return to the map after the clear message sinks in.
+    // Only trigger if the player is still on this level (hasn't
+    // already navigated away manually).
+    setTimeout(() => {
+      const h = location.hash.replace(/^#/, '');
+      if (h === id || h === 'level/' + id) {
+        navigate('#map');
+      }
+    }, 1600);
   }
   renderNodes();
 }
