@@ -103,32 +103,15 @@
     justify-content: center;
   }
   .avatar-pixel {
-    width: 56px;
-    height: 56px;
-    background: var(--gb-light);
+    width: 72px;
+    height: 72px;
     border: 3px solid var(--gb-darkest);
-    position: relative;
     image-rendering: pixelated;
+    image-rendering: crisp-edges;
     flex-shrink: 0;
-    overflow: hidden;
-  }
-  /* Simple pixel face */
-  .avatar-pixel::before,
-  .avatar-pixel::after {
-    content: "";
-    position: absolute;
-    background: var(--gb-darkest);
-  }
-  .avatar-pixel::before {
-    top: 30%; left: 25%;
-    width: 10%;
-    height: 10%;
-    box-shadow: 140% 0 0 var(--gb-darkest);
-  }
-  .avatar-pixel::after {
-    bottom: 24%; left: 32%;
-    width: 36%;
-    height: 8%;
+    display: block;
+    background: var(--paper);
+    box-shadow: 3px 3px 0 var(--gb-dark);
   }
 
   .intro-name {
@@ -231,14 +214,6 @@
     margin-left: 4px;
   }
 
-  /* Avatar: blinking eyes for life */
-  .avatar-pixel::before {
-    animation: eyeBlink 4.5s infinite;
-  }
-  @keyframes eyeBlink {
-    0%, 94%, 100% { height: 10%; }
-    96% { height: 2%; }
-  }
 
   .intro-actions {
     display: flex;
@@ -316,20 +291,6 @@
     font-size: 12px;
     letter-spacing: 1px;
     margin-left: 6px;
-  }
-  .map-header .replay-intro {
-    display: inline-block;
-    margin-top: 10px;
-    font-family: "VT323", monospace;
-    font-size: 14px;
-    color: var(--gold-deep);
-    text-decoration: none;
-    border-bottom: 1px dashed var(--gold);
-    letter-spacing: 1px;
-  }
-  .map-header .replay-intro:hover {
-    color: var(--gb-darkest);
-    border-bottom-color: var(--gb-dark);
   }
 
   .map-section-title {
@@ -790,20 +751,24 @@
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-  /* Tiny admin link */
-  .admin-link {
-    position: fixed;
-    bottom: 8px;
-    right: 10px;
+  /* Admin link in footer */
+  .admin-link-footer {
     font-family: "Press Start 2P", monospace;
     font-size: 8px;
-    color: var(--paper-edge);
+    color: var(--ink-soft);
     text-decoration: none;
-    z-index: 5;
-    opacity: 0.4;
-    letter-spacing: 1px;
+    letter-spacing: 2px;
+    display: inline-block;
+    margin-top: 8px;
+    padding: 5px 10px;
+    border: 1px dashed var(--paper-edge);
+    opacity: 0.7;
   }
-  .admin-link:hover { opacity: 1; color: var(--gold-deep); }
+  .admin-link-footer:hover {
+    opacity: 1;
+    color: var(--gold-deep);
+    border-color: var(--gold);
+  }
 
   @media (max-width: 600px) {
     .wrap { padding: 22px 14px 80px; }
@@ -832,7 +797,7 @@
 <section class="scene scene-intro" data-scene="intro">
   <div class="intro-card">
     <div class="intro-speaker-row">
-      <div class="avatar-pixel"></div>
+      <img class="avatar-pixel" src="avatar.gif" alt="HAO" width="72" height="72">
       <span class="intro-name" id="introSpeaker">HAO</span>
     </div>
 
@@ -864,7 +829,6 @@
       <div class="status">
         目前身份<span class="class-tag" id="classTag">訪客</span>
       </div>
-      <a href="#intro" class="replay-intro">▶ 重看開場</a>
     </header>
 
     <h2 class="map-section-title" id="mapTitleEl">▸ 世界地圖</h2>
@@ -895,8 +859,9 @@
     </section>
 
     <footer>
-      <p>Artist IG · <a href="https://instagram.com/mr.alleys" target="_blank" rel="noopener">@mr.alleys</a></p>
-      <p class="credits">MVP BUILD 0.2 · MADE WITH ♥ &amp; PIXELS</p>
+      <p>Artist IG · <a href="https://instagram.com/haohao.zip" target="_blank" rel="noopener">@haohao.zip</a></p>
+      <p class="credits">MVP BUILD 0.4 · MADE WITH ♥ &amp; PIXELS</p>
+      <p><a href="admin.html" class="admin-link-footer">關主登入 →</a></p>
     </footer>
   </div>
 </section>
@@ -935,7 +900,6 @@
 </section>
 
 <div class="toast" id="toast">—</div>
-<a href="admin.html" class="admin-link">關主登入</a>
 
 <script>
 // ============================================================
