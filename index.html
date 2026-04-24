@@ -12,14 +12,14 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build-version" content="1.0">
+<meta name="build-version" content="1.1">
 <script>
   // iOS Safari aggressive cache buster.
   // On load, compare the version this page thinks it is vs the last version
   // stored locally. If they differ on a CACHED page (i.e. localStorage has
   // newer version than current HTML), force a hard reload with fresh query.
   (function() {
-    const CURRENT = '1.0';
+    const CURRENT = '1.1';
     const LAST = localStorage.getItem('hao-rpg-build');
     if (LAST && LAST !== CURRENT && !location.search.includes('_nocache=')) {
       const sep = location.search ? '&' : '?';
@@ -976,7 +976,7 @@
 
     <footer>
       <p>Artist IG · <a href="https://instagram.com/haohao.zip" target="_blank" rel="noopener">@haohao.zip</a></p>
-      <p class="credits">MVP BUILD 1.0 · LEVEL TASKS(主線任務制)</p>
+      <p class="credits">MVP BUILD 1.1 · TOKEN-ONLY ADMIN · 填空 UI 同步</p>
       <p><a href="admin.html" class="admin-link-footer">關主登入 →</a></p>
     </footer>
   </div>
@@ -1340,7 +1340,14 @@ function clearLevel(id, msg) {
   }
   saveState();
   toast(msg || '✓ 已推進');
-  if (activeLevel && activeLevel.id === id) renderActionBlock(activeLevel);
+  if (activeLevel && activeLevel.id === id) {
+    renderActionBlock(activeLevel);
+    // Sync missing-piece UI to filled state (the ??? block)
+    if (activeLevel.hasMissingPiece) {
+      const mpEl = document.getElementById('missingPiece');
+      if (mpEl) mpEl.classList.toggle('filled', state.filled.includes(id));
+    }
+  }
   renderNodes();
 }
 

@@ -366,50 +366,14 @@
 
 <div class="wrap">
 
-<!-- ====================== SCENE: Login (first time + returning) ====================== -->
-<section id="sceneLogin">
-  <h1 class="page-title">關主登入</h1>
-  <p class="page-sub">這裡只有陳則皞進得來。先設一個關主密碼,之後就用這組密碼登入。</p>
-
-  <div class="panel">
-    <div id="loginFirstTime">
-      <h2 class="panel-title">首次進來:設定關主密碼</h2>
-      <p class="panel-desc">這組密碼只存在你的瀏覽器(不上傳任何地方)。換裝置要重新設。</p>
-      <label class="field">
-        <span class="label-text">NEW PASSWORD</span>
-        <input type="password" id="newPass" placeholder="至少 6 個字">
-      </label>
-      <label class="field">
-        <span class="label-text">CONFIRM</span>
-        <input type="password" id="newPass2" placeholder="再打一次">
-      </label>
-      <div class="btn-row">
-        <button class="primary" id="btnSetPass">設定密碼</button>
-      </div>
-      <div class="alert alert-error hidden" id="loginFirstErr"></div>
-    </div>
-
-    <div id="loginReturn" class="hidden">
-      <h2 class="panel-title">輸入關主密碼</h2>
-      <label class="field">
-        <span class="label-text">PASSWORD</span>
-        <input type="password" id="returnPass" autocomplete="current-password">
-      </label>
-      <div class="btn-row">
-        <button class="primary" id="btnLogin">登入</button>
-        <button class="btn-danger" id="btnResetPass">忘記密碼(重設)</button>
-      </div>
-      <div class="alert alert-error hidden" id="loginReturnErr"></div>
-    </div>
-  </div>
-</section>
-
 <!-- ====================== SCENE: Token Setup Wizard ====================== -->
-<section id="sceneTokenSetup" class="hidden">
-  <h1 class="page-title">連線 GitHub</h1>
+<section id="sceneTokenSetup">
+  <h1 class="page-title">關主登入</h1>
   <p class="page-sub">
-    後台要能「存檔」回網站,就要用你的 GitHub 帳號發一張「鑰匙(Token)」。
-    下面三步,跟著按就好。<b>這張鑰匙只存在你的瀏覽器。</b>
+    這個後台用 <b>GitHub Token</b> 當登入憑證 — 一張 Token 就是你的身份,
+    貼到任何瀏覽器都認得(手機、Mac、別台電腦都行)。<br>
+    如果你 Apple 備忘錄裡已經存過 Token,直接跳到 Step 2 貼上去。
+    沒有的話從 Step 1 去 GitHub 產一張。
   </p>
 
   <div class="panel">
@@ -583,9 +547,7 @@ const REPO_OWNER = 'okiijuuhyygt';
 const REPO_NAME  = 'artist-rpg-mvp';
 const CONTENT_PATH = 'content.json';
 
-const LS_PASS = 'hao-admin-pass-v1';
 const LS_TOKEN = 'hao-admin-token-v1';
-const LS_SESSION = 'hao-admin-session-v1';
 const LS_DOWNLOAD_MODE = 'hao-admin-download-v1';
 
 // =======================================================
@@ -596,14 +558,8 @@ function show(id) { $(id).classList.remove('hidden'); }
 function hide(id) { $(id).classList.add('hidden'); }
 function setStatus(text) { $('statusBadge').textContent = text; }
 
-async function sha256(str) {
-  const buf = new TextEncoder().encode(str);
-  const hash = await crypto.subtle.digest('SHA-256', buf);
-  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
-}
-
 function showScene(name) {
-  ['sceneLogin', 'sceneTokenSetup', 'sceneEditor'].forEach(s => {
+  ['sceneTokenSetup', 'sceneEditor'].forEach(s => {
     $(s).classList.add('hidden');
   });
   $(name).classList.remove('hidden');
@@ -620,74 +576,19 @@ function setPath(obj, path, value) {
 }
 
 // =======================================================
-// LOGIN SCENE
+// ROUTER — no password layer. Token itself is the auth.
+// Token exists in localStorage → direct to editor.
+// Token missing → show Token setup wizard.
 // =======================================================
-async function initLogin() {
-  const hasPass = !!localStorage.getItem(LS_PASS);
-  if (hasPass) {
-    hide('loginFirstTime');
-    show('loginReturn');
-    $('returnPass').focus();
-  } else {
-    show('loginFirstTime');
-    hide('loginReturn');
-    $('newPass').focus();
-  }
-}
-
-$('btnSetPass').addEventListener('click', async () => {
-  const p = $('newPass').value;
-  const p2 = $('newPass2').value;
-  const errEl = $('loginFirstErr');
-  errEl.classList.add('hidden');
-  if (p.length < 6) {
-    errEl.textContent = '密碼至少 6 個字';
-    errEl.classList.remove('hidden');
-    return;
-  }
-  if (p !== p2) {
-    errEl.textContent = '兩次密碼不一樣';
-    errEl.classList.remove('hidden');
-    return;
-  }
-  const hash = await sha256(p);
-  localStorage.setItem(LS_PASS, hash);
-  sessionStorage.setItem(LS_SESSION, '1');
-  setStatus('已登入');
-  routeAfterLogin();
-});
-
-$('btnLogin').addEventListener('click', async () => {
-  const p = $('returnPass').value;
-  const errEl = $('loginReturnErr');
-  errEl.classList.add('hidden');
-  const stored = localStorage.getItem(LS_PASS);
-  const hash = await sha256(p);
-  if (hash !== stored) {
-    errEl.textContent = '密碼不對';
-    errEl.classList.remove('hidden');
-    return;
-  }
-  sessionStorage.setItem(LS_SESSION, '1');
-  setStatus('已登入');
-  routeAfterLogin();
-});
-
-$('btnResetPass').addEventListener('click', () => {
-  if (!confirm('真的要清掉密碼重設嗎?(Token 也會一起清掉)')) return;
-  localStorage.removeItem(LS_PASS);
-  localStorage.removeItem(LS_TOKEN);
-  sessionStorage.removeItem(LS_SESSION);
-  initLogin();
-});
-
-function routeAfterLogin() {
+function route() {
   const token = localStorage.getItem(LS_TOKEN);
   const downloadMode = localStorage.getItem(LS_DOWNLOAD_MODE) === '1';
   if (token || downloadMode) {
+    setStatus(token ? '已連線 GitHub' : '下載模式');
     showScene('sceneEditor');
     initEditor();
   } else {
+    setStatus('未連線');
     showScene('sceneTokenSetup');
   }
 }
@@ -1017,10 +918,9 @@ $('btnSave').addEventListener('click', async () => {
 });
 
 $('btnLogout').addEventListener('click', () => {
-  if (!confirm('登出會清掉 Token,下次要重新設。確定?')) return;
+  if (!confirm('登出會清掉這個瀏覽器存的 Token(GitHub 上的 Token 不受影響)。確定?')) return;
   localStorage.removeItem(LS_TOKEN);
   localStorage.removeItem(LS_DOWNLOAD_MODE);
-  sessionStorage.removeItem(LS_SESSION);
   location.reload();
 });
 
@@ -1028,15 +928,8 @@ $('btnLogout').addEventListener('click', () => {
 // BOOT
 // =======================================================
 (function boot() {
-  const loggedIn = sessionStorage.getItem(LS_SESSION) === '1';
-  if (loggedIn) {
-    setStatus('已登入');
-    routeAfterLogin();
-  } else {
-    setStatus('未登入');
-    showScene('sceneLogin');
-    initLogin();
-  }
+  // Token-only auth: no session concept. Route by token presence.
+  route();
 })();
 </script>
 </body>
