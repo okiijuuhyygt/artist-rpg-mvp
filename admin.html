@@ -366,80 +366,21 @@
 
 <div class="wrap">
 
-<!-- ====================== SCENE: Token Setup Wizard ====================== -->
+<!-- ====================== SCENE: Login ====================== -->
 <section id="sceneTokenSetup">
   <h1 class="page-title">關主登入</h1>
-  <p class="page-sub">
-    這個後台用 <b>GitHub Token</b> 當登入憑證 — 一張 Token 就是你的身份,
-    貼到任何瀏覽器都認得(手機、Mac、別台電腦都行)。<br>
-    如果你 Apple 備忘錄裡已經存過 Token,直接跳到 Step 2 貼上去。
-    沒有的話從 Step 1 去 GitHub 產一張。
-  </p>
 
   <div class="panel">
-    <div class="steps">
-
-      <div class="step active" id="stepOpenGithub">
-        <div class="step-num">STEP 1 / 3</div>
-        <div class="step-title">去 GitHub 產生一張 Token</div>
-        <div class="step-body">
-          <p>點下面這個大按鈕,會跳到 GitHub 網頁。我已經幫你把設定都預填好了:</p>
-          <p>
-            <b>① 名字</b> 會自動填成 <span class="mono">artist-rpg-mvp-cms</span><br>
-            <b>② 權限</b> 會自動勾 <span class="mono">public_repo</span>(只能改你的公開 repo)<br>
-            <b>③ 到期日</b> 建議選 <b>90 天</b> 或 <b>No expiration</b>(永久)
-          </p>
-          <a href="https://github.com/settings/tokens/new?description=artist-rpg-mvp-cms&scopes=public_repo" target="_blank" rel="noopener" class="big-action" id="openGithubBtn">
-            ▶ 打開 GitHub 產生 Token
-            <span class="big-sub">會開新分頁 · 結束滑到最底按綠色「Generate token」</span>
-          </a>
-          <p class="alert alert-info">
-            產生完成後,GitHub 會顯示一串 <span class="mono">ghp_xxxxxxxxxxxxxxxxxxx</span> 的字,按旁邊的複製圖示,然後回來這頁。
-          </p>
-        </div>
+    <form id="loginForm">
+      <label class="field">
+        <span class="label-text">PASSWORD</span>
+        <input type="password" id="tokenInput" autocomplete="current-password" autofocus>
+      </label>
+      <div class="btn-row">
+        <button class="primary" id="btnVerifyToken" type="submit">登入</button>
       </div>
-
-      <div class="step" id="stepPasteToken">
-        <div class="step-num">STEP 2 / 3</div>
-        <div class="step-title">把那串字貼進來</div>
-        <div class="step-body">
-          <label class="field">
-            <span class="label-text">GITHUB TOKEN</span>
-            <input type="password" id="tokenInput" placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
-            <span class="hint">貼上後按下面的「驗證並儲存」</span>
-          </label>
-          <div class="btn-row">
-            <button class="primary" id="btnVerifyToken">驗證並儲存</button>
-          </div>
-          <div class="alert alert-error hidden" id="tokenErr"></div>
-          <div class="alert alert-ok hidden" id="tokenOk"></div>
-        </div>
-      </div>
-
-      <div class="step" id="stepDone">
-        <div class="step-num">STEP 3 / 3</div>
-        <div class="step-title">完成!</div>
-        <div class="step-body">
-          <p>✓ Token 已存好,接下來可以開始改內容了。</p>
-          <div class="btn-row">
-            <button class="primary" id="btnGoEditor">▶ 進入編輯器</button>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <div class="panel">
-    <div class="panel-title">我不想設 Token,可以改用別的方式嗎?</div>
-    <p class="panel-desc">
-      可以,但就要**手動**把檔案上傳回 GitHub,比較慢。點下面那顆「下載模式」,編輯後會給你一個 content.json 下載,
-      你要自己去 <a href="https://github.com/okiijuuhyygt/artist-rpg-mvp" target="_blank">GitHub 的 repo 頁面</a>
-      點「Add file → Upload files」把檔案拖上去。
-    </p>
-    <div class="btn-row">
-      <button class="secondary" id="btnDownloadMode">改用下載模式</button>
-    </div>
+      <div class="alert alert-error hidden" id="tokenErr"></div>
+    </form>
   </div>
 </section>
 
@@ -582,76 +523,44 @@ function setPath(obj, path, value) {
 // =======================================================
 function route() {
   const token = localStorage.getItem(LS_TOKEN);
-  const downloadMode = localStorage.getItem(LS_DOWNLOAD_MODE) === '1';
-  if (token || downloadMode) {
-    setStatus(token ? '已連線 GitHub' : '下載模式');
+  if (token) {
+    setStatus('已登入');
     showScene('sceneEditor');
     initEditor();
   } else {
-    setStatus('未連線');
+    setStatus('未登入');
     showScene('sceneTokenSetup');
   }
 }
 
 // =======================================================
-// TOKEN SETUP SCENE
+// LOGIN
 // =======================================================
-$('openGithubBtn').addEventListener('click', () => {
-  // mark step 1 done when they click
-  setTimeout(() => {
-    $('stepOpenGithub').classList.remove('active');
-    $('stepOpenGithub').classList.add('done');
-    $('stepPasteToken').classList.add('active');
-    $('tokenInput').focus();
-  }, 500);
-});
-
-$('btnVerifyToken').addEventListener('click', async () => {
+$('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
   const tok = $('tokenInput').value.trim();
   const errEl = $('tokenErr');
-  const okEl = $('tokenOk');
+  const btn = $('btnVerifyToken');
   errEl.classList.add('hidden');
-  okEl.classList.add('hidden');
-  if (!tok || tok.length < 30) {
-    errEl.textContent = 'Token 格式看起來不對,應該是 ghp_ 開頭的一長串字。';
-    errEl.classList.remove('hidden');
-    return;
-  }
-  $('btnVerifyToken').disabled = true;
-  $('btnVerifyToken').textContent = '驗證中...';
+  if (!tok) { return; }
+  btn.disabled = true;
+  btn.textContent = '驗證中...';
   try {
-    // Test: try to read content.json
     const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${CONTENT_PATH}`, {
       headers: { 'Authorization': `Bearer ${tok}`, 'Accept': 'application/vnd.github+json' }
     });
-    if (!res.ok) {
-      const txt = await res.text();
-      throw new Error(`GitHub 回 ${res.status}: ${txt.slice(0, 200)}`);
-    }
+    if (!res.ok) throw new Error('auth-failed');
     localStorage.setItem(LS_TOKEN, tok);
-    okEl.textContent = '✓ Token 沒問題,已儲存。';
-    okEl.classList.remove('hidden');
-    $('stepPasteToken').classList.remove('active');
-    $('stepPasteToken').classList.add('done');
-    $('stepDone').classList.add('active');
-  } catch (e) {
-    errEl.textContent = '驗證失敗:' + e.message;
+    route();
+  } catch (err) {
+    errEl.textContent = '密碼不對';
     errEl.classList.remove('hidden');
+    $('tokenInput').value = '';
+    $('tokenInput').focus();
   } finally {
-    $('btnVerifyToken').disabled = false;
-    $('btnVerifyToken').textContent = '驗證並儲存';
+    btn.disabled = false;
+    btn.textContent = '登入';
   }
-});
-
-$('btnGoEditor').addEventListener('click', () => {
-  showScene('sceneEditor');
-  initEditor();
-});
-
-$('btnDownloadMode').addEventListener('click', () => {
-  localStorage.setItem(LS_DOWNLOAD_MODE, '1');
-  showScene('sceneEditor');
-  initEditor();
 });
 
 // =======================================================
