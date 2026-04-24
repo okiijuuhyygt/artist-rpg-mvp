@@ -316,17 +316,14 @@
     margin-left: 6px;
   }
   .map-header .class-tag.gold {
-    background: linear-gradient(135deg, #ffd76b 0%, #d6a01a 55%, #8f6a16 100%);
-    border-color: #5a4010;
-    color: #2a1d04;
-    box-shadow: 0 0 0 1px #fff0a8 inset, 2px 2px 0 var(--gold-deep);
+    background: var(--gold);
+    border-color: var(--gold-deep);
+    color: var(--gb-darkest);
     letter-spacing: 2px;
     font-weight: 600;
-    animation: goldShimmer 2.4s ease-in-out infinite;
-  }
-  @keyframes goldShimmer {
-    0%, 100% { filter: brightness(1) drop-shadow(0 0 0 #ffd76b); }
-    50% { filter: brightness(1.12) drop-shadow(0 0 4px rgba(255, 215, 107, 0.6)); }
+    box-shadow:
+      inset 1px 1px 0 rgba(255, 250, 235, 0.35),
+      2px 2px 0 var(--gold-deep);
   }
 
   .map-section-title {
