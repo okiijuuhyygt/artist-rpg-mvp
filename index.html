@@ -201,6 +201,45 @@
   }
   .intro-progress .dot.done { background: var(--gb-dark); }
 
+  /* 90s visitor counter */
+  .visitor-counter {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-family: "Press Start 2P", monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--gb-darkest);
+    margin-top: 4px;
+  }
+  .visitor-counter .c-label { opacity: 0.75; }
+  .visitor-counter .c-num {
+    background: var(--gb-darkest);
+    color: var(--gb-light);
+    padding: 4px 9px;
+    letter-spacing: 4px;
+    font-size: 11px;
+    border: 2px solid var(--gb-darkest);
+    box-shadow: 2px 2px 0 var(--gb-dark);
+  }
+  .visitor-counter .c-num .you {
+    color: var(--gb-lightest);
+    font-size: 8px;
+    opacity: 0.7;
+    letter-spacing: 1px;
+    margin-left: 4px;
+  }
+
+  /* Avatar: blinking eyes for life */
+  .avatar-pixel::before {
+    animation: eyeBlink 4.5s infinite;
+  }
+  @keyframes eyeBlink {
+    0%, 94%, 100% { height: 10%; }
+    96% { height: 2%; }
+  }
+
   .intro-actions {
     display: flex;
     gap: 10px;
@@ -277,6 +316,20 @@
     font-size: 12px;
     letter-spacing: 1px;
     margin-left: 6px;
+  }
+  .map-header .replay-intro {
+    display: inline-block;
+    margin-top: 10px;
+    font-family: "VT323", monospace;
+    font-size: 14px;
+    color: var(--gold-deep);
+    text-decoration: none;
+    border-bottom: 1px dashed var(--gold);
+    letter-spacing: 1px;
+  }
+  .map-header .replay-intro:hover {
+    color: var(--gb-darkest);
+    border-bottom-color: var(--gb-dark);
   }
 
   .map-section-title {
@@ -790,6 +843,11 @@
 
     <div class="intro-progress" id="introProgress"></div>
 
+    <div class="visitor-counter">
+      <span class="c-label">VISITOR</span>
+      <span class="c-num" id="visitorCount">----<span class="you" id="visitorYou"></span></span>
+    </div>
+
     <div class="intro-actions">
       <button id="btnSkip">SKIP ▶</button>
       <button id="btnEnter" class="btn-enter">▶ 進入世界</button>
@@ -804,8 +862,9 @@
       <h1 class="pixel-title" id="pixelTitle">CHEN TSE-HAO</h1>
       <p class="sub" id="subtitle">H A O · の 世 界</p>
       <div class="status">
-        目前身份<span class="class-tag" id="classTag">遊客</span>
+        目前身份<span class="class-tag" id="classTag">訪客</span>
       </div>
+      <a href="#intro" class="replay-intro">▶ 重看開場</a>
     </header>
 
     <h2 class="map-section-title" id="mapTitleEl">▸ 世界地圖</h2>
@@ -995,12 +1054,15 @@ function navigate(hash) {
 }
 
 function handleHashChange() {
-  const { scene, levelId } = parseHash();
-  if (scene === 'intro' && state.introSeen) {
-    // If they've seen intro, default land on map
-    location.hash = 'map';
+  const raw = location.hash.replace(/^#/, '');
+  if (!raw) {
+    // Empty hash: first visit -> intro, returning -> map
+    location.hash = state.introSeen ? 'map' : 'intro';
     return;
   }
+  const { scene, levelId } = parseHash();
+  // If navigating back to intro, restart it so they can re-read
+  if (scene === 'intro') restartIntro();
   switchScene(scene, { levelId });
 }
 
@@ -1375,6 +1437,59 @@ function toast(msg) {
 }
 
 // ============================================================
+// VISITOR COUNTER (90s style · 4 digits · wraps at 10000)
+// Uses abacus.jasoncameron.dev — free, no API key needed.
+// ============================================================
+async function fetchVisitorCount() {
+  const numEl = document.getElementById('visitorCount');
+  const youEl = document.getElementById('visitorYou');
+  const formatNum = n => (n % 10000).toString().padStart(4, '0');
+  try {
+    // Only increment once per browser (persistent via localStorage)
+    const haveCountedKey = 'hao-rpg-counted';
+    const myNumberKey = 'hao-rpg-my-number';
+    let myNumber = localStorage.getItem(myNumberKey);
+    let endpoint;
+    if (localStorage.getItem(haveCountedKey) && myNumber) {
+      // Already counted; just fetch current total
+      endpoint = 'https://abacus.jasoncameron.dev/get/hao-artist-rpg-mvp/visits';
+    } else {
+      // First visit: increment
+      endpoint = 'https://abacus.jasoncameron.dev/hit/hao-artist-rpg-mvp/visits';
+    }
+    const res = await fetch(endpoint);
+    if (!res.ok) throw new Error(res.status);
+    const data = await res.json();
+    const total = data.value;
+    if (!localStorage.getItem(haveCountedKey)) {
+      localStorage.setItem(haveCountedKey, '1');
+      localStorage.setItem(myNumberKey, String(total));
+      myNumber = total;
+    }
+    // Render with a tiny typewriter-roll effect
+    rollNumber(numEl, total, formatNum);
+    if (myNumber) youEl.textContent = ` · YOU=${formatNum(Number(myNumber))}`;
+  } catch (e) {
+    numEl.textContent = '????';
+    youEl.textContent = '';
+  }
+}
+
+function rollNumber(el, finalNum, formatter) {
+  const finalStr = formatter(finalNum);
+  const duration = 900;
+  const start = Date.now();
+  function tick() {
+    const t = Math.min(1, (Date.now() - start) / duration);
+    const n = Math.floor(finalNum * (0.4 + 0.6 * t));
+    el.childNodes[0] && (el.childNodes[0].nodeValue = formatter(n));
+    if (t < 1) requestAnimationFrame(tick);
+    else el.childNodes[0] && (el.childNodes[0].nodeValue = finalStr);
+  }
+  tick();
+}
+
+// ============================================================
 // INIT
 // ============================================================
 (async () => {
@@ -1384,6 +1499,8 @@ function toast(msg) {
   if (lines.length) typeLine(lines[0]);
   // Route to initial scene
   handleHashChange();
+  // Fetch visitor count (async, not blocking)
+  fetchVisitorCount();
 })();
 </script>
 </body>
