@@ -9,6 +9,26 @@
 <meta property="og:description" content="不是一張 EP,是一款遊戲。一起推進這張世界地圖。">
 <meta property="og:locale" content="zh_TW">
 <meta name="theme-color" content="#efe9de">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="build-version" content="0.9">
+<script>
+  // iOS Safari aggressive cache buster.
+  // On load, compare the version this page thinks it is vs the last version
+  // stored locally. If they differ on a CACHED page (i.e. localStorage has
+  // newer version than current HTML), force a hard reload with fresh query.
+  (function() {
+    const CURRENT = '0.9';
+    const LAST = localStorage.getItem('hao-rpg-build');
+    if (LAST && LAST !== CURRENT && !location.search.includes('_nocache=')) {
+      const sep = location.search ? '&' : '?';
+      location.replace(location.pathname + location.search + sep + '_nocache=' + Date.now() + location.hash);
+      return;
+    }
+    localStorage.setItem('hao-rpg-build', CURRENT);
+  })();
+</script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -864,7 +884,7 @@
 
     <footer>
       <p>Artist IG · <a href="https://instagram.com/haohao.zip" target="_blank" rel="noopener">@haohao.zip</a></p>
-      <p class="credits">MVP BUILD 0.5 · 8-BIT BGM + BIGGER HERO</p>
+      <p class="credits">MVP BUILD 0.9 · KIT EMAIL + CACHE BUSTER</p>
       <p><a href="admin.html" class="admin-link-footer">關主登入 →</a></p>
     </footer>
   </div>
