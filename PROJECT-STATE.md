@@ -1,7 +1,7 @@
 # Artist RPG MVP · 專案狀態
 
-> 最後更新:2026-04-25 凌晨 04:30
-> Build: index v1.2 (code v1.21) · content 已被耗耗 admin 編輯
+> 最後更新:2026-04-25 凌晨 **05:10**
+> Build: **index v1.3 / code v1.27** · content 已被耗耗 admin 編輯
 
 ## 網址
 - 公開站 · https://okiijuuhyygt.github.io/artist-rpg-mvp/

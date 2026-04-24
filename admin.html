@@ -346,6 +346,76 @@
   .save-bar .save-btn:hover:not(:disabled) { background: var(--gb-mid); }
   .save-bar .save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
+  /* Audio browse modal */
+  .audio-browse-modal {
+    position: fixed; inset: 0;
+    background: rgba(15, 56, 15, 0.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+  }
+  .audio-browse-modal.open { display: flex; }
+  .audio-browse-card {
+    width: 100%;
+    max-width: 520px;
+    max-height: 80vh;
+    background: var(--paper-light);
+    border: 3px solid var(--gb-darkest);
+    box-shadow: 6px 6px 0 var(--paper-edge);
+    padding: 24px 20px;
+    overflow-y: auto;
+  }
+  .audio-browse-card h3 {
+    font-family: "Press Start 2P", monospace;
+    font-size: 11px;
+    color: var(--gb-darkest);
+    letter-spacing: 2px;
+    margin: 0 0 16px;
+  }
+  .audio-browse-list { display: flex; flex-direction: column; gap: 6px; }
+  .audio-browse-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--paper);
+    border: 2px solid var(--paper-edge);
+    font-family: "VT323", monospace;
+    font-size: 15px;
+    color: var(--ink);
+  }
+  .audio-browse-row .fname { word-break: break-all; flex: 1; }
+  .audio-browse-row .fsize { font-size: 13px; color: var(--ink-soft); flex-shrink: 0; }
+  .audio-browse-row button {
+    font-family: "PingFang TC", sans-serif;
+    font-size: 12px;
+    padding: 6px 12px;
+    background: var(--gb-dark);
+    color: var(--paper-light);
+    border: 2px solid var(--gb-darkest);
+    cursor: pointer;
+  }
+  .audio-browse-close {
+    margin-top: 16px;
+    padding: 10px 14px;
+    background: transparent;
+    border: 1px solid var(--ink-soft);
+    color: var(--ink-soft);
+    cursor: pointer;
+    font-size: 12px;
+    letter-spacing: 1px;
+  }
+  .audio-browse-empty {
+    font-family: "VT323", monospace;
+    font-size: 16px;
+    color: var(--ink-soft);
+    text-align: center;
+    padding: 20px;
+  }
+
   /* Audio upload slots */
   .audio-slot {
     background: var(--paper);
@@ -527,6 +597,15 @@
 </style>
 </head>
 <body>
+
+<!-- Audio browse modal (lists existing audio/ files in repo) -->
+<div class="audio-browse-modal" id="audioBrowseModal">
+  <div class="audio-browse-card">
+    <h3 id="audioBrowseTitle">選既有音檔</h3>
+    <div id="audioBrowseList"><div class="audio-browse-empty">載入中…</div></div>
+    <button class="audio-browse-close" id="audioBrowseCloseBtn">取消</button>
+  </div>
+</div>
 
 <div class="topbar">
   <div class="tb-left">
@@ -874,6 +953,7 @@ function renderAudioUploads() {
         <span class="audio-slot-current">${hasFile ? '✓ ' + escapeHtml(shortName) : '(8-bit 預設)'}</span>
       </div>
       <div class="audio-slot-actions">
+        <button class="audio-file-btn audio-browse-btn" type="button" title="選既有的">📁</button>
         <label class="audio-file-btn">${hasFile ? '更換' : '選音檔'}
           <input type="file" accept="audio/*,.mp3,.wav,.m4a,.ogg" hidden>
         </label>
@@ -888,9 +968,73 @@ function renderAudioUploads() {
     });
     const clearBtn = el.querySelector('.audio-clear-btn');
     if (clearBtn) clearBtn.addEventListener('click', () => clearAudio(slot.key));
+    const browseBtn = el.querySelector('.audio-browse-btn');
+    if (browseBtn) browseBtn.addEventListener('click', () => openAudioBrowser(slot.key, slot.label));
     box.appendChild(el);
   });
 }
+
+async function openAudioBrowser(targetKey, slotLabel) {
+  const modal = document.getElementById('audioBrowseModal');
+  const list = document.getElementById('audioBrowseList');
+  const title = document.getElementById('audioBrowseTitle');
+  title.textContent = `選既有音檔 → ${slotLabel}`;
+  list.innerHTML = '<div class="audio-browse-empty">載入中…</div>';
+  modal.classList.add('open');
+  const tok = localStorage.getItem(LS_TOKEN);
+  if (!tok) {
+    list.innerHTML = '<div class="audio-browse-empty">需要登入才能列 repo。</div>';
+    return;
+  }
+  try {
+    const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/audio`, {
+      headers: { 'Authorization': `Bearer ${tok}`, 'Accept': 'application/vnd.github+json' }
+    });
+    if (!res.ok) {
+      if (res.status === 404) {
+        list.innerHTML = '<div class="audio-browse-empty">audio/ 資料夾還是空的。先上傳一個音檔再來。</div>';
+      } else {
+        throw new Error(res.status);
+      }
+      return;
+    }
+    const files = (await res.json()).filter(f => f.type === 'file');
+    if (!files.length) {
+      list.innerHTML = '<div class="audio-browse-empty">audio/ 裡沒檔案。</div>';
+      return;
+    }
+    list.innerHTML = '<div class="audio-browse-list"></div>';
+    const listEl = list.querySelector('.audio-browse-list');
+    files.forEach(f => {
+      const kb = (f.size / 1024).toFixed(0);
+      const mb = (f.size / 1024 / 1024).toFixed(1);
+      const sizeText = f.size > 1024 * 1024 ? `${mb} MB` : `${kb} KB`;
+      const row = document.createElement('div');
+      row.className = 'audio-browse-row';
+      row.innerHTML =
+        `<span class="fname">${escapeHtml(f.name)}</span>` +
+        `<span class="fsize">${sizeText}</span>` +
+        `<button type="button">選這個</button>`;
+      row.querySelector('button').addEventListener('click', () => {
+        setPath(contentData, 'audio.' + targetKey, f.path);
+        closeAudioBrowser();
+        renderAudioUploads();
+        updateSaveBar();
+      });
+      listEl.appendChild(row);
+    });
+  } catch (e) {
+    list.innerHTML = '<div class="audio-browse-empty">讀取失敗:' + escapeHtml(e.message) + '</div>';
+  }
+}
+
+function closeAudioBrowser() {
+  document.getElementById('audioBrowseModal').classList.remove('open');
+}
+document.getElementById('audioBrowseCloseBtn').addEventListener('click', closeAudioBrowser);
+document.getElementById('audioBrowseModal').addEventListener('click', (e) => {
+  if (e.target.id === 'audioBrowseModal') closeAudioBrowser();
+});
 
 async function uploadAudio(file, key, slotEl) {
   const tok = localStorage.getItem(LS_TOKEN);
@@ -960,8 +1104,45 @@ async function uploadAudio(file, key, slotEl) {
   }
 }
 
-function clearAudio(key) {
-  if (!confirm('清除這個音檔的設定?(檔案留在 repo,只是網頁不再引用)')) return;
+async function clearAudio(key) {
+  const currentPath = getPath(contentData, 'audio.' + key) || '';
+  if (!currentPath) {
+    setPath(contentData, 'audio.' + key, '');
+    renderAudioUploads();
+    updateSaveBar();
+    return;
+  }
+  if (!confirm(`清除「${key}」並從 repo 刪除 ${currentPath}?\n(不可回復)`)) return;
+  const tok = localStorage.getItem(LS_TOKEN);
+  if (!tok) { alert('需要登入才能刪除 repo 檔案。'); return; }
+  try {
+    // Need the file's sha to DELETE via Contents API
+    const check = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${currentPath}`, {
+      headers: { 'Authorization': `Bearer ${tok}`, 'Accept': 'application/vnd.github+json' }
+    });
+    if (check.ok) {
+      const data = await check.json();
+      const delRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${currentPath}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${tok}`,
+          'Accept': 'application/vnd.github+json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: 'admin: delete audio ' + currentPath,
+          sha: data.sha,
+        }),
+      });
+      if (!delRes.ok) {
+        const txt = await delRes.text();
+        throw new Error(delRes.status + ' ' + txt.slice(0, 120));
+      }
+    }
+    // If the file was already missing (404 on check), that's fine — nothing to delete.
+  } catch (e) {
+    alert('⚠ repo 檔案刪除失敗:' + e.message + '\n(設定仍會清空)');
+  }
   setPath(contentData, 'audio.' + key, '');
   renderAudioUploads();
   updateSaveBar();
