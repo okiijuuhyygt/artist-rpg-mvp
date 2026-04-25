@@ -141,7 +141,7 @@
   "audio": {
     "bgm": {
       "intro": "",
-      "map": ""
+      "map": "audio/bgm-map.mp3"
     },
     "levels": {
       "L0": ""
