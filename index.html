@@ -23,14 +23,14 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build-version" content="2.1">
+<meta name="build-version" content="2.1.1">
 <script>
   // iOS Safari aggressive cache buster.
   // On load, compare the version this page thinks it is vs the last version
   // stored locally. If they differ on a CACHED page (i.e. localStorage has
   // newer version than current HTML), force a hard reload with fresh query.
   (function() {
-    const CURRENT = '2.1';
+    const CURRENT = '2.1.1';
     const LAST = localStorage.getItem('hao-rpg-build');
     if (LAST && LAST !== CURRENT && !location.search.includes('_nocache=')) {
       const sep = location.search ? '&' : '?';
@@ -2877,7 +2877,7 @@ async function playTone() {
   try {
     // Prefer uploaded mp3 (set via admin). Fall back to 8-bit generator.
     const uploaded = CONTENT.audio && CONTENT.audio.levels && CONTENT.audio.levels[activeLevel.id];
-    const url = uploaded ? uploaded : await renderToneBlob(activeLevel, 30);
+    const url = uploaded ? audioSrcWithVer(uploaded, 'levels.' + activeLevel.id) : await renderToneBlob(activeLevel, 30);
     const el = ensureAudioEl();
     el.src = url;
     el.currentTime = 0;
@@ -2973,10 +2973,24 @@ const bgmEls = {}; // scene -> audio element
 const bgmUrls = {};
 let activeBgmScene = null;
 
+// Bust browser cache when admin uploads a new mp3 to the same slot.
+// __audioVer is bumped by admin (admin.html) on every upload/clear/browse.
+function getNestedVer(dotted) {
+  if (!CONTENT.__audioVer) return null;
+  return dotted.split('.').reduce((o, k) => (o ? o[k] : undefined), CONTENT.__audioVer);
+}
+function audioSrcWithVer(path, key) {
+  if (!path) return path;
+  const ver = getNestedVer(key);
+  if (!ver) return path;
+  const sep = path.includes('?') ? '&' : '?';
+  return path + sep + 'v=' + ver;
+}
+
 async function getBgmUrl(scene) {
   // Prefer uploaded mp3 (set via admin); fall back to 8-bit blob.
   const uploaded = CONTENT.audio && CONTENT.audio.bgm && CONTENT.audio.bgm[scene];
-  if (uploaded) return uploaded;
+  if (uploaded) return audioSrcWithVer(uploaded, 'bgm.' + scene);
   if (bgmUrls[scene]) return bgmUrls[scene];
   const blob = await renderBgm(BGM_PATTERNS[scene]);
   const url = URL.createObjectURL(blob);

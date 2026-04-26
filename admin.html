@@ -1159,6 +1159,7 @@ async function openAudioBrowser(targetKey, slotLabel) {
         `<button type="button">選這個</button>`;
       row.querySelector('button').addEventListener('click', () => {
         setPath(contentData, 'audio.' + targetKey, f.path);
+        setPath(contentData, '__audioVer.' + targetKey, Date.now());
         closeAudioBrowser();
         renderAudioUploads();
         updateSaveBar();
@@ -1236,9 +1237,12 @@ async function uploadAudio(file, key, slotEl) {
 
     // Update contentData → will be saved to content.json on next 儲存到網站
     setPath(contentData, 'audio.' + key, path);
+    // Bump version stamp so JSON differs even when path string is identical
+    // (replacing a same-extension file). Also drives ?v=<stamp> cache-bust on the player side.
+    setPath(contentData, '__audioVer.' + key, Date.now());
     renderAudioUploads();
     updateSaveBar();
-    alert('✓ 音檔已上傳到 repo。\n記得按底下「儲存到網站」讓網頁真的用上它。');
+    alert('✓ 音檔已上傳到 repo。\n按底下「儲存到網站」讓玩家瀏覽器強制 reload 新版。');
   } catch (e) {
     slotEl.classList.remove('uploading');
     currentEl.textContent = prevText;
@@ -1246,46 +1250,22 @@ async function uploadAudio(file, key, slotEl) {
   }
 }
 
-async function clearAudio(key) {
+function clearAudio(key) {
+  // SAFE BY DEFAULT: this only unlinks the slot from contentData. The repo
+  // file is left alone — it might still be referenced by another slot, or
+  // be a song you 📁-browsed in. Use the 「🧹 音檔倉庫」 GC tool below to
+  // truly delete files that nothing references anymore.
   const currentPath = getPath(contentData, 'audio.' + key) || '';
   if (!currentPath) {
     setPath(contentData, 'audio.' + key, '');
+    setPath(contentData, '__audioVer.' + key, Date.now());
     renderAudioUploads();
     updateSaveBar();
     return;
   }
-  if (!confirm(`清除「${key}」並從 repo 刪除 ${currentPath}?\n(不可回復)`)) return;
-  const tok = localStorage.getItem(LS_TOKEN);
-  if (!tok) { alert('需要登入才能刪除 repo 檔案。'); return; }
-  try {
-    // Need the file's sha to DELETE via Contents API
-    const check = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${currentPath}`, {
-      headers: { 'Authorization': `Bearer ${tok}`, 'Accept': 'application/vnd.github+json' }
-    });
-    if (check.ok) {
-      const data = await check.json();
-      const delRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${currentPath}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${tok}`,
-          'Accept': 'application/vnd.github+json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: 'admin: delete audio ' + currentPath,
-          sha: data.sha,
-        }),
-      });
-      if (!delRes.ok) {
-        const txt = await delRes.text();
-        throw new Error(delRes.status + ' ' + txt.slice(0, 120));
-      }
-    }
-    // If the file was already missing (404 on check), that's fine — nothing to delete.
-  } catch (e) {
-    alert('⚠ repo 檔案刪除失敗:' + e.message + '\n(設定仍會清空)');
-  }
+  if (!confirm(`從這個槽移除「${key}」?\n\n(只 unlink,不會從 repo 刪掉 ${currentPath} 的檔案。要徹底刪檔請去下方「🧹 音檔倉庫」整理孤兒檔。)`)) return;
   setPath(contentData, 'audio.' + key, '');
+  setPath(contentData, '__audioVer.' + key, Date.now());
   renderAudioUploads();
   updateSaveBar();
 }
