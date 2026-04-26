@@ -23,14 +23,14 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build-version" content="2.0">
+<meta name="build-version" content="2.1">
 <script>
   // iOS Safari aggressive cache buster.
   // On load, compare the version this page thinks it is vs the last version
   // stored locally. If they differ on a CACHED page (i.e. localStorage has
   // newer version than current HTML), force a hard reload with fresh query.
   (function() {
-    const CURRENT = '2.0';
+    const CURRENT = '2.1';
     const LAST = localStorage.getItem('hao-rpg-build');
     if (LAST && LAST !== CURRENT && !location.search.includes('_nocache=')) {
       const sep = location.search ? '&' : '?';
@@ -290,6 +290,28 @@
   /* ========== SCENE 2: Map ========== */
   .scene-map { background: var(--paper); }
 
+  .map-topbar {
+    display: flex;
+    justify-content: flex-start;
+    padding: 12px 0 0;
+  }
+  .map-back-intro {
+    font-family: "Press Start 2P", monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    padding: 8px 12px;
+    background: var(--paper-light);
+    color: var(--ink);
+    border: 2px solid var(--gb-darkest);
+    cursor: pointer;
+    box-shadow: 2px 2px 0 var(--paper-edge);
+  }
+  .map-back-intro:hover {
+    background: var(--gb-lightest);
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0 var(--gb-darkest);
+  }
+
   /* EP picker tabs — pixel button bar */
   .ep-tabs {
     display: flex;
@@ -411,6 +433,108 @@
     letter-spacing: 2px;
   }
   .vote-budget b { color: var(--gb-darkest); font-size: 12px; }
+
+  /* ========== Devlog feed (邊做邊丟) ========== */
+  .devlog {
+    margin-top: 28px;
+    padding: 18px 16px 14px;
+    background: var(--paper-light);
+    border: 3px solid var(--gb-darkest);
+    box-shadow: 5px 5px 0 var(--paper-edge);
+    position: relative;
+  }
+  .devlog::before {
+    content: "";
+    position: absolute;
+    top: -10px;
+    right: 22px;
+    width: 14px;
+    height: 14px;
+    background: var(--gold);
+    border: 2px solid var(--gb-darkest);
+  }
+  .devlog-title {
+    font-family: "Press Start 2P", monospace;
+    font-size: 11px;
+    color: var(--gb-darkest);
+    letter-spacing: 2px;
+    margin: 0 0 4px;
+  }
+  .devlog-sub {
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin: 0 0 14px;
+  }
+  .devlog-entry {
+    padding: 12px;
+    margin-bottom: 8px;
+    background: var(--paper);
+    border: 2px solid var(--paper-edge);
+  }
+  .devlog-entry:last-child { margin-bottom: 0; }
+  .devlog-entry-meta {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 6px;
+    align-items: center;
+  }
+  .devlog-entry-icon { font-size: 14px; }
+  .devlog-entry-date {
+    font-family: "VT323", monospace;
+    font-size: 14px;
+    color: var(--gold-deep);
+    letter-spacing: 1px;
+  }
+  .devlog-entry-type {
+    font-family: "Press Start 2P", monospace;
+    font-size: 8px;
+    letter-spacing: 1px;
+    color: var(--ink-soft);
+    margin-left: auto;
+  }
+  .devlog-entry-title {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+  .devlog-body {
+    font-size: 13px;
+    line-height: 1.65;
+    color: var(--ink);
+    margin: 0;
+    white-space: pre-wrap;
+  }
+  .devlog-lyric {
+    font-family: "VT323", monospace;
+    font-size: 18px;
+    line-height: 1.7;
+    color: var(--gb-darkest);
+    margin: 4px 0 0;
+    padding: 8px 12px;
+    background: var(--gb-lightest);
+    white-space: pre-wrap;
+  }
+  .devlog-link {
+    display: inline-block;
+    font-size: 13px;
+    color: var(--gold-deep);
+    border-bottom: 1px solid var(--gold);
+    padding-bottom: 2px;
+    text-decoration: none;
+    margin-top: 4px;
+  }
+  .devlog-link:hover {
+    color: var(--gb-darkest);
+    border-color: var(--gb-darkest);
+  }
+  .devlog-empty {
+    font-size: 12px;
+    color: var(--ink-soft);
+    font-style: italic;
+    text-align: center;
+    padding: 8px 0;
+  }
 
   .map-header {
     text-align: center;
@@ -1288,6 +1412,9 @@
 <!-- ============ SCENE 2: MAP ============ -->
 <section class="scene scene-map" data-scene="map">
   <div class="wrap">
+    <div class="map-topbar">
+      <button class="map-back-intro" id="btnBackToIntro" type="button" title="回開場對話">← 回 INTRO</button>
+    </div>
     <header class="map-header">
       <h1 class="pixel-title" id="pixelTitle">CHEN TSE-HAO</h1>
       <p class="sub" id="subtitle">H A O · の 世 界</p>
@@ -1306,6 +1433,8 @@
     <div class="world-map">
       <div id="nodes"></div>
       <div id="songsList" style="display:none;"></div>
+
+      <div id="devlogMap"></div>
       <div class="progress-wrap">
         <div class="progress-label">
           <span>世界推進度</span>
@@ -1331,7 +1460,7 @@
 
     <footer>
       <div id="socialsBlock" style="margin-bottom:14px;"></div>
-      <p class="credits">BUILD 2.0 · haohao.unzip · 多 EP 並存</p>
+      <p class="credits">BUILD 2.1 · haohao.unzip · 多 EP + 製作日誌</p>
       <p><a href="admin.html" class="admin-link-footer">關主登入 →</a></p>
     </footer>
   </div>
@@ -1375,6 +1504,8 @@
       <div class="action-title" id="actionTitle">▸ 完成任務</div>
       <div id="actionBody"></div>
     </div>
+
+    <div id="devlogLevel"></div>
   </div>
 </section>
 
@@ -1520,6 +1651,63 @@ function applyContent() {
   renderNodes();
   renderSocials();
   updateClass();
+}
+
+// ============================================================
+// DEVLOG (邊做邊丟) — flat list of entries with attachTo:
+//   ""             = global (renders on every map)
+//   "ep1" / "ep2"  = renders on that EP's map only
+//   "ep1/L1" etc.  = renders only on that level/song detail page
+// ============================================================
+function renderDevlog(containerId, attachToFilter) {
+  const box = document.getElementById(containerId);
+  if (!box) return;
+  const dl = CONTENT.devlog || {};
+  const all = (dl.entries || []).slice().sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  const entries = all.filter(attachToFilter);
+  if (!entries.length) { box.innerHTML = ''; return; }
+
+  let html = `<div class="devlog">`;
+  html += `<h3 class="devlog-title">${escapeHtml(dl.title || '📓 製作日誌')}</h3>`;
+  if (dl.subtitle) html += `<p class="devlog-sub">${escapeHtml(dl.subtitle)}</p>`;
+  entries.forEach(e => { html += renderDevlogEntry(e); });
+  html += `</div>`;
+  box.innerHTML = html;
+}
+
+function renderDevlogEntry(e) {
+  const typeIcon = ({ text: '✎', lyric: '♬', audio: '🎙', link: '🔗' })[e.type] || '·';
+  let content = '';
+  if (e.title) content += `<div class="devlog-entry-title">${escapeHtml(e.title)}</div>`;
+  if (e.type === 'lyric') {
+    content += `<div class="devlog-lyric">${escapeHtml(e.body || '')}</div>`;
+  } else if (e.type === 'audio' && e.mediaUrl) {
+    if (e.body) content += `<p class="devlog-body">${escapeHtml(e.body)}</p>`;
+    content += `<audio controls preload="metadata" src="${escapeHtml(e.mediaUrl)}" style="width:100%;margin-top:8px;"></audio>`;
+  } else if (e.type === 'link' && e.mediaUrl) {
+    if (e.body) content += `<p class="devlog-body">${escapeHtml(e.body)}</p>`;
+    content += `<a class="devlog-link" href="${escapeHtml(e.mediaUrl)}" target="_blank" rel="noopener">前往 ↗</a>`;
+  } else {
+    content += `<p class="devlog-body">${escapeHtml(e.body || '')}</p>`;
+  }
+  return `
+    <article class="devlog-entry">
+      <div class="devlog-entry-meta">
+        <span class="devlog-entry-icon">${typeIcon}</span>
+        <span class="devlog-entry-date">${escapeHtml(e.date || '')}</span>
+        <span class="devlog-entry-type">${escapeHtml(String(e.type || '').toUpperCase())}</span>
+      </div>
+      ${content}
+    </article>
+  `;
+}
+
+function devlogFilterForMap(epId) {
+  return (e) => !e.attachTo || e.attachTo === epId;
+}
+function devlogFilterForItem(epId, itemId) {
+  const target = epId + '/' + itemId;
+  return (e) => e.attachTo === target;
 }
 
 function renderSocials() {
@@ -1702,6 +1890,10 @@ document.getElementById('btnSkip').addEventListener('click', () => {
   state.introSeen = true; saveState();
   navigate('#map');
 });
+document.getElementById('btnBackToIntro').addEventListener('click', () => {
+  // Returning player wants to re-read the opener — go back without resetting introSeen.
+  navigate('#intro');
+});
 document.getElementById('btnEnter').addEventListener('click', () => {
   state.introSeen = true; saveState();
   navigate('#map');
@@ -1760,6 +1952,7 @@ function renderNodes() {
     // Hide quest progress meter (it doesn't apply to voting).
     const pwrap = document.querySelector('.scene-map .progress-wrap');
     if (pwrap) pwrap.style.display = 'none';
+    renderDevlog('devlogMap', devlogFilterForMap(ep.id));
     return;
   }
   // level-quest (default / EP1)
@@ -1797,6 +1990,8 @@ function renderNodes() {
   const pf = document.getElementById('progressFill');
   if (pt) pt.textContent = `${cleared} / ${total}`;
   if (pf) pf.style.width = total ? `${(cleared / total) * 100}%` : '0%';
+  // Devlog feed for this EP's map (global entries + ep-tagged entries).
+  renderDevlog('devlogMap', devlogFilterForMap(ep.id));
 }
 
 function escapeHtml(s) {
@@ -1977,6 +2172,8 @@ function renderSong(ep, songId) {
   if (endgameSrc) {
     appendVaultEndgameCTA(body, endgameSrc);
   }
+  // Devlog entries attached to this song (e.g. lyric drafts, voice memos).
+  renderDevlog('devlogLevel', devlogFilterForItem(ep.id, song.id));
 }
 
 function appendVaultEndgameCTA(body, eg) {
@@ -2533,6 +2730,9 @@ function renderLevel(levelId) {
   }
   renderActionBlock(lv);
   stopTone();
+  // Devlog entries attached to this level (lyric drafts, murmurs, etc).
+  const epForLog = getCurrentEp();
+  renderDevlog('devlogLevel', devlogFilterForItem(epForLog.id, lv.id));
 }
 
 document.getElementById('btnBack').addEventListener('click', () => {

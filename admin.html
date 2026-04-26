@@ -776,6 +776,30 @@
       </div>
     </details>
 
+    <!-- Devlog (邊做邊丟動態) -->
+    <details class="editor-section" open>
+      <summary>📓 製作日誌(邊做邊丟 · murmur / lyric / audio / link)</summary>
+      <div class="section-body">
+        <p class="hint" style="margin-bottom:10px;">
+          每條 entry 可選擇貼到哪 ——<br>
+          • <code>留空</code> = 全站動態,<b>每張 EP map 都會看到</b><br>
+          • <code>ep1</code> 或 <code>ep2</code> = 只在那張 EP 的 map 看到<br>
+          • <code>ep1/L1</code> / <code>ep2/S2</code> = 只在那關/那首 song 的 detail 看到<br>
+          日期格式 <code>YYYY-MM-DD</code>,新的會自動排在最上面。
+        </p>
+        <label class="field">
+          <span class="label-text">區塊標題</span>
+          <input type="text" data-path="devlog.title" placeholder="📓 製作日誌">
+        </label>
+        <label class="field">
+          <span class="label-text">區塊副文字</span>
+          <input type="text" data-path="devlog.subtitle" placeholder="我邊做邊丟。最新的在最上面。">
+        </label>
+        <div id="devlogEditor"></div>
+        <button class="add-row-btn" id="addDevlogEntry" type="button">+ 加一條 entry</button>
+      </div>
+    </details>
+
     <!-- Lyrics Wall (L3 cleared 後展示) -->
     <details class="editor-section">
       <summary>✍ 歌詞牆(L3 闖完顯示)</summary>
@@ -1031,6 +1055,8 @@ function renderEditor() {
   renderIntroLines();
   // Lyrics wall
   renderLyricsWall();
+  // Devlog
+  renderDevlogEditor();
   // Levels
   renderLevels();
   // Audio uploads
@@ -1437,6 +1463,77 @@ $('addLyricsLine').addEventListener('click', () => {
   contentData.lyricsWall.items = contentData.lyricsWall.items || [];
   contentData.lyricsWall.items.push('「新的歌詞...」');
   renderLyricsWall();
+  updateSaveBar();
+});
+
+// =======================================================
+// DEVLOG EDITOR — flat list of entries with type-aware fields
+// =======================================================
+const DEVLOG_TYPES = [
+  { value: 'text',  label: '✎ text — 文字 / murmur' },
+  { value: 'lyric', label: '♬ lyric — 歌詞片段' },
+  { value: 'audio', label: '🎙 audio — 錄音檔(URL)' },
+  { value: 'link',  label: '🔗 link — 任何外連' },
+];
+
+function todayISO() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
+function renderDevlogEditor() {
+  const box = $('devlogEditor');
+  if (!box) return;
+  box.innerHTML = '';
+  contentData.devlog = contentData.devlog || {};
+  const entries = contentData.devlog.entries = contentData.devlog.entries || [];
+  // Sort newest first for editor display, but keep storage order intact.
+  const indexed = entries.map((e, i) => ({ e, i })).sort((a, b) => (b.e.date || '').localeCompare(a.e.date || ''));
+  indexed.forEach(({ e, i: idx }) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'editor-section';
+    wrap.style.cssText = 'margin-bottom:10px;padding:10px 12px;background:#fafafa;';
+    wrap.innerHTML = `
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;">
+        <input type="date" class="dl-date" value="${escapeHtml(e.date || '')}" style="padding:6px;border:1px solid #ccc;">
+        <select class="dl-type" style="padding:6px;border:1px solid #ccc;">${DEVLOG_TYPES.map(t => `<option value="${t.value}"${e.type === t.value ? ' selected' : ''}>${escapeHtml(t.label)}</option>`).join('')}</select>
+        <input type="text" class="dl-attach" value="${escapeHtml(e.attachTo || '')}" placeholder="attachTo: 留空 / ep1 / ep2/S2" style="flex:1;min-width:160px;padding:6px;border:1px solid #ccc;font-family:monospace;font-size:12px;">
+        <button class="remove-btn dl-del" type="button" title="刪此 entry">✕</button>
+      </div>
+      <input type="text" class="dl-title" value="${escapeHtml(e.title || '')}" placeholder="標題(可空)" style="width:100%;padding:6px;border:1px solid #ccc;margin-bottom:6px;">
+      <textarea class="dl-body" rows="3" placeholder="內文(text=murmur / lyric=歌詞 / audio=說明文字 / link=說明)" style="width:100%;padding:6px;border:1px solid #ccc;margin-bottom:6px;">${escapeHtml(e.body || '')}</textarea>
+      <input type="text" class="dl-media" value="${escapeHtml(e.mediaUrl || '')}" placeholder="mediaUrl(audio 用 audio/devlog/xxx.m4a 路徑;link 用 https://...)" style="width:100%;padding:6px;border:1px solid #ccc;font-family:monospace;font-size:12px;">
+    `;
+    const upd = (k, v) => { e[k] = v; updateSaveBar(); };
+    wrap.querySelector('.dl-date').addEventListener('input', ev => upd('date', ev.target.value));
+    wrap.querySelector('.dl-type').addEventListener('change', ev => upd('type', ev.target.value));
+    wrap.querySelector('.dl-attach').addEventListener('input', ev => upd('attachTo', ev.target.value.trim()));
+    wrap.querySelector('.dl-title').addEventListener('input', ev => upd('title', ev.target.value));
+    wrap.querySelector('.dl-body').addEventListener('input', ev => upd('body', ev.target.value));
+    wrap.querySelector('.dl-media').addEventListener('input', ev => upd('mediaUrl', ev.target.value.trim()));
+    wrap.querySelector('.dl-del').addEventListener('click', () => {
+      if (!confirm(`刪掉這條 entry?\n${e.date || ''} · ${e.type || ''} · ${(e.title || e.body || '').slice(0, 40)}`)) return;
+      entries.splice(idx, 1);
+      renderDevlogEditor();
+      updateSaveBar();
+    });
+    box.appendChild(wrap);
+  });
+}
+
+$('addDevlogEntry').addEventListener('click', () => {
+  contentData.devlog = contentData.devlog || {};
+  contentData.devlog.entries = contentData.devlog.entries || [];
+  contentData.devlog.entries.push({
+    id: 'd' + (contentData.devlog.entries.length + 1) + '-' + Date.now().toString(36).slice(-4),
+    date: todayISO(),
+    type: 'text',
+    title: '',
+    body: '',
+    mediaUrl: '',
+    attachTo: ''
+  });
+  renderDevlogEditor();
   updateSaveBar();
 });
 

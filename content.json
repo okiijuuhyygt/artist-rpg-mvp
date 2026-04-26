@@ -120,6 +120,45 @@
       }
     }
   ],
+  "devlog": {
+    "title": "📓 製作日誌",
+    "subtitle": "我邊做邊丟。最新的在最上面。",
+    "entries": [
+      {
+        "id": "d1",
+        "date": "2026-04-26",
+        "type": "text",
+        "title": "EP2 上線了",
+        "body": "今天把「未發行倉庫」的概念做出來了。3 首 demo 先放上去:33歲我娶妳、白熊效應、小九份。\n\n對,demo 音檔還沒上傳,我得先決定要放粗到什麼程度。",
+        "attachTo": ""
+      },
+      {
+        "id": "d2",
+        "date": "2026-04-25",
+        "type": "lyric",
+        "title": "33歲的那首歌的新句子",
+        "body": "「我以為 33 是個門\n結果 34 才知道,門根本沒開過」",
+        "attachTo": "ep2/S1"
+      },
+      {
+        "id": "d3",
+        "date": "2026-04-24",
+        "type": "text",
+        "title": "九份的句子",
+        "body": "在 7-11 買關東煮的時候想到的。寫在便利貼上,回家發現便利貼黏在外套上,被洗衣機洗掉了。\n\n到現在還在想那句到底是什麼。",
+        "attachTo": "ep2/S3"
+      },
+      {
+        "id": "d4",
+        "date": "2026-04-22",
+        "type": "link",
+        "title": "haohao.unzip podcast 第三集上了",
+        "body": "聊「為什麼我寫了 130 首歌但只上架 10 首」",
+        "mediaUrl": "https://open.firstory.me/user/haohao-zip/platforms",
+        "attachTo": ""
+      }
+    ]
+  },
   "lyricsWall": {
     "title": "✍ 歌詞牆 · 收進來了",
     "intro": "你寫的會放在最上面(★)。下面是已經收進這章封面底圖的歌詞,耗耗手動 curate。",
