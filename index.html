@@ -2603,8 +2603,10 @@ function renderActionBlock(lv) {
     btn.className = 'action-btn';
     btn.textContent = action.label || '📝 寫字 / 上傳';
     btn.addEventListener('click', () => {
-      const formId = (lv.id === 'L3' && CONTENT.lyricsWall && CONTENT.lyricsWall.tallyFormId)
-        ? CONTENT.lyricsWall.tallyFormId
+      // L3 → simplified lyrics-only form (Merv0l). Hardcoded fallback so admin
+      // saves that overwrite content.json don't break the L3 wiring.
+      const formId = lv.id === 'L3'
+        ? ((CONTENT.lyricsWall && CONTENT.lyricsWall.tallyFormId) || 'Merv0l')
         : null;
       openSubmitModal(action.ctxLabel || lv.id, formId);
       clearLevel(lv.id, action.clearedMsg);
@@ -2723,6 +2725,10 @@ function appendPaywallJoinBtn(body, levelId) {
   // 關主 (admin token present) = owner previewing the site, don't
   // show a 'pay me' CTA since the owner is the payee.
   if (localStorage.getItem('hao-admin-token-v1')) return;
+  // Paywall sells the EP1 完整版 product only. EP2 is a free vault-vote
+  // channel — no paywall button there even in paid mode.
+  const ep = getCurrentEp();
+  if (ep && ep.id !== 'ep1') return;
   const mode = paywallMode();
   if (mode === 'free') return;
   // Skip this level if its teaser is empty — lets 關主 hide the CTA
