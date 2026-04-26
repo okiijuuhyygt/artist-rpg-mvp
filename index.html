@@ -23,14 +23,14 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build-version" content="2.2.1">
+<meta name="build-version" content="2.2.2">
 <script>
   // iOS Safari aggressive cache buster.
   // On load, compare the version this page thinks it is vs the last version
   // stored locally. If they differ on a CACHED page (i.e. localStorage has
   // newer version than current HTML), force a hard reload with fresh query.
   (function() {
-    const CURRENT = '2.2.1';
+    const CURRENT = '2.2.2';
     const LAST = localStorage.getItem('hao-rpg-build');
     if (LAST && LAST !== CURRENT && !location.search.includes('_nocache=')) {
       const sep = location.search ? '&' : '?';
@@ -328,8 +328,13 @@
   }
   .marquee-item a:hover { color: var(--gb-lightest); }
   @keyframes marqueeScroll {
-    0%   { transform: translate3d(0, 0, 0); }
-    100% { transform: translate3d(-100%, 0, 0); }
+    /* translateX (not translate3d) — translate3d forces a GPU compositor
+       layer that some screen-recording tools (QuickTime / macOS built-in)
+       skip when capturing the main framebuffer, making the marquee look
+       blank in the recording. translateX still GPU-accelerates but doesn't
+       force layer promotion, so the recorder sees it. */
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-100%); }
   }
   @media (prefers-reduced-motion: reduce) {
     .marquee-track { animation: none; padding-left: 0; }
