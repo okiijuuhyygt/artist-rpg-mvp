@@ -26,7 +26,7 @@
     "hao": "關主"
   },
   "paywall": {
-    "mode": "paid",
+    "mode": "free",
     "enabled": true,
     "priceLabel": "150 TWD",
     "checkoutUrl": "https://p.ecpay.com.tw/6963529",
