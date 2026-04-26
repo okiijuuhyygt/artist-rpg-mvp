@@ -26,7 +26,7 @@
     "hao": "關主"
   },
   "paywall": {
-    "mode": "pre-order",
+    "mode": "paid",
     "enabled": true,
     "priceLabel": "150 TWD",
     "checkoutUrl": "https://p.ecpay.com.tw/6963529",
@@ -178,7 +178,6 @@
     ]
   },
   "lyricsWall": {
-    "tallyFormId": "Merv0l",
     "title": "✍ 歌詞牆 · 收進來了",
     "intro": "你寫的會放在最上面(★)。下面是已經收進這章封面底圖的歌詞,耗耗手動 curate。",
     "items": [
@@ -298,6 +297,6 @@
     }
   },
   "counterReset": {
-    "namespace": "rmog66dc5"
+    "namespace": "rmog6idvx"
   }
 }
