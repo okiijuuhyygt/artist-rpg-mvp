@@ -120,6 +120,17 @@
       }
     }
   ],
+  "counterReset": {
+    "namespace": ""
+  },
+  "village": {
+    "threshold": 30,
+    "counterKey": "village-count",
+    "label": "召喚陣啟動門檻",
+    "beforeMsg": "還差 {remaining} 個村民,召喚陣就啟動。",
+    "atMsg": "✅ 召喚陣已啟動!客座 NPC 即將現身。",
+    "overflowMsg": "✅ 召喚陣 {count} 人 · 持續累積中"
+  },
   "marquee": {
     "enabled": true,
     "speed": "normal",

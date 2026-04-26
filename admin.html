@@ -838,6 +838,24 @@
       </div>
     </details>
 
+    <!-- Counter reset (清掉測試 abacus 數據) -->
+    <details class="editor-section">
+      <summary>🔄 Reset 計數器(清掉 test 投票 / 訪客數)</summary>
+      <div class="section-body">
+        <p class="hint" style="margin-bottom:10px;">
+          abacus 共享計數器設計上**不能 -1 或 reset**,但我們可以**換 namespace**(等於指向新的乾淨 counter,從 0 開始)。<br>
+          影響範圍:L2 投票 / EP2 vault-vote / 召喚陣門檻 / 訪客數 — <b>全部一起 reset</b>。<br>
+          舊數據留在舊 URL 永遠不會被刪,只是 site 不再 reference。<br>
+          ⚠ 真正 launch / 大量真粉絲投票後請<b>不要按</b>,會把真實數據洗掉。
+        </p>
+        <label class="field">
+          <span class="label-text">當前 reset 後綴(空 = 用原始 counter)</span>
+          <input type="text" data-path="counterReset.namespace" placeholder="(空)" readonly style="background:#f5f5f5;font-family:monospace;font-size:12px;">
+        </label>
+        <button class="add-row-btn" id="resetCountersBtn" type="button" style="background:#fff5f5;border-color:#c44;color:#a33;">🔄 Reset 全部計數器(換新 namespace)</button>
+      </div>
+    </details>
+
     <!-- Lyrics Wall (L3 cleared 後展示) -->
     <details class="editor-section">
       <summary>✍ 歌詞牆(L3 闖完顯示)</summary>
@@ -1570,6 +1588,18 @@ function renderMarqueeEditor() {
     box.appendChild(row);
   });
 }
+
+$('resetCountersBtn').addEventListener('click', () => {
+  const cur = (contentData.counterReset && contentData.counterReset.namespace) || '(空 = 原始 counter)';
+  if (!confirm(`Reset 全部 abacus 計數器?\n\n當前後綴: ${cur}\n→ 新後綴: r${Date.now().toString(36)}\n\n影響:L2 投票 / EP2 vault-vote / 召喚陣 / 訪客數 全部歸零。\n舊數據留在舊 URL,site 不再 reference。\n\n按 OK 確認,然後記得「儲存到網站」+ 等 1-2 分鐘 redeploy。`)) return;
+  contentData.counterReset = contentData.counterReset || {};
+  contentData.counterReset.namespace = 'r' + Date.now().toString(36);
+  // Re-render input field to show new value
+  const inp = document.querySelector('[data-path="counterReset.namespace"]');
+  if (inp) inp.value = contentData.counterReset.namespace;
+  updateSaveBar();
+  alert('✓ 已換新 namespace = ' + contentData.counterReset.namespace + '\n按底下「儲存到網站」生效。');
+});
 
 $('addMarqueeItem').addEventListener('click', () => {
   contentData.marquee = contentData.marquee || {};

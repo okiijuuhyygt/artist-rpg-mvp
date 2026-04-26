@@ -23,14 +23,14 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build-version" content="2.3">
+<meta name="build-version" content="2.4">
 <script>
   // iOS Safari aggressive cache buster.
   // On load, compare the version this page thinks it is vs the last version
   // stored locally. If they differ on a CACHED page (i.e. localStorage has
   // newer version than current HTML), force a hard reload with fresh query.
   (function() {
-    const CURRENT = '2.3';
+    const CURRENT = '2.4';
     const LAST = localStorage.getItem('hao-rpg-build');
     if (LAST && LAST !== CURRENT && !location.search.includes('_nocache=')) {
       const sep = location.search ? '&' : '?';
@@ -486,6 +486,53 @@
     letter-spacing: 2px;
   }
   .vote-budget b { color: var(--gb-darkest); font-size: 12px; }
+
+  /* Village progress bar — L4 召喚陣 門檻 */
+  .village-progress {
+    margin-top: 16px;
+    padding: 14px;
+    background: var(--paper-light);
+    border: 2px solid var(--gb-darkest);
+    box-shadow: 3px 3px 0 var(--paper-edge);
+  }
+  .village-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+  }
+  .village-label {
+    font-family: "Press Start 2P", monospace;
+    font-size: 9px;
+    color: var(--gb-darkest);
+    letter-spacing: 1px;
+  }
+  .village-count {
+    font-family: "VT323", monospace;
+    font-size: 18px;
+    color: var(--gold-deep);
+    letter-spacing: 1px;
+  }
+  .village-bar {
+    height: 14px;
+    background: var(--paper-edge);
+    border: 2px solid var(--gb-darkest);
+    position: relative;
+    overflow: hidden;
+  }
+  .village-fill {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    background: var(--gb-mid);
+    transition: width 0.5s ease;
+  }
+  .village-msg {
+    margin: 8px 0 0;
+    font-size: 12px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+  .village-msg-done { color: var(--gb-darkest); font-weight: bold; }
 
   /* ========== Devlog feed (邊做邊丟) ========== */
   .devlog {
@@ -1562,7 +1609,7 @@
 
     <footer>
       <div id="socialsBlock" style="margin-bottom:14px;"></div>
-      <p class="credits">BUILD 2.3 · haohao.unzip · 玩家投稿 + 跑馬燈 + 多 EP</p>
+      <p class="credits">BUILD 2.4 · haohao.unzip · 召喚陣門檻 + 全 Tally 投稿</p>
       <p><a href="admin.html" class="admin-link-footer">關主登入 →</a></p>
     </footer>
   </div>
@@ -2167,7 +2214,7 @@ function songVoteHitKey(ep, song) {
 async function fetchSongTally(ep, song) {
   const key = songVoteHitKey(ep, song);
   try {
-    const res = await fetch(`${POLL_API}/get/${POLL_NS}/${encodeURIComponent(key)}`);
+    const res = await fetch(`${POLL_API}/get/${pollNs()}/${encodeURIComponent(key)}`);
     if (!res.ok) return 0;
     const data = await res.json();
     return data.value || 0;
@@ -2177,7 +2224,7 @@ async function fetchSongTally(ep, song) {
 async function bumpSongTally(ep, song) {
   const key = songVoteHitKey(ep, song);
   try {
-    const res = await fetch(`${POLL_API}/hit/${POLL_NS}/${encodeURIComponent(key)}`);
+    const res = await fetch(`${POLL_API}/hit/${pollNs()}/${encodeURIComponent(key)}`);
     if (!res.ok) return null;
     const data = await res.json();
     return data.value || 0;
@@ -2405,10 +2452,11 @@ const LEVEL_ACTIONS = {
     clearedMsg: '你投下了一票,下一關解鎖了。',
   },
   L3: {
-    type: 'text',
-    prompt: '寫一句「影響過你的歌詞」(任何人、中外皆可)。這句話會進章節首頁的底圖。',
-    placeholder: '例如:\n「以前的事,今晚不再提」\n「我不是英雄,只是想陪你走一段」',
-    clearedMsg: '你寫的字已送達。這章的封面會用上。',
+    type: 'submit-tally',
+    prompt: '寫一句「影響過你的歌詞」(任何人、中外皆可)。送出後 hao 會看到,精選的會 curate 進下方歌詞牆。',
+    label: '📝 寫一句送給 hao (順便可以上傳照片 / 錄音)',
+    ctxLabel: 'L3 寫字關',
+    clearedMsg: '送出按鈕點過了 — 你寫的字 hao 在 Tally 收得到。下面是已 curate 的歌詞牆。',
   },
   L4: {
     type: 'button',
@@ -2480,9 +2528,16 @@ function renderActionBlock(lv) {
       appendSubmitButton(body, ctxLabel, '📤 投稿給 hao (寫字 / 上傳照片錄音)');
     }
     // L3 cleared → show curated lyrics wall (other players' lines).
-    if (lv.id === 'L3') appendLyricsWall(body);
-    // L4 finale: peak-end moment to surface EP2 notification CTA.
-    if (lv.id === 'L4') appendEndgameEmailCTA(body);
+    if (lv.id === 'L3') {
+      // L3 is now submit-tally type — text goes to Tally cloud, not localStorage.
+      // No need for the legacy localStorage hint.
+      appendLyricsWall(body);
+    }
+    // L4 finale: village threshold progress + EP2 notification CTA.
+    if (lv.id === 'L4') {
+      appendVillageProgress(body);
+      appendEndgameEmailCTA(body);
+    }
     return;
   }
 
@@ -2508,6 +2563,8 @@ function renderActionBlock(lv) {
     p.textContent = state.email ? action.prompt.split('。')[0] + '。' : action.prompt;
     body.appendChild(p);
   } else if (action.type === 'text') {
+    // Legacy: kept for backwards-compat if any level still uses type:text.
+    // L3 has been migrated to submit-tally below.
     const p = document.createElement('p');
     p.className = 'action-prompt';
     p.textContent = action.prompt;
@@ -2530,6 +2587,21 @@ function renderActionBlock(lv) {
       clearLevel(lv.id, action.clearedMsg);
     });
     body.appendChild(btn);
+  } else if (action.type === 'submit-tally') {
+    // Single-button action: opens Tally modal + marks level cleared.
+    // No localStorage textarea — submissions go straight to Tally cloud.
+    const p = document.createElement('p');
+    p.className = 'action-prompt';
+    p.textContent = action.prompt;
+    body.appendChild(p);
+    const btn = document.createElement('button');
+    btn.className = 'action-btn';
+    btn.textContent = action.label || '📝 寫字 / 上傳';
+    btn.addEventListener('click', () => {
+      openSubmitModal(action.ctxLabel || lv.id);
+      clearLevel(lv.id, action.clearedMsg);
+    });
+    body.appendChild(btn);
   }
   // Append join CTA in non-cleared state too (always offer the bundle).
   appendPaywallJoinBtn(body, lv.id);
@@ -2537,6 +2609,11 @@ function renderActionBlock(lv) {
   if (lv.id === 'L1' || lv.id === 'L3') {
     const ctxLabel = lv.id === 'L1' ? 'L1 第一首歌' : 'L3 寫字關';
     appendSubmitButton(body, ctxLabel, '📤 投稿給 hao (寫字 / 上傳照片錄音)');
+  }
+  // Show village progress on L4 even before "啟動" — players see their
+  // contribution toward the threshold (their own email already counted).
+  if (lv.id === 'L4') {
+    appendVillageProgress(body);
   }
 }
 
@@ -2547,12 +2624,22 @@ function renderActionBlock(lv) {
 // local-only so we don't inflate.
 // ============================================================
 const POLL_API = 'https://abacus.jasoncameron.dev';
-const POLL_NS = 'hao-artist-rpg-mvp';
+const POLL_NS_BASE = 'hao-artist-rpg-mvp';
+// Resolved namespace = base + optional reset suffix from content.json.
+// Admin can hit "🔄 Reset counters" → bumps suffix → all abacus URLs point
+// to fresh counters that start at 0. Old data stays at the old URL but
+// nothing in the live app references it anymore.
+function pollNs() {
+  const suffix = (CONTENT.counterReset && CONTENT.counterReset.namespace) || '';
+  return POLL_NS_BASE + (suffix ? '-' + suffix : '');
+}
+// Legacy alias for any inline references still using POLL_NS.
+const POLL_NS = POLL_NS_BASE;
 
 async function recordVote(levelId, choiceId) {
   const key = `vote-${String(levelId).toLowerCase()}-${String(choiceId).toLowerCase()}`;
   try {
-    await fetch(`${POLL_API}/hit/${POLL_NS}/${key}`);
+    await fetch(`${POLL_API}/hit/${pollNs()}/${key}`);
   } catch (e) {
     console.warn('recordVote failed', e);
   }
@@ -2564,7 +2651,7 @@ async function fetchVoteResults(lv) {
   await Promise.all(lv.branches.map(async ch => {
     const key = `vote-${String(lv.id).toLowerCase()}-${String(ch.id).toLowerCase()}`;
     try {
-      const res = await fetch(`${POLL_API}/get/${POLL_NS}/${key}`);
+      const res = await fetch(`${POLL_API}/get/${pollNs()}/${key}`);
       if (res.ok) {
         const data = await res.json();
         out[ch.id] = data.value || 0;
@@ -2796,6 +2883,61 @@ function appendSubmitButton(body, contextLabel, btnLabel) {
     openSubmitModal(contextLabel);
   });
   body.appendChild(btn);
+}
+
+// ============================================================
+// VILLAGE COUNTER (L4 召喚陣 門檻進度)
+// Shared abacus counter, bumps once per gate-form submit per browser.
+// ============================================================
+function villageCounterUrl(action) {
+  const v = CONTENT.village || {};
+  const key = v.counterKey || 'village-count';
+  return `${POLL_API}/${action}/${pollNs()}/${encodeURIComponent(key)}`;
+}
+async function bumpVillageCounter() {
+  try { await fetch(villageCounterUrl('hit')); } catch {}
+}
+async function fetchVillageCount() {
+  try {
+    const res = await fetch(villageCounterUrl('get'));
+    if (!res.ok) return 0;
+    const data = await res.json();
+    return data.value || 0;
+  } catch { return 0; }
+}
+
+async function appendVillageProgress(body) {
+  const v = CONTENT.village || {};
+  const threshold = Number(v.threshold) || 30;
+  const card = document.createElement('div');
+  card.className = 'village-progress';
+  card.innerHTML = `
+    <div class="village-head">
+      <span class="village-label">${escapeHtml(v.label || '召喚陣啟動門檻')}</span>
+      <span class="village-count" data-count>— / ${threshold}</span>
+    </div>
+    <div class="village-bar"><div class="village-fill" data-fill style="width:0%"></div></div>
+    <p class="village-msg" data-msg>計算中…</p>
+  `;
+  body.appendChild(card);
+  const count = await fetchVillageCount();
+  const pct = Math.min(100, (count / threshold) * 100);
+  const fillEl = card.querySelector('[data-fill]');
+  const countEl = card.querySelector('[data-count]');
+  const msgEl = card.querySelector('[data-msg]');
+  if (fillEl) fillEl.style.width = pct.toFixed(1) + '%';
+  if (countEl) countEl.textContent = count + ' / ' + threshold;
+  if (msgEl) {
+    let msg;
+    if (count >= threshold) {
+      const tpl = (count > threshold && v.overflowMsg) ? v.overflowMsg : (v.atMsg || '✅ 召喚陣已啟動!');
+      msg = tpl.replace('{count}', count);
+    } else {
+      msg = (v.beforeMsg || '還差 {remaining} 個村民。').replace('{remaining}', threshold - count);
+    }
+    msgEl.textContent = msg;
+    msgEl.classList.toggle('village-msg-done', count >= threshold);
+  }
 }
 
 function appendEndgameEmailCTA(body) {
@@ -3256,6 +3398,12 @@ document.getElementById('gateForm').addEventListener('submit', (e) => {
   // We optimistically update UI/state; Kit handles dedupe on its side.
   state.email = email;
   if (state.class === 'guest') state.class = 'villager';
+  // Bump shared village counter (used by L4 召喚陣 progress bar). Only fire
+  // once per browser to avoid one player inflating the count by re-submitting.
+  if (!state.villageCounted) {
+    state.villageCounted = true;
+    bumpVillageCounter();
+  }
   saveState();
   document.getElementById('gateSuccess').classList.add('show');
   updateClass();
@@ -3312,10 +3460,10 @@ async function fetchVisitorCount() {
     let endpoint;
     if (localStorage.getItem(haveCountedKey) && myNumber) {
       // Already counted; just fetch current total
-      endpoint = 'https://abacus.jasoncameron.dev/get/hao-artist-rpg-mvp/visits';
+      endpoint = `${POLL_API}/get/${pollNs()}/visits`;
     } else {
       // First visit: increment
-      endpoint = 'https://abacus.jasoncameron.dev/hit/hao-artist-rpg-mvp/visits';
+      endpoint = `${POLL_API}/hit/${pollNs()}/visits`;
     }
     const res = await fetch(endpoint);
     if (!res.ok) throw new Error(res.status);
