@@ -153,7 +153,17 @@
     resize: vertical;
   }
   input:focus, textarea:focus, select:focus { outline: none; background: var(--gb-lightest); }
-  textarea { min-height: 70px; line-height: 1.5; }
+  textarea {
+    min-height: 70px;
+    /* Cap height + own scroll. Without this, long textareas grow to
+       full content size and iOS auto-scrolls the *page* whenever the
+       cursor moves (long-press drag, two-finger select), feeling like
+       the page swiped to the bottom. With max-height the cursor swipe
+       scrolls *inside* the textarea instead. */
+    max-height: 220px;
+    overflow-y: auto;
+    line-height: 1.5;
+  }
   label.field {
     display: block;
     margin-bottom: 14px;
@@ -1066,7 +1076,7 @@ async function initEditor() {
   } catch (e) {
     $('loadingContent').textContent = '讀取失敗:' + e.message;
   }
-  updateSaveBar();
+  markEditorClean();
 }
 
 function renderEditor() {
@@ -1680,19 +1690,24 @@ function escapeHtml(s) {
   return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
+// v2.2.3: dropped JSON-diff dirty detection.
+// updateSaveBar() = called by every input handler (typing, select, click).
+//   Any user touch enables the save button. We don't try to detect "no real
+//   change" because that swallowed legit save intent (e.g. type-then-delete
+//   removed the dirty mark). Saving identical content is a GitHub no-op.
+// markEditorClean() = called by init load + after save success. Keeps the
+//   button disabled until the next user action.
 function updateSaveBar() {
-  const changed = JSON.stringify(contentData) !== originalContent;
   const downloadMode = localStorage.getItem(LS_DOWNLOAD_MODE) === '1';
-  $('btnSave').disabled = !changed;
-  if (!changed) {
-    $('saveInfo').textContent = '沒有變更';
-  } else if (downloadMode) {
-    $('saveInfo').textContent = '有未儲存的變更(下載模式)';
-    $('btnSave').textContent = '下載 content.json';
-  } else {
-    $('saveInfo').textContent = '有未儲存的變更';
-    $('btnSave').textContent = '儲存到網站';
-  }
+  $('btnSave').disabled = false;
+  $('saveInfo').textContent = downloadMode ? '有變更(下載模式)' : '有變更';
+  $('btnSave').textContent = downloadMode ? '下載 content.json' : '儲存到網站';
+}
+function markEditorClean(msg) {
+  const downloadMode = localStorage.getItem(LS_DOWNLOAD_MODE) === '1';
+  $('btnSave').disabled = true;
+  $('saveInfo').textContent = msg || '就緒';
+  $('btnSave').textContent = downloadMode ? '下載 content.json' : '儲存到網站';
 }
 
 // =======================================================
@@ -1710,7 +1725,7 @@ $('btnSave').addEventListener('click', async () => {
     a.click();
     URL.revokeObjectURL(url);
     originalContent = JSON.stringify(contentData);
-    $('saveInfo').textContent = '✓ 已下載 content.json — 記得上傳回 GitHub';
+    markEditorClean('✓ 已下載 content.json — 記得上傳回 GitHub');
     return;
   }
   const tok = localStorage.getItem(LS_TOKEN);
@@ -1752,12 +1767,11 @@ $('btnSave').addEventListener('click', async () => {
       throw new Error('寫入失敗:' + putRes.status + ' ' + txt.slice(0, 200));
     }
     originalContent = JSON.stringify(contentData);
-    $('saveInfo').textContent = '✓ 已儲存!30 秒 - 2 分鐘內網站會更新。';
-    $('btnSave').textContent = '儲存到網站';
+    markEditorClean('✓ 已儲存!30 秒 - 2 分鐘內網站會更新。');
   } catch (e) {
     $('saveInfo').textContent = '✗ ' + e.message;
-  } finally {
-    updateSaveBar();
+    // Re-enable so the user can retry without poking another input.
+    $('btnSave').disabled = false;
   }
 });
 
