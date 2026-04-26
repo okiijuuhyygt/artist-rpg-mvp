@@ -26,7 +26,7 @@
     "hao": "關主"
   },
   "paywall": {
-    "mode": "pre-order",
+    "mode": "free",
     "enabled": true,
     "priceLabel": "150 TWD",
     "checkoutUrl": "https://p.ecpay.com.tw/6963529",
@@ -295,5 +295,8 @@
     "levels": {
       "L0": ""
     }
+  },
+  "counterReset": {
+    "namespace": "rmog66dc5"
   }
 }
