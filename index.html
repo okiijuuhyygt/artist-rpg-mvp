@@ -290,14 +290,15 @@
   /* ========== SCENE 2: Map ========== */
   .scene-map { background: var(--paper); }
 
-  /* EP picker tabs */
+  /* EP picker tabs — pixel button bar */
   .ep-tabs {
     display: flex;
     gap: 6px;
     margin: 8px 0 18px;
     padding: 4px;
-    border: 2px solid var(--gb-darkest);
     background: var(--paper-light);
+    border: 2px solid var(--gb-darkest);
+    box-shadow: 4px 4px 0 var(--paper-edge);
     overflow-x: auto;
   }
   .ep-tab {
@@ -308,87 +309,108 @@
     font-size: 13px;
     line-height: 1.3;
     background: transparent;
-    color: var(--ink-soft);
+    color: var(--ink);
     border: 2px solid transparent;
     cursor: pointer;
     text-align: left;
   }
-  .ep-tab:hover { background: var(--gb-lightest); }
+  .ep-tab:hover:not(.active) { background: var(--gb-lightest); }
   .ep-tab.active {
-    background: var(--gb-darkest);
-    color: var(--gb-lightest);
+    background: var(--gb-light);
+    color: var(--gb-darkest);
     border-color: var(--gb-darkest);
+    box-shadow: 2px 2px 0 var(--gb-darkest);
   }
   .ep-tab .ep-tab-tag {
     display: inline-block;
-    font-weight: bold;
-    letter-spacing: .1em;
+    font-family: "Press Start 2P", monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
     margin-right: 6px;
   }
   .ep-tab .ep-tab-sub {
     display: block;
     font-size: 11px;
-    margin-top: 2px;
-    opacity: .85;
-  }
-  .ep-intro {
-    margin: 0 0 18px;
-    padding: 14px 16px;
-    border-left: 4px solid var(--gold);
-    background: var(--paper-light);
-    font-size: 13px;
-    line-height: 1.65;
-    white-space: pre-wrap;
-    color: var(--ink);
+    margin-top: 4px;
+    opacity: .8;
   }
 
-  /* Vault-vote song cards */
-  .song-card {
-    border: 2px solid var(--gb-darkest);
-    background: #fff;
-    padding: 14px 16px;
-    margin-bottom: 12px;
-    cursor: pointer;
-    transition: transform .12s ease;
-  }
-  .song-card:hover { transform: translateY(-2px); background: var(--gb-lightest); }
-  .song-card.voted { border-color: var(--gold); background: var(--paper-light); }
-  .song-card-head {
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
-    margin-bottom: 6px;
-  }
-  .song-card-num { font-size: 12px; color: var(--ink-soft); font-family: 'Press Start 2P', monospace; }
-  .song-card-title { font-size: 16px; font-weight: bold; color: var(--gb-darkest); flex: 1; }
-  .song-card-year { font-size: 12px; color: var(--ink-soft); }
-  .song-card-status { font-size: 12px; color: var(--ink-soft); margin-bottom: 8px; }
-  .song-card-votes { display: flex; align-items: center; gap: 10px; font-size: 13px; }
-  .song-card-vote-bar {
-    flex: 1;
-    height: 8px;
-    background: var(--gb-lightest);
+  /* EP intro — dialog box (matches .gate aesthetic) */
+  .ep-intro {
+    margin: 0 0 18px;
+    padding: 16px 18px;
+    background: var(--paper-light);
+    border: 3px solid var(--gb-darkest);
+    box-shadow: 5px 5px 0 var(--paper-edge);
+    font-size: 13px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    color: var(--ink);
     position: relative;
   }
-  .song-card-vote-bar > div {
+  .ep-intro::before {
+    content: "";
     position: absolute;
-    left: 0; top: 0; bottom: 0;
+    top: -10px;
+    left: 22px;
+    width: 14px;
+    height: 14px;
+    background: var(--gb-light);
+    border: 2px solid var(--gb-darkest);
+  }
+
+  /* Vault-vote song nodes — reuse .node + voted modifier */
+  .node.vault-song .node-icon {
+    font-family: "VT323", monospace;
+    font-size: 22px;
+    background: var(--gb-light);
+  }
+  .node.vault-song.voted {
+    border-color: var(--gb-dark);
+    background: var(--gb-lightest);
+  }
+  .node.vault-song.voted .node-icon {
     background: var(--gold);
+    color: var(--gb-darkest);
   }
-  .song-card-voted-tag {
-    font-size: 11px;
-    color: var(--gold-deep);
-    font-weight: bold;
-    letter-spacing: .1em;
-  }
-  .vote-budget {
-    text-align: center;
+  .node-meta {
     font-size: 12px;
     color: var(--ink-soft);
-    margin: 4px 0 14px;
-    letter-spacing: .1em;
+    margin-top: 6px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
   }
-  .vote-budget b { color: var(--gold-deep); font-size: 14px; }
+  .vote-bar {
+    flex: 1;
+    min-width: 70px;
+    height: 6px;
+    background: var(--paper-edge);
+    position: relative;
+    margin: 0 6px;
+  }
+  .vote-bar > div {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    background: var(--gb-mid);
+  }
+  .voted-tag {
+    font-family: "Press Start 2P", monospace;
+    font-size: 9px;
+    color: var(--gold-deep);
+    letter-spacing: 1px;
+  }
+
+  .vote-budget {
+    text-align: center;
+    font-family: "Press Start 2P", monospace;
+    font-size: 10px;
+    color: var(--ink-soft);
+    margin: 4px 0 14px;
+    letter-spacing: 2px;
+  }
+  .vote-budget b { color: var(--gb-darkest); font-size: 12px; }
 
   .map-header {
     text-align: center;
@@ -1829,41 +1851,40 @@ async function renderSongList(ep) {
   const myVotes = votedSongIds(ep.id);
   const cap = ep.voteCap || 3;
 
-  // Header: vote budget + deadline.
-  let html = `<div class="vote-budget">你的票:<b> ${myVotes.length} / ${cap}</b>`;
-  if (ep.voteDeadline) html += ` · 截止 ${escapeHtml(ep.voteDeadline)}`;
+  // Header: vote budget + deadline (pixel-font tag bar).
+  let html = `<div class="vote-budget">YOUR VOTES <b>${myVotes.length}/${cap}</b>`;
+  if (ep.voteDeadline) html += ` · DEADLINE ${escapeHtml(ep.voteDeadline)}`;
   html += `</div>`;
 
-  // Skeleton (tally fills in async).
+  // Use the same .node structure as EP1 levels for visual consistency.
   songs.forEach((song, i) => {
     const voted = myVotes.includes(song.id);
+    const num = String(i + 1).padStart(2, '0');
     html += `
-      <div class="song-card${voted ? ' voted' : ''}" data-song="${escapeHtml(song.id)}">
-        <div class="song-card-head">
-          <span class="song-card-num">${String(i + 1).padStart(2, '0')}</span>
-          <span class="song-card-title">${escapeHtml(song.title)}</span>
-          <span class="song-card-year">${escapeHtml(song.year || '')}</span>
+      <div class="node vault-song${voted ? ' voted' : ''}" data-song="${escapeHtml(song.id)}">
+        <div class="node-icon">${num}</div>
+        <div class="node-body">
+          <p class="node-title"><span class="num">S${i + 1}</span>${escapeHtml(song.title)}</p>
+          <p class="node-desc">${escapeHtml(song.year || '')}${song.year ? ' · ' : ''}${escapeHtml(song.status || '')}</p>
+          <div class="node-meta">
+            <span data-tally="${escapeHtml(song.id)}">— 票</span>
+            <div class="vote-bar"><div data-tallybar="${escapeHtml(song.id)}" style="width:0%"></div></div>
+            ${voted ? '<span class="voted-tag">★ VOTED</span>' : ''}
+          </div>
         </div>
-        <div class="song-card-status">${escapeHtml(song.status || '')}</div>
-        <div class="song-card-votes">
-          <span data-tally="${escapeHtml(song.id)}">— 票</span>
-          <div class="song-card-vote-bar"><div data-tallybar="${escapeHtml(song.id)}" style="width:0%"></div></div>
-          ${voted ? '<span class="song-card-voted-tag">★ 你投了</span>' : ''}
-        </div>
+        <span class="node-badge ${voted ? 'main' : 'side'}">DEMO</span>
       </div>
     `;
   });
 
   box.innerHTML = html;
-  // Wire clicks → navigate into song detail.
-  box.querySelectorAll('.song-card').forEach(card => {
+  box.querySelectorAll('.node.vault-song').forEach(card => {
     card.addEventListener('click', () => {
       const sid = card.dataset.song;
       navigate('#' + ep.id + '/' + sid);
     });
   });
 
-  // Async tallies (parallel).
   const tallies = await Promise.all(songs.map(s => fetchSongTally(ep, s)));
   const max = Math.max(1, ...tallies);
   songs.forEach((s, i) => {
