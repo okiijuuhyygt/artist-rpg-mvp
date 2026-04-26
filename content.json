@@ -64,6 +64,62 @@
     "title": "EP1 · haohao.unzip",
     "shortTag": "EP1"
   },
+  "currentEpId": "ep1",
+  "eps": [
+    {
+      "id": "ep1",
+      "type": "level-quest",
+      "title": "EP1 · haohao.unzip",
+      "shortTag": "EP1",
+      "subtitle": "歌們的誕生 · L0–L4 闖關",
+      "useRootData": true
+    },
+    {
+      "id": "ep2",
+      "type": "vault-vote",
+      "title": "EP2 · 未發行倉庫",
+      "shortTag": "EP2",
+      "subtitle": "我有 130 首沒上架的歌。投票決定哪首先做完。",
+      "intro": "這不是一張 EP,是一個倉庫。\n\n我寫了 130 首歌,只有 10 首在 Spotify。剩下 120 首卡在「詞曲完成 / Suno 編曲 / 正式編曲一半 / 卡在某個 bridge」。\n\n這裡放了其中 3 首的粗糙 demo + 為什麼還沒做完的故事。每人有 3 票。截止後票數最多的會在 EP3 真的做完上架。\n\n這是「製作委員會」的真實意思:你們投的票,我會聽。",
+      "voteDeadline": "2026-08-01",
+      "voteCap": 3,
+      "shareCounterNs": "haohao-ep2-vault",
+      "songs": [
+        {
+          "id": "S1",
+          "title": "33歲我娶妳",
+          "year": "2014",
+          "status": "詞曲完成 · 沒編曲",
+          "backstory": "23 歲寫的。當時想說「34 歲再來看這首歌會是什麼感覺」。結果現在 34 了,我還在寫歌、沒結婚、收件人也沒了。\n\n卡在「要不要把歌詞時間軸更新成 43 歲」這件事。如果我改了,那原本的我就不見了。如果我不改,這首歌等於一個過期的承諾。\n\n你會想聽哪一個版本?",
+          "demoUrl": "",
+          "voteKey": "33sui"
+        },
+        {
+          "id": "S2",
+          "title": "白熊效應",
+          "year": "2024",
+          "status": "詞曲完成 · Suno 編曲",
+          "backstory": "「想忘掉誰就會更想起誰」的那種狀態。\n\n寫完這首歌之後我自己也忘不掉這首歌。卡在「主歌太抒情、副歌太爆」混不起來,前後 4 個版本都被我自己槍掉。\n\n要不要乾脆讓主歌跟副歌變成兩首歌?還是硬接,變成一首人格分裂的歌?",
+          "demoUrl": "",
+          "voteKey": "whitebear"
+        },
+        {
+          "id": "S3",
+          "title": "小九份",
+          "year": "2024",
+          "status": "詞曲完成 · 正式編曲一半",
+          "backstory": "在九份租屋的時候寫的,但寫不完。搬走之後反而寫得出來。\n\n現在卡在 bridge 那一段歌詞,改了 7 版自己都不滿意。每次回去看,都覺得「這個版本還可以,但缺一個句子」。\n\n那個句子是什麼,我不知道。也許你聽完 demo 會幫我想到。",
+          "demoUrl": "",
+          "voteKey": "jiufen"
+        }
+      ],
+      "endgame": {
+        "title": "🎵 投票結束時你會收到通知",
+        "body": "EP2 結算那天,我會把票數最多的那首寫信告訴你。如果是你投的,有一首歌的誕生就是因為你。",
+        "ctaLabel": "▶ 留下 email 等通知"
+      }
+    }
+  ],
   "lyricsWall": {
     "title": "✍ 歌詞牆 · 收進來了",
     "intro": "你寫的會放在最上面(★)。下面是已經收進這章封面底圖的歌詞,耗耗手動 curate。",

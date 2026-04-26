@@ -23,14 +23,14 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build-version" content="1.6">
+<meta name="build-version" content="2.0">
 <script>
   // iOS Safari aggressive cache buster.
   // On load, compare the version this page thinks it is vs the last version
   // stored locally. If they differ on a CACHED page (i.e. localStorage has
   // newer version than current HTML), force a hard reload with fresh query.
   (function() {
-    const CURRENT = '1.6';
+    const CURRENT = '2.0';
     const LAST = localStorage.getItem('hao-rpg-build');
     if (LAST && LAST !== CURRENT && !location.search.includes('_nocache=')) {
       const sep = location.search ? '&' : '?';
@@ -289,6 +289,106 @@
 
   /* ========== SCENE 2: Map ========== */
   .scene-map { background: var(--paper); }
+
+  /* EP picker tabs */
+  .ep-tabs {
+    display: flex;
+    gap: 6px;
+    margin: 8px 0 18px;
+    padding: 4px;
+    border: 2px solid var(--gb-darkest);
+    background: var(--paper-light);
+    overflow-x: auto;
+  }
+  .ep-tab {
+    flex: 1;
+    min-width: 0;
+    padding: 10px 12px;
+    font-family: inherit;
+    font-size: 13px;
+    line-height: 1.3;
+    background: transparent;
+    color: var(--ink-soft);
+    border: 2px solid transparent;
+    cursor: pointer;
+    text-align: left;
+  }
+  .ep-tab:hover { background: var(--gb-lightest); }
+  .ep-tab.active {
+    background: var(--gb-darkest);
+    color: var(--gb-lightest);
+    border-color: var(--gb-darkest);
+  }
+  .ep-tab .ep-tab-tag {
+    display: inline-block;
+    font-weight: bold;
+    letter-spacing: .1em;
+    margin-right: 6px;
+  }
+  .ep-tab .ep-tab-sub {
+    display: block;
+    font-size: 11px;
+    margin-top: 2px;
+    opacity: .85;
+  }
+  .ep-intro {
+    margin: 0 0 18px;
+    padding: 14px 16px;
+    border-left: 4px solid var(--gold);
+    background: var(--paper-light);
+    font-size: 13px;
+    line-height: 1.65;
+    white-space: pre-wrap;
+    color: var(--ink);
+  }
+
+  /* Vault-vote song cards */
+  .song-card {
+    border: 2px solid var(--gb-darkest);
+    background: #fff;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: transform .12s ease;
+  }
+  .song-card:hover { transform: translateY(-2px); background: var(--gb-lightest); }
+  .song-card.voted { border-color: var(--gold); background: var(--paper-light); }
+  .song-card-head {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .song-card-num { font-size: 12px; color: var(--ink-soft); font-family: 'Press Start 2P', monospace; }
+  .song-card-title { font-size: 16px; font-weight: bold; color: var(--gb-darkest); flex: 1; }
+  .song-card-year { font-size: 12px; color: var(--ink-soft); }
+  .song-card-status { font-size: 12px; color: var(--ink-soft); margin-bottom: 8px; }
+  .song-card-votes { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+  .song-card-vote-bar {
+    flex: 1;
+    height: 8px;
+    background: var(--gb-lightest);
+    position: relative;
+  }
+  .song-card-vote-bar > div {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    background: var(--gold);
+  }
+  .song-card-voted-tag {
+    font-size: 11px;
+    color: var(--gold-deep);
+    font-weight: bold;
+    letter-spacing: .1em;
+  }
+  .vote-budget {
+    text-align: center;
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin: 4px 0 14px;
+    letter-spacing: .1em;
+  }
+  .vote-budget b { color: var(--gold-deep); font-size: 14px; }
 
   .map-header {
     text-align: center;
@@ -1174,11 +1274,16 @@
       </div>
     </header>
 
+    <div id="epTabs" class="ep-tabs"></div>
+
     <h2 class="map-section-title" id="mapTitleEl">▸ 世界地圖</h2>
     <p class="map-section-note" id="mapNoteEl">—</p>
 
+    <div id="epIntro" class="ep-intro" style="display:none;"></div>
+
     <div class="world-map">
       <div id="nodes"></div>
+      <div id="songsList" style="display:none;"></div>
       <div class="progress-wrap">
         <div class="progress-label">
           <span>世界推進度</span>
@@ -1204,7 +1309,7 @@
 
     <footer>
       <div id="socialsBlock" style="margin-bottom:14px;"></div>
-      <p class="credits">MVP BUILD 1.6 · haohao.unzip</p>
+      <p class="credits">BUILD 2.0 · haohao.unzip · 多 EP 並存</p>
       <p><a href="admin.html" class="admin-link-footer">關主登入 →</a></p>
     </footer>
   </div>
@@ -1305,7 +1410,46 @@ const STORAGE_KEY = 'hao-rpg-v2';
 const defaultState = {
   cleared: [], filled: [], hasKey: false, picks: {},
   email: null, class: 'guest', introSeen: false,
+  currentEpId: 'ep1',
+  perEp: {},
 };
+
+// ============================================================
+// MULTI-EP HELPERS
+// EP1 keeps using root-level state (cleared/filled/etc) so
+// existing players don't lose progress. EP2+ stores under
+// state.perEp[epId]. Schema-driven dispatch by ep.type.
+// ============================================================
+function getEps() {
+  return Array.isArray(CONTENT.eps) && CONTENT.eps.length
+    ? CONTENT.eps
+    : [{ id: 'ep1', type: 'level-quest', title: CONTENT.meta?.worldName || 'EP1', shortTag: 'EP1', useRootData: true }];
+}
+function getCurrentEp() {
+  const eps = getEps();
+  const wanted = state.currentEpId || CONTENT.currentEpId || eps[0].id;
+  return eps.find(e => e.id === wanted) || eps[0];
+}
+function getEpById(epId) {
+  return getEps().find(e => e.id === epId);
+}
+function epDataLevels(ep) {
+  // level-quest type: prefer ep.levels, fallback to root .levels for ep1 (useRootData)
+  if (ep.useRootData) return CONTENT.levels || [];
+  return ep.levels || [];
+}
+function epPerEpState(epId) {
+  state.perEp = state.perEp || {};
+  state.perEp[epId] = state.perEp[epId] || {};
+  return state.perEp[epId];
+}
+function switchEp(epId) {
+  if (state.currentEpId === epId) { navigate('#map'); return; }
+  state.currentEpId = epId;
+  saveState();
+  // Hash uses #ep<id> form so refresh stays on the chosen EP.
+  navigate('#' + epId);
+}
 function loadState() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -1386,10 +1530,18 @@ function renderSocials() {
 function parseHash() {
   const h = (location.hash || '').replace(/^#/, '');
   if (!h) return { scene: 'intro' };
+  // EP-prefixed: #ep1, #ep2, #ep1/L1, #ep2/S1
+  const epMatch = h.match(/^(ep\d+)(?:\/(.+))?$/i);
+  if (epMatch) {
+    const epId = epMatch[1].toLowerCase();
+    const item = epMatch[2];
+    if (!item) return { scene: 'map', epId };
+    return { scene: 'level', epId, levelId: item };
+  }
   if (h === 'map') return { scene: 'map' };
   if (h.startsWith('level/')) return { scene: 'level', levelId: h.split('/')[1] };
-  // Short form: #L1
-  if (/^L\d+$/i.test(h)) return { scene: 'level', levelId: h };
+  // Short forms (legacy): #L1 or #S1 — resolve under currentEpId
+  if (/^[LS]\d+$/i.test(h)) return { scene: 'level', levelId: h };
   return { scene: 'intro' };
 }
 
@@ -1430,10 +1582,15 @@ function handleHashChange() {
     location.hash = state.introSeen ? 'map' : 'intro';
     return;
   }
-  const { scene, levelId } = parseHash();
+  const parsed = parseHash();
+  // EP switch via hash: persist into state so deep links survive reload.
+  if (parsed.epId && parsed.epId !== state.currentEpId) {
+    state.currentEpId = parsed.epId;
+    saveState();
+  }
   // If navigating back to intro, restart it so they can re-read
-  if (scene === 'intro') restartIntro();
-  switchScene(scene, { levelId });
+  if (parsed.scene === 'intro') restartIntro();
+  switchScene(parsed.scene, { levelId: parsed.levelId, epId: parsed.epId });
 }
 
 window.addEventListener('hashchange', handleHashChange);
@@ -1538,11 +1695,59 @@ function isUnlocked(level) {
   return state.cleared.includes(level.unlockedBy);
 }
 
+function renderEpTabs() {
+  const box = document.getElementById('epTabs');
+  if (!box) return;
+  const eps = getEps();
+  // Hide tabs entirely if there's only one EP — no need to clutter the UI.
+  if (eps.length < 2) { box.style.display = 'none'; return; }
+  box.style.display = 'flex';
+  box.innerHTML = '';
+  const currentId = (state.currentEpId || CONTENT.currentEpId || eps[0].id);
+  eps.forEach(ep => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'ep-tab' + (ep.id === currentId ? ' active' : '');
+    btn.innerHTML = `<span class="ep-tab-tag">${escapeHtml(ep.shortTag || ep.id.toUpperCase())}</span>${escapeHtml(ep.title.split(' · ').slice(1).join(' · ') || ep.title)}<span class="ep-tab-sub">${escapeHtml(ep.subtitle || '')}</span>`;
+    btn.addEventListener('click', () => switchEp(ep.id));
+    box.appendChild(btn);
+  });
+}
+
 function renderNodes() {
-  const el = document.getElementById('nodes');
-  if (!el) return;
-  el.innerHTML = '';
-  const levels = CONTENT.levels || [];
+  // Always rebuild the EP picker first — it's the same on every map render.
+  renderEpTabs();
+  const ep = getCurrentEp();
+  // Per-EP intro blurb (vault-vote uses this; level-quest hides it).
+  const introEl = document.getElementById('epIntro');
+  if (introEl) {
+    if (ep.type === 'vault-vote' && ep.intro) {
+      introEl.style.display = 'block';
+      introEl.textContent = ep.intro;
+    } else {
+      introEl.style.display = 'none';
+      introEl.textContent = '';
+    }
+  }
+  // Dispatch by EP type.
+  const nodesEl = document.getElementById('nodes');
+  const songsEl = document.getElementById('songsList');
+  if (ep.type === 'vault-vote') {
+    if (nodesEl) nodesEl.style.display = 'none';
+    if (songsEl) { songsEl.style.display = 'block'; renderSongList(ep); }
+    // Hide quest progress meter (it doesn't apply to voting).
+    const pwrap = document.querySelector('.scene-map .progress-wrap');
+    if (pwrap) pwrap.style.display = 'none';
+    return;
+  }
+  // level-quest (default / EP1)
+  if (songsEl) songsEl.style.display = 'none';
+  const pwrap = document.querySelector('.scene-map .progress-wrap');
+  if (pwrap) pwrap.style.display = '';
+  if (!nodesEl) return;
+  nodesEl.style.display = '';
+  nodesEl.innerHTML = '';
+  const levels = epDataLevels(ep);
   levels.forEach((lv) => {
     const unlocked = isUnlocked(lv);
     const cleared = state.cleared.includes(lv.id);
@@ -1558,11 +1763,11 @@ function renderNodes() {
       <span class="node-badge ${lv.tag || 'main'}">${(lv.tag || 'main').toUpperCase()}</span>
     `;
     if (unlocked) {
-      n.addEventListener('click', () => navigate('#' + lv.id));
+      n.addEventListener('click', () => navigate('#' + ep.id + '/' + lv.id));
     } else {
       n.addEventListener('click', () => toast('這裡還沒開 — 先往前推進。'));
     }
-    el.appendChild(n);
+    nodesEl.appendChild(n);
   });
   const cleared = state.cleared.length;
   const total = levels.length;
@@ -1574,6 +1779,235 @@ function renderNodes() {
 
 function escapeHtml(s) {
   return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// ============================================================
+// VAULT-VOTE (EP2) — songs list + per-song detail + voting
+// State: per-EP under state.perEp[epId] = { votes: {songId: bool}, voteCount }
+// Public tally via abacus shared counter (one key per song).
+// ============================================================
+function epVoteState(epId) {
+  const s = epPerEpState(epId);
+  s.votes = s.votes || {};
+  return s;
+}
+
+function votedSongIds(epId) {
+  const s = epVoteState(epId);
+  return Object.keys(s.votes).filter(k => s.votes[k]);
+}
+
+function songVoteHitKey(ep, song) {
+  const ns = ep.shareCounterNs || ('haohao-' + ep.id + '-vault');
+  return ns + '__' + (song.voteKey || song.id);
+}
+
+async function fetchSongTally(ep, song) {
+  const key = songVoteHitKey(ep, song);
+  try {
+    const res = await fetch(`${POLL_API}/get/${POLL_NS}__${encodeURIComponent(key)}`);
+    if (!res.ok) return 0;
+    const data = await res.json();
+    return data.value || 0;
+  } catch { return 0; }
+}
+
+async function bumpSongTally(ep, song) {
+  const key = songVoteHitKey(ep, song);
+  try {
+    const res = await fetch(`${POLL_API}/hit/${POLL_NS}__${encodeURIComponent(key)}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.value || 0;
+  } catch { return null; }
+}
+
+async function renderSongList(ep) {
+  const box = document.getElementById('songsList');
+  if (!box) return;
+  const songs = ep.songs || [];
+  const myVotes = votedSongIds(ep.id);
+  const cap = ep.voteCap || 3;
+
+  // Header: vote budget + deadline.
+  let html = `<div class="vote-budget">你的票:<b> ${myVotes.length} / ${cap}</b>`;
+  if (ep.voteDeadline) html += ` · 截止 ${escapeHtml(ep.voteDeadline)}`;
+  html += `</div>`;
+
+  // Skeleton (tally fills in async).
+  songs.forEach((song, i) => {
+    const voted = myVotes.includes(song.id);
+    html += `
+      <div class="song-card${voted ? ' voted' : ''}" data-song="${escapeHtml(song.id)}">
+        <div class="song-card-head">
+          <span class="song-card-num">${String(i + 1).padStart(2, '0')}</span>
+          <span class="song-card-title">${escapeHtml(song.title)}</span>
+          <span class="song-card-year">${escapeHtml(song.year || '')}</span>
+        </div>
+        <div class="song-card-status">${escapeHtml(song.status || '')}</div>
+        <div class="song-card-votes">
+          <span data-tally="${escapeHtml(song.id)}">— 票</span>
+          <div class="song-card-vote-bar"><div data-tallybar="${escapeHtml(song.id)}" style="width:0%"></div></div>
+          ${voted ? '<span class="song-card-voted-tag">★ 你投了</span>' : ''}
+        </div>
+      </div>
+    `;
+  });
+
+  box.innerHTML = html;
+  // Wire clicks → navigate into song detail.
+  box.querySelectorAll('.song-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const sid = card.dataset.song;
+      navigate('#' + ep.id + '/' + sid);
+    });
+  });
+
+  // Async tallies (parallel).
+  const tallies = await Promise.all(songs.map(s => fetchSongTally(ep, s)));
+  const max = Math.max(1, ...tallies);
+  songs.forEach((s, i) => {
+    const t = tallies[i];
+    const tEl = box.querySelector(`[data-tally="${CSS.escape(s.id)}"]`);
+    const bEl = box.querySelector(`[data-tallybar="${CSS.escape(s.id)}"]`);
+    if (tEl) tEl.textContent = t + ' 票';
+    if (bEl) bEl.style.width = ((t / max) * 100).toFixed(1) + '%';
+  });
+}
+
+function renderSong(ep, songId) {
+  const song = (ep.songs || []).find(s => s.id === songId);
+  if (!song) { navigate('#' + ep.id); return; }
+  activeLevel = null; // vault-vote songs are not quest levels.
+  // Reuse the existing level scene shell — we hand-render the action block.
+  document.getElementById('topbarTitle').textContent = song.title;
+  document.getElementById('levelTag').textContent = (ep.shortTag || ep.id.toUpperCase()) + ' · 未發行倉庫';
+  document.getElementById('levelTitle').textContent = song.title;
+  document.getElementById('levelSub').textContent = song.year ? (song.year + ' · ' + (song.status || '')) : (song.status || '');
+  document.getElementById('levelStory').textContent = song.backstory || '';
+  // Hide quest-only blocks (tone bar, missing-piece, branch).
+  const audioBlock = document.querySelector('.scene-level .audio-block');
+  if (audioBlock) audioBlock.style.display = 'none';
+  ['missingPiece', 'branchBlock'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+  const ab = document.getElementById('actionBlock');
+  const titleEl = document.getElementById('actionTitle');
+  const body = document.getElementById('actionBody');
+  ab.style.display = 'block';
+  ab.classList.remove('cleared');
+  titleEl.textContent = '▸ 投這首一票';
+  body.innerHTML = '';
+
+  const myVotes = votedSongIds(ep.id);
+  const voted = myVotes.includes(song.id);
+  const cap = ep.voteCap || 3;
+  const remaining = cap - myVotes.length;
+
+  // Demo audio (if present) — same <audio> pattern as levels.
+  if (song.demoUrl) {
+    const audio = document.createElement('audio');
+    audio.controls = true;
+    audio.preload = 'metadata';
+    audio.src = song.demoUrl;
+    audio.style.cssText = 'width:100%;margin-bottom:12px;';
+    body.appendChild(audio);
+  } else {
+    const noaudio = document.createElement('p');
+    noaudio.className = 'action-prompt';
+    noaudio.style.cssText = 'font-style:italic;color:var(--ink-soft);margin-bottom:12px;';
+    noaudio.textContent = '(demo 音檔還沒上傳 · 你還是可以投票表態)';
+    body.appendChild(noaudio);
+  }
+
+  const tallyP = document.createElement('p');
+  tallyP.style.cssText = 'font-size:13px;color:var(--ink-soft);margin-bottom:10px;';
+  tallyP.innerHTML = '目前票數:<b data-livetally>—</b> 票';
+  body.appendChild(tallyP);
+  fetchSongTally(ep, song).then(t => {
+    const b = body.querySelector('[data-livetally]');
+    if (b) b.textContent = ' ' + t + ' ';
+  });
+
+  const btn = document.createElement('button');
+  btn.className = 'action-btn';
+  if (voted) {
+    btn.textContent = '✓ 你已投這首 (取消)';
+    btn.addEventListener('click', () => unvoteForSong(ep, song));
+  } else if (remaining <= 0) {
+    btn.disabled = true;
+    btn.textContent = `★ 你的 3 票已用完 (改投這首要先取消另一首)`;
+  } else {
+    btn.textContent = `▶ 投這首一票 (還剩 ${remaining - 1} 票)`;
+    btn.addEventListener('click', () => voteForSong(ep, song));
+  }
+  body.appendChild(btn);
+
+  const back = document.createElement('button');
+  back.className = 'action-btn secondary';
+  back.style.marginTop = '8px';
+  back.textContent = '← 回 ' + (ep.shortTag || 'EP') + ' 倉庫';
+  back.addEventListener('click', () => navigate('#' + ep.id));
+  body.appendChild(back);
+
+  // Endgame email CTA — vault-vote uses ep.endgame, fallback to root paywall.endgame.
+  const endgameSrc = ep.endgame || (CONTENT.paywall && CONTENT.paywall.endgame) || null;
+  if (endgameSrc) {
+    appendVaultEndgameCTA(body, endgameSrc);
+  }
+}
+
+function appendVaultEndgameCTA(body, eg) {
+  const card = document.createElement('div');
+  card.style.cssText = 'margin-top:18px;padding:14px 16px;border:2px solid var(--gb-darkest);background:var(--gb-lightest);';
+  const h = document.createElement('div');
+  h.style.cssText = 'font-weight:bold;font-size:14px;margin-bottom:8px;color:var(--gb-darkest);';
+  h.textContent = eg.title || eg.headline || '🎵 投票結束時你會收到通知';
+  card.appendChild(h);
+  const p = document.createElement('p');
+  p.style.cssText = 'font-size:12px;line-height:1.55;margin:0 0 10px 0;color:var(--ink-soft);';
+  if (state.email) {
+    p.textContent = '✓ 你已在名單上 (' + state.email.split('@')[0] + ') · 截止那天我寄信給你。';
+    card.appendChild(p);
+  } else {
+    p.textContent = eg.body || '';
+    card.appendChild(p);
+    const btn = document.createElement('button');
+    btn.className = 'action-btn';
+    btn.style.fontSize = '13px';
+    btn.style.padding = '8px 14px';
+    btn.textContent = eg.ctaLabel || '▶ 留下 email';
+    btn.addEventListener('click', jumpToGateEmail);
+    card.appendChild(btn);
+  }
+  body.appendChild(card);
+}
+
+async function voteForSong(ep, song) {
+  const s = epVoteState(ep.id);
+  const cap = ep.voteCap || 3;
+  if (Object.keys(s.votes).filter(k => s.votes[k]).length >= cap) {
+    toast('你的 ' + cap + ' 票已用完。');
+    return;
+  }
+  s.votes[song.id] = true;
+  saveState();
+  toast('★ 投了「' + song.title + '」');
+  const newTally = await bumpSongTally(ep, song);
+  // Re-render the detail view to reflect new state.
+  renderSong(ep, song.id);
+  if (newTally != null) {
+    // No-op: renderSong's async fetchSongTally will pick it up.
+  }
+}
+
+function unvoteForSong(ep, song) {
+  const s = epVoteState(ep.id);
+  delete s.votes[song.id];
+  saveState();
+  toast('取消對「' + song.title + '」的票 (公開計數器仍 +1,abacus 不支援 -1)');
+  renderSong(ep, song.id);
 }
 
 // ============================================================
@@ -1995,7 +2429,15 @@ document.addEventListener('keydown', (e) => {
 });
 
 function renderLevel(levelId) {
-  const lv = (CONTENT.levels || []).find(l => l.id === levelId);
+  // EP-aware dispatch: vault-vote songs share the level-scene shell
+  // but render via renderSong instead of the quest-level pipeline.
+  const ep = getCurrentEp();
+  if (ep && ep.type === 'vault-vote') {
+    renderSong(ep, levelId);
+    return;
+  }
+  // level-quest path (EP1 default).
+  const lv = (epDataLevels(ep) || CONTENT.levels || []).find(l => l.id === levelId);
   if (!lv) {
     navigate('#map');
     return;
@@ -2006,6 +2448,9 @@ function renderLevel(levelId) {
     return;
   }
   activeLevel = lv;
+  // Re-show quest-only blocks in case we just came back from a vault-vote song.
+  const audioBlock = document.querySelector('.scene-level .audio-block');
+  if (audioBlock) audioBlock.style.display = '';
   document.getElementById('topbarTitle').textContent = lv.title;
   document.getElementById('levelTag').textContent = `LEVEL ${lv.num}`;
   document.getElementById('levelTitle').textContent = lv.title;
