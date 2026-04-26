@@ -23,14 +23,14 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build-version" content="2.6">
+<meta name="build-version" content="2.8">
 <script>
   // iOS Safari aggressive cache buster.
   // On load, compare the version this page thinks it is vs the last version
   // stored locally. If they differ on a CACHED page (i.e. localStorage has
   // newer version than current HTML), force a hard reload with fresh query.
   (function() {
-    const CURRENT = '2.6';
+    const CURRENT = '2.8';
     const LAST = localStorage.getItem('hao-rpg-build');
     if (LAST && LAST !== CURRENT && !location.search.includes('_nocache=')) {
       const sep = location.search ? '&' : '?';
@@ -2517,12 +2517,9 @@ function renderActionBlock(lv) {
     body.appendChild(cta);
     // Also append join CTA in cleared state (unified at end of function)
     appendPaywallJoinBtn(body, lv.id);
-    // Submit button — L1 (寫一句進 MV) and L3 (送字) need a way to actually
-    // reach haohao. Without it L3 textarea only saves to localStorage.
-    if (lv.id === 'L1' || lv.id === 'L3') {
-      const ctxLabel = lv.id === 'L1' ? 'L1 第一首歌' : 'L3 寫字關';
-      appendSubmitButton(body, ctxLabel, '📤 投稿給 hao (寫字 / 上傳照片錄音)');
-    }
+    // (v2.8: L1 generic submit button removed. L3 is rendered via
+    //  type:submit-tally inside renderActionBlock; L4 has its own
+    //  finale-only "📨 想丟東西給 hao" button below.)
     // L3 cleared → show curated lyrics wall (other players' lines).
     if (lv.id === 'L3') {
       // L3 is now submit-tally type — text goes to Tally cloud, not localStorage.
@@ -2596,7 +2593,8 @@ function renderActionBlock(lv) {
     body.appendChild(btn);
   } else if (action.type === 'submit-tally') {
     // Single-button action: opens Tally modal + marks level cleared.
-    // No localStorage textarea — submissions go straight to Tally cloud.
+    // L3 uses lyricsWall.tallyFormId (lyrics-only simplified form);
+    // others fall through to default SUBMIT_FORM_ID (full form).
     const p = document.createElement('p');
     p.className = 'action-prompt';
     p.textContent = action.prompt;
@@ -2605,7 +2603,10 @@ function renderActionBlock(lv) {
     btn.className = 'action-btn';
     btn.textContent = action.label || '📝 寫字 / 上傳';
     btn.addEventListener('click', () => {
-      openSubmitModal(action.ctxLabel || lv.id);
+      const formId = (lv.id === 'L3' && CONTENT.lyricsWall && CONTENT.lyricsWall.tallyFormId)
+        ? CONTENT.lyricsWall.tallyFormId
+        : null;
+      openSubmitModal(action.ctxLabel || lv.id, formId);
       clearLevel(lv.id, action.clearedMsg);
     });
     body.appendChild(btn);
@@ -2854,14 +2855,15 @@ function appendLyricsWall(body) {
 // ============================================================
 const SUBMIT_FORM_ID = 'J9V8N4';
 
-function openSubmitModal(contextLabel) {
+function openSubmitModal(contextLabel, formIdOverride) {
   const iframe = document.getElementById('submitIframe');
   const params = new URLSearchParams({
     alignLeft: '1',
     hideTitle: '0',
     transparentBackground: '1',
   });
-  iframe.src = `https://tally.so/embed/${SUBMIT_FORM_ID}?${params.toString()}#level=${encodeURIComponent(contextLabel || '')}`;
+  const formId = formIdOverride || SUBMIT_FORM_ID;
+  iframe.src = `https://tally.so/embed/${formId}?${params.toString()}#level=${encodeURIComponent(contextLabel || '')}`;
   const modal = document.getElementById('submitModal');
   modal.classList.add('open');
   modal.setAttribute('aria-hidden', 'false');

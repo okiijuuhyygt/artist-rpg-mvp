@@ -862,6 +862,11 @@
       <div class="section-body">
         <p class="hint" style="margin-bottom:10px;">L3 是「寫一句影響過你的歌詞」。闖完後會看到這面牆 — 玩家自己寫的標 ★ 在最上,下面是你 curate 的 lines。空白 = L3 完成後不顯示這個 block。</p>
         <label class="field">
+          <span class="label-text">L3 專用 Tally form ID(只收歌詞,簡化版)</span>
+          <input type="text" data-path="lyricsWall.tallyFormId" placeholder="例如 ABC123(空 = fallback 到完整版 J9V8N4)">
+          <span class="hint">去 Tally 建一個只有「email + 一句歌詞」兩欄的 form,Publish 後 URL 是 https://tally.so/r/<b>ABC123</b>,把 ABC123 貼這裡。</span>
+        </label>
+        <label class="field">
           <span class="label-text">標題</span>
           <input type="text" data-path="lyricsWall.title" placeholder="✍ 歌詞牆 · 收進來了">
         </label>
