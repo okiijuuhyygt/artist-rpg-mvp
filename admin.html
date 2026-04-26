@@ -655,6 +655,12 @@
 
   <div id="loadingContent" class="alert alert-info">讀取中...</div>
   <div id="editorBody" class="hidden">
+    <nav style="position:sticky;top:0;z-index:50;background:#fff;display:flex;gap:6px;padding:8px;margin:-12px -12px 14px;border-bottom:2px solid var(--gb-darkest);box-shadow:0 2px 4px rgba(0,0,0,0.05);">
+      <a href="#global-area" style="flex:1;text-align:center;padding:8px;background:var(--paper-light);border:2px solid var(--gb-darkest);text-decoration:none;color:var(--ink);font-family:'Press Start 2P',monospace;font-size:9px;letter-spacing:1px;">🌍 全站</a>
+      <a href="#ep1-area" style="flex:1;text-align:center;padding:8px;background:var(--paper-light);border:2px solid var(--gb-darkest);text-decoration:none;color:var(--ink);font-family:'Press Start 2P',monospace;font-size:9px;letter-spacing:1px;">📀 EP1</a>
+      <a href="#ep2-area" style="flex:1;text-align:center;padding:8px;background:var(--paper-light);border:2px solid var(--gb-darkest);text-decoration:none;color:var(--ink);font-family:'Press Start 2P',monospace;font-size:9px;letter-spacing:1px;">🆕 EP2</a>
+    </nav>
+    <span id="global-area"></span>
 
     <!-- Meta -->
     <details class="editor-section" open>
@@ -943,10 +949,10 @@
     </details>
 
     <!-- Levels -->
-    <h2 class="page-title" style="font-size: 13px; margin-top: 28px;">▸ EP1 關卡(level-quest)</h2>
+    <h2 id="ep1-area" class="page-title" style="font-size: 13px; margin-top: 28px;">▸ EP1 關卡(level-quest)</h2>
     <div id="levelsEditor"></div>
 
-    <h2 class="page-title" style="font-size: 13px; margin-top: 32px;">▸ EP2 未發行倉庫(vault-vote)</h2>
+    <h2 id="ep2-area" class="page-title" style="font-size: 13px; margin-top: 32px;">▸ EP2 未發行倉庫(vault-vote)</h2>
     <details class="editor-section" open>
       <summary>EP2 元數據 + 歌曲清單</summary>
       <div class="section-body">
