@@ -1759,6 +1759,10 @@ function switchEp(epId) {
   saveState();
   // Hash uses #ep<id> form so refresh stays on the chosen EP.
   navigate('#' + epId);
+  // v3.0.4: force re-render — switchScene early-returns when current scene is
+  // already map, and hashchange ordering had a race that broke EP2→EP1 click.
+  // Calling renderNodes here unconditionally is idempotent and 100% reliable.
+  renderNodes();
 }
 function loadState() {
   try {
