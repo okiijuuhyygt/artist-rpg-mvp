@@ -1918,6 +1918,7 @@ function switchScene(to, params = {}) {
   if (!next) return;
   if (current === next) {
     if (to === 'level') renderLevel(params.levelId);
+    if (to === 'map') renderNodes();  // ← bug fix v3.0.3: 從同 scene 切 EP 時必須重 render
     return;
   }
   if (to === 'level') renderLevel(params.levelId);
