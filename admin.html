@@ -976,6 +976,7 @@
         <h4 style="margin:20px 0 6px;border-top:1px solid var(--ink-soft);padding-top:14px;">── 歌曲清單(每首一張卡) ──</h4>
         <div id="ep2SongsEditor"></div>
         <button class="add-row-btn" id="addEp2Song" type="button">+ 加一首 demo 歌</button>
+        <button class="add-row-btn" id="resetEp2VotesBtn" type="button" style="background:#fff5f5;border-color:#c44;color:#a33;margin-top:10px;">🔄 Reset EP2 投票(只洗 S1/S2/S3,不影響其他 counter)</button>
         <h4 style="margin:20px 0 6px;border-top:1px solid var(--ink-soft);padding-top:14px;">── 投票結束 endgame CTA ──</h4>
         <label class="field">
           <span class="label-text">endgame 標題</span>
@@ -1740,6 +1741,17 @@ function renderEp2Songs() {
     box.appendChild(card);
   });
 }
+
+$('resetEp2VotesBtn').addEventListener('click', () => {
+  const ep2 = findEp('ep2');
+  if (!ep2) return alert('找不到 ep2');
+  const cur = ep2.shareCounterNs || '(預設 haohao-ep2-vault)';
+  const next = 'haohao-ep2-vault-r' + Date.now().toString(36);
+  if (!confirm(`Reset EP2 投票?\n\n當前 ns:${cur}\n→ 新 ns:${next}\n\n影響:S1/S2/S3 票數歸 0(換到新 abacus key,舊資料留在舊 URL)。其他 counter(訪客數 / L2 / 召喚陣)不受影響。\n\n玩家瀏覽器內 ★ VOTED 標記不會清(那是 localStorage)。`)) return;
+  ep2.shareCounterNs = next;
+  updateSaveBar();
+  alert('✓ 已換 ns = ' + next + '\n按底下「儲存到網站」生效,1-2 分鐘後玩家看到的票數歸 0。');
+});
 
 $('addEp2Song').addEventListener('click', () => {
   const ep2 = findEp('ep2');
