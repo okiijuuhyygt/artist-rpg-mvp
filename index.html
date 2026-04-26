@@ -23,14 +23,14 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build-version" content="2.5">
+<meta name="build-version" content="2.6">
 <script>
   // iOS Safari aggressive cache buster.
   // On load, compare the version this page thinks it is vs the last version
   // stored locally. If they differ on a CACHED page (i.e. localStorage has
   // newer version than current HTML), force a hard reload with fresh query.
   (function() {
-    const CURRENT = '2.5';
+    const CURRENT = '2.6';
     const LAST = localStorage.getItem('hao-rpg-build');
     if (LAST && LAST !== CURRENT && !location.search.includes('_nocache=')) {
       const sep = location.search ? '&' : '?';
@@ -1609,7 +1609,7 @@
 
     <footer>
       <div id="socialsBlock" style="margin-bottom:14px;"></div>
-      <p class="credits">BUILD 2.5 · haohao.unzip · L3 混合投稿 + 召喚陣 counter 修</p>
+      <p class="credits">BUILD 2.6 · haohao.unzip · L3 純 Tally + L4 任意投稿</p>
       <p><a href="admin.html" class="admin-link-footer">關主登入 →</a></p>
     </footer>
   </div>
@@ -2448,10 +2448,11 @@ const LEVEL_ACTIONS = {
     clearedMsg: '你投下了一票,下一關解鎖了。',
   },
   L3: {
-    type: 'text',
-    prompt: '寫一句「影響過你的歌詞」(任何人、中外皆可)。送出後會在下方歌詞牆 ★ 出現你寫的字。',
-    placeholder: '例如:\n「以前的事,今晚不再提」\n「我不是英雄,只是想陪你走一段」',
-    clearedMsg: '✓ 你寫的字進歌詞牆 ★ 了。',
+    type: 'submit-tally',
+    prompt: '寫一句「影響過你的歌詞」(任何人、中外皆可)。點按鈕 → 跳一個小框讓你寫 → 送出後 hao 收得到,精選的會 curate 進歌詞牆。',
+    label: '📝 寫一句歌詞給歌詞牆',
+    ctxLabel: 'L3 歌詞牆',
+    clearedMsg: '✓ 點過了 — 你寫的字 hao 收得到。下面是已 curate 的歌詞牆。',
   },
   L4: {
     type: 'button',
@@ -2528,10 +2529,12 @@ function renderActionBlock(lv) {
       // No need for the legacy localStorage hint.
       appendLyricsWall(body);
     }
-    // L4 finale: village threshold progress + EP2 notification CTA.
+    // L4 finale: village threshold progress + EP2 CTA + open submission CTA
+    // (last page = where players can dump anything photo/voice/file to hao).
     if (lv.id === 'L4') {
       appendVillageProgress(body);
       appendEndgameEmailCTA(body);
+      appendSubmitButton(body, 'L4 闖完 · 任意投稿', '📨 想丟東西給 hao? (寫字 / 照片 / 錄音都可以)');
     }
     return;
   }
@@ -2609,10 +2612,8 @@ function renderActionBlock(lv) {
   }
   // Append join CTA in non-cleared state too (always offer the bundle).
   appendPaywallJoinBtn(body, lv.id);
-  // L3 only — see cleared-state comment above.
-  if (lv.id === 'L3') {
-    appendSubmitButton(body, 'L3 歌詞牆', '📝 想寫一句歌詞給 hao,順便上傳一張照片?');
-  }
+  // (L3 submit button now built by renderActionBlock via type:submit-tally,
+  //  no extra append needed.)
   // Show village progress on L4 even before "啟動" — players see their
   // contribution toward the threshold (their own email already counted).
   if (lv.id === 'L4') {
