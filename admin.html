@@ -670,9 +670,20 @@
       </div>
     </details>
 
-    <details class="editor-section">
+    <details class="editor-section" open>
       <summary>付費設定(製作委員會)</summary>
       <div class="section-body">
+        <label class="field">
+          <span class="label-text">⚙ MODE(付費模式 — 最重要的開關)</span>
+          <select data-path="paywall.mode" style="padding:10px;font-size:15px;border:2px solid var(--gb-darkest);background:#fff;">
+            <option value="free">🆓 free — 完全藏付費 CTA(EP 累名單期 / 沒實體交付)</option>
+            <option value="pre-order">📮 pre-order — CTA 改成「想第一個玩到」收 email 不收錢</option>
+            <option value="paid">💳 paid — 每關 CTA 跳綠界結帳(完整版上線後才切)</option>
+          </select>
+          <span class="hint">預設 <b>free</b>。等實體交付/數位 delivery 流程準備好,再切 <b>pre-order</b> 收意向,最後 <b>paid</b> 真收錢。</span>
+        </label>
+
+        <h4 style="margin:18px 0 4px;border-top:1px solid var(--ink-soft);padding-top:14px;">── paid 模式專用 ──</h4>
         <label class="field">
           <span class="label-text">CHECKOUT URL(綠界付款頁)</span>
           <input type="text" data-path="paywall.checkoutUrl" placeholder="https://payment.ecpay.com.tw/...">
@@ -687,7 +698,7 @@
           <textarea data-path="paywall.comingSoonMsg" rows="2"></textarea>
         </label>
         <label class="field">
-          <span class="label-text">L0 TEASER</span>
+          <span class="label-text">L0 TEASER(空白 = 此關不顯示 CTA)</span>
           <textarea data-path="paywall.perLevelTeaser.L0" rows="2"></textarea>
         </label>
         <label class="field">
@@ -705,6 +716,38 @@
         <label class="field">
           <span class="label-text">L4 TEASER</span>
           <textarea data-path="paywall.perLevelTeaser.L4" rows="2"></textarea>
+        </label>
+
+        <h4 style="margin:18px 0 4px;border-top:1px solid var(--ink-soft);padding-top:14px;">── pre-order 模式專用 ──</h4>
+        <label class="field">
+          <span class="label-text">PRE-ORDER CTA 按鈕文字(每關底下)</span>
+          <input type="text" data-path="paywall.preOrder.ctaLabel" placeholder="✦ 想第一個玩到完整版">
+        </label>
+        <label class="field">
+          <span class="label-text">PRE-ORDER 標題(modal 內)</span>
+          <input type="text" data-path="paywall.preOrder.headline" placeholder="EP 還在做。想第一個拿到嗎?">
+        </label>
+        <label class="field">
+          <span class="label-text">PRE-ORDER 內文(modal 內)</span>
+          <textarea data-path="paywall.preOrder.body" rows="4"></textarea>
+        </label>
+        <label class="field">
+          <span class="label-text">PRE-ORDER 引導去填 email 的按鈕</span>
+          <input type="text" data-path="paywall.preOrder.ctaToGate" placeholder="▶ 去填 email">
+        </label>
+
+        <h4 style="margin:18px 0 4px;border-top:1px solid var(--ink-soft);padding-top:14px;">── L4 闖完後的 EP2 通知 CTA(所有 mode 都會顯示)──</h4>
+        <label class="field">
+          <span class="label-text">ENDGAME 標題</span>
+          <input type="text" data-path="paywall.endgame.headline" placeholder="🎵 想第一個玩到 EP2?">
+        </label>
+        <label class="field">
+          <span class="label-text">ENDGAME 內文(沒填 email 的人會看到)</span>
+          <textarea data-path="paywall.endgame.body" rows="3"></textarea>
+        </label>
+        <label class="field">
+          <span class="label-text">ENDGAME 按鈕文字</span>
+          <input type="text" data-path="paywall.endgame.ctaLabel" placeholder="▶ 留下 email">
         </label>
       </div>
     </details>
@@ -768,6 +811,19 @@
       或去「設定 → Apple ID → iCloud → 語音備忘錄」開同步,之後 Files App 會有「語音備忘錄」資料夾直接選。
     </p>
     <div id="audioUploads"></div>
+
+    <!-- Audio storage GC — orphan audio cleanup -->
+    <details class="editor-section" style="margin-top:20px;">
+      <summary>🧹 音檔倉庫(整理孤兒檔)</summary>
+      <div class="section-body">
+        <p class="hint" style="margin-bottom:12px;">
+          repo 的 <code>audio/</code> 資料夾裡可能有上傳過但現在沒人用的檔(換音檔、選別的、手動 push)。
+          按掃描列出全部,孤兒檔可一鍵刪。
+        </p>
+        <button id="audioGcScanBtn" class="add-row-btn" type="button">🔍 掃描 audio/ 資料夾</button>
+        <div id="audioGcResults" style="margin-top:12px;"></div>
+      </div>
+    </details>
 
   </div>
 
@@ -1147,6 +1203,110 @@ async function clearAudio(key) {
   renderAudioUploads();
   updateSaveBar();
 }
+
+// =======================================================
+// AUDIO GC — list audio/ folder, mark orphans (files
+// not referenced by any slot in contentData.audio), allow
+// one-click delete.
+// =======================================================
+function collectUsedAudioPaths() {
+  const used = new Set();
+  AUDIO_SLOTS.forEach(slot => {
+    const p = getPath(contentData, 'audio.' + slot.key);
+    if (p && typeof p === 'string') used.add(p);
+  });
+  return used;
+}
+
+async function scanAudioFolder() {
+  const tok = localStorage.getItem(LS_TOKEN);
+  const resultsEl = document.getElementById('audioGcResults');
+  if (!tok) { resultsEl.innerHTML = '<p class="hint">需要登入才能掃描 repo。</p>'; return; }
+  resultsEl.innerHTML = '<p class="hint">掃描中…</p>';
+  try {
+    const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/audio?ref=main&_=${Date.now()}`, {
+      headers: { 'Authorization': `Bearer ${tok}`, 'Accept': 'application/vnd.github+json' }
+    });
+    if (!res.ok) {
+      if (res.status === 404) { resultsEl.innerHTML = '<p class="hint">audio/ 資料夾不存在或還是空的。</p>'; return; }
+      throw new Error(res.status);
+    }
+    const files = (await res.json()).filter(f => f.type === 'file');
+    if (!files.length) { resultsEl.innerHTML = '<p class="hint">audio/ 裡沒檔案。</p>'; return; }
+    const used = collectUsedAudioPaths();
+    const totalSize = files.reduce((s, f) => s + f.size, 0);
+    const orphans = files.filter(f => !used.has(f.path));
+    const orphanSize = orphans.reduce((s, f) => s + f.size, 0);
+
+    const summary = document.createElement('div');
+    summary.style.cssText = 'background:var(--gb-lightest);padding:10px 12px;border-left:3px solid var(--gb-dark);margin-bottom:10px;font-size:12px;';
+    summary.innerHTML = `共 <b>${files.length}</b> 個檔案 · 總 ${(totalSize/1024/1024).toFixed(2)} MB · 其中 <b>${orphans.length}</b> 個孤兒(${(orphanSize/1024/1024).toFixed(2)} MB)`;
+    resultsEl.innerHTML = '';
+    resultsEl.appendChild(summary);
+
+    files.forEach(f => {
+      const isOrphan = !used.has(f.path);
+      const row = document.createElement('div');
+      row.style.cssText = `display:flex;align-items:center;gap:8px;padding:8px;border:1px solid ${isOrphan ? '#c84' : 'var(--gb-mid)'};margin-bottom:6px;background:${isOrphan ? '#fffaf0' : '#fff'};flex-wrap:wrap;`;
+      row.innerHTML = `
+        <span style="flex:1;min-width:140px;word-break:break-all;font-family:monospace;font-size:12px;">${escapeHtml(f.name)}</span>
+        <span style="font-size:11px;color:var(--ink-soft);">${(f.size/1024).toFixed(0)} KB</span>
+        <span style="font-size:11px;font-weight:bold;color:${isOrphan ? '#c84' : '#3a7'};">${isOrphan ? '⚠ 孤兒' : '✓ 使用中'}</span>
+      `;
+      if (isOrphan) {
+        const btn = document.createElement('button');
+        btn.className = 'audio-clear-btn';
+        btn.type = 'button';
+        btn.textContent = '🗑 刪除';
+        btn.addEventListener('click', () => deleteOrphanAudio(f.path, f.sha));
+        row.appendChild(btn);
+      }
+      resultsEl.appendChild(row);
+    });
+
+    if (orphans.length > 1) {
+      const allBtn = document.createElement('button');
+      allBtn.className = 'add-row-btn';
+      allBtn.type = 'button';
+      allBtn.style.marginTop = '8px';
+      allBtn.textContent = `🗑 一鍵刪光全部 ${orphans.length} 個孤兒`;
+      allBtn.addEventListener('click', async () => {
+        if (!confirm(`一次刪掉 ${orphans.length} 個孤兒檔(${(orphanSize/1024/1024).toFixed(2)} MB)?\n不可回復。`)) return;
+        for (const f of orphans) {
+          await deleteOrphanAudio(f.path, f.sha, true);
+        }
+        scanAudioFolder();
+      });
+      resultsEl.appendChild(allBtn);
+    }
+  } catch (e) {
+    resultsEl.innerHTML = '<p class="hint">掃描失敗:' + escapeHtml(e.message) + '</p>';
+  }
+}
+
+async function deleteOrphanAudio(path, sha, silent) {
+  if (!silent && !confirm(`從 repo 刪除 ${path}?\n(不可回復)`)) return;
+  const tok = localStorage.getItem(LS_TOKEN);
+  if (!tok) { alert('需要登入。'); return; }
+  try {
+    const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${tok}`,
+        'Accept': 'application/vnd.github+json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ message: 'admin: gc orphan audio ' + path, sha }),
+    });
+    if (!res.ok) throw new Error(res.status + ' ' + (await res.text()).slice(0, 120));
+    if (!silent) { alert('✓ 已刪除 ' + path); scanAudioFolder(); }
+  } catch (e) {
+    if (!silent) alert('刪除失敗:' + e.message);
+    else console.warn('刪除孤兒檔失敗', path, e);
+  }
+}
+
+document.getElementById('audioGcScanBtn').addEventListener('click', scanAudioFolder);
 
 function renderIntroLines() {
   const box = $('introLinesEditor');

@@ -14,7 +14,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build-version" content="1.3">
+<meta name="build-version" content="1.4">
 <script>
   // iOS Safari aggressive cache buster.
   // On load, compare the version this page thinks it is vs the last version
@@ -1636,6 +1636,8 @@ function renderActionBlock(lv) {
     body.appendChild(cta);
     // Also append join CTA in cleared state (unified at end of function)
     appendPaywallJoinBtn(body, lv.id);
+    // L4 finale: peak-end moment to surface EP2 notification CTA.
+    if (lv.id === 'L4') appendEndgameEmailCTA(body);
     return;
   }
 
@@ -1755,19 +1757,41 @@ async function renderVoteResults(lv) {
   });
 }
 
+function paywallMode() {
+  const p = CONTENT.paywall || {};
+  // Backwards compat: if mode missing, infer from enabled flag — old
+  // configs used { enabled:true } to mean paid mode.
+  if (!p.mode) return p.enabled === false ? 'free' : 'paid';
+  return String(p.mode).toLowerCase();
+}
+
+function jumpToGateEmail() {
+  navigate('#map');
+  setTimeout(() => {
+    const form = document.getElementById('gateForm');
+    if (form) form.scrollIntoView({behavior: 'smooth', block: 'center'});
+    const inp = document.getElementById('gateEmail');
+    if (inp) inp.focus();
+  }, 400);
+}
+
 function appendPaywallJoinBtn(body, levelId) {
   const p = CONTENT.paywall;
   if (!p || p.enabled === false) return;
   // 關主 (admin token present) = owner previewing the site, don't
   // show a 'pay me' CTA since the owner is the payee.
   if (localStorage.getItem('hao-admin-token-v1')) return;
+  const mode = paywallMode();
+  if (mode === 'free') return;
   // Skip this level if its teaser is empty — lets 關主 hide the CTA
   // on specific levels (e.g. L0 is an invitation, no sale pitch there).
   const teaser = p.perLevelTeaser && p.perLevelTeaser[levelId];
   if (!teaser || !String(teaser).trim()) return;
   const joinBtn = document.createElement('button');
   joinBtn.className = 'action-btn secondary';
-  joinBtn.textContent = '✦ 加入製作委員會';
+  joinBtn.textContent = mode === 'pre-order'
+    ? ((p.preOrder && p.preOrder.ctaLabel) || '✦ 想第一個玩到完整版')
+    : '✦ 加入製作委員會';
   joinBtn.style.marginTop = '10px';
   joinBtn.addEventListener('click', (e) => { e.stopPropagation(); openPaywall(levelId); });
   body.appendChild(joinBtn);
@@ -1775,20 +1799,48 @@ function appendPaywallJoinBtn(body, levelId) {
 
 function openPaywall(levelId) {
   const p = CONTENT.paywall || {};
-  document.getElementById('paywallEyebrow').textContent = p.bundleTitle || '加入製作委員會';
-  document.getElementById('paywallSubtitle').textContent = p.bundleSubtitle || '從這一關開始';
-  document.getElementById('paywallTeaser').textContent = (p.perLevelTeaser && p.perLevelTeaser[levelId]) || '';
+  const mode = paywallMode();
+  const isPreOrder = mode === 'pre-order';
+  const po = p.preOrder || {};
+
+  document.getElementById('paywallEyebrow').textContent = isPreOrder
+    ? (po.ctaLabel ? po.ctaLabel.replace(/^[✦▶]\s*/, '') : '想第一個玩到')
+    : (p.bundleTitle || '加入製作委員會');
+  document.getElementById('paywallSubtitle').textContent = isPreOrder
+    ? (po.headline || 'EP 還在做。想第一個拿到嗎?')
+    : (p.bundleSubtitle || '從這一關開始');
+  document.getElementById('paywallTeaser').textContent = isPreOrder
+    ? (po.body || '')
+    : ((p.perLevelTeaser && p.perLevelTeaser[levelId]) || '');
+
   const itemsEl = document.getElementById('paywallItems');
   itemsEl.innerHTML = '';
-  (p.bundleItems || []).forEach(item => {
-    const li = document.createElement('li');
-    li.textContent = item;
-    itemsEl.appendChild(li);
-  });
-  document.getElementById('paywallPrice').textContent = p.priceLabel || '';
+  if (!isPreOrder) {
+    (p.bundleItems || []).forEach(item => {
+      const li = document.createElement('li');
+      li.textContent = item;
+      itemsEl.appendChild(li);
+    });
+  }
+
+  document.getElementById('paywallPrice').textContent = isPreOrder ? '免費' : (p.priceLabel || '');
   const checkout = document.getElementById('paywallCheckout');
   const soon = document.getElementById('paywallSoon');
-  if (p.checkoutUrl) {
+
+  if (isPreOrder) {
+    if (state.email) {
+      checkout.disabled = true;
+      checkout.textContent = '✓ 你已在名單上 (' + state.email.split('@')[0] + ')';
+      checkout.onclick = null;
+      soon.hidden = false;
+      soon.textContent = 'EP 完整版上線時會寄信給你。';
+    } else {
+      checkout.disabled = false;
+      checkout.textContent = po.ctaToGate || '▶ 去填 email';
+      checkout.onclick = () => { closePaywall(); jumpToGateEmail(); };
+      soon.hidden = true;
+    }
+  } else if (p.checkoutUrl) {
     checkout.disabled = false;
     checkout.textContent = '▶ 前往結帳';
     checkout.onclick = () => window.open(p.checkoutUrl, '_blank', 'noopener');
@@ -1804,6 +1856,37 @@ function openPaywall(levelId) {
   modal.classList.add('open');
   modal.setAttribute('aria-hidden', 'false');
   document.body.style.overflow = 'hidden';
+}
+
+function appendEndgameEmailCTA(body) {
+  const eg = (CONTENT.paywall && CONTENT.paywall.endgame) || {};
+  const card = document.createElement('div');
+  card.className = 'endgame-card';
+  card.style.cssText = 'margin-top:18px;padding:14px 16px;border:2px solid var(--gb-darkest);background:var(--gb-lightest);';
+
+  const h = document.createElement('div');
+  h.style.cssText = 'font-weight:bold;font-size:15px;margin-bottom:8px;color:var(--gb-darkest);';
+  h.textContent = eg.headline || '🎵 想第一個玩到 EP2?';
+  card.appendChild(h);
+
+  const b = document.createElement('p');
+  b.style.cssText = 'font-size:13px;line-height:1.55;margin:0 0 12px 0;color:var(--ink-soft);white-space:pre-wrap;';
+
+  if (state.email) {
+    b.textContent = '✓ 你的 email 已在名單上 (' + state.email.split('@')[0] + ')\nEP2 上線那天我會寄信給你。';
+    card.appendChild(b);
+  } else {
+    b.textContent = eg.body || '';
+    card.appendChild(b);
+    const btn = document.createElement('button');
+    btn.className = 'action-btn';
+    btn.style.marginTop = '4px';
+    btn.textContent = eg.ctaLabel || '▶ 留下 email';
+    btn.addEventListener('click', jumpToGateEmail);
+    card.appendChild(btn);
+  }
+
+  body.appendChild(card);
 }
 
 function closePaywall() {

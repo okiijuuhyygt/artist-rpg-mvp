@@ -26,6 +26,7 @@
     "hao": "關主"
   },
   "paywall": {
+    "mode": "free",
     "enabled": true,
     "priceLabel": "150 TWD",
     "checkoutUrl": "https://p.ecpay.com.tw/6963529",
@@ -45,7 +46,23 @@
       "L3": "付費後:你寫的歌詞會印成實體明信片,這張 EP 發行前寄到你信箱。",
       "L4": "付費後:你的名字會進召喚陣名單、翻唱歌手的 credit。"
     },
-    "comingSoonMsg": "結帳系統建置中,我還在跟綠界串。先填下面那個 email 名單,我這邊好了會寄信給你。"
+    "comingSoonMsg": "結帳系統建置中,我還在跟綠界串。先填下面那個 email 名單,我這邊好了會寄信給你。",
+    "preOrder": {
+      "ctaLabel": "✦ 想第一個玩到完整版",
+      "headline": "EP 還在做。想第一個拿到嗎?",
+      "body": "現在玩到的是 demo 版。完整版上線(包含所有 demo、歌詞 PDF、podcast)會先寄給名單上的人。\n\n上面的 email 欄位填一下就好,不用付錢。EP1 完整版好了我會寄,EP2 上線也會通知你。",
+      "ctaToGate": "▶ 去填 email"
+    },
+    "endgame": {
+      "headline": "🎵 想第一個玩到 EP2?",
+      "body": "EP2 還在寫。上線那天我會寄信給填過 email 的人,可以第一個玩到。",
+      "ctaLabel": "▶ 留下 email"
+    }
+  },
+  "ep": {
+    "id": "ep1",
+    "title": "EP1 · haohao.unzip",
+    "shortTag": "EP1"
   },
   "levels": [
     {
