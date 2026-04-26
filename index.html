@@ -1827,7 +1827,7 @@ function songVoteHitKey(ep, song) {
 async function fetchSongTally(ep, song) {
   const key = songVoteHitKey(ep, song);
   try {
-    const res = await fetch(`${POLL_API}/get/${POLL_NS}__${encodeURIComponent(key)}`);
+    const res = await fetch(`${POLL_API}/get/${POLL_NS}/${encodeURIComponent(key)}`);
     if (!res.ok) return 0;
     const data = await res.json();
     return data.value || 0;
@@ -1837,7 +1837,7 @@ async function fetchSongTally(ep, song) {
 async function bumpSongTally(ep, song) {
   const key = songVoteHitKey(ep, song);
   try {
-    const res = await fetch(`${POLL_API}/hit/${POLL_NS}__${encodeURIComponent(key)}`);
+    const res = await fetch(`${POLL_API}/hit/${POLL_NS}/${encodeURIComponent(key)}`);
     if (!res.ok) return null;
     const data = await res.json();
     return data.value || 0;
