@@ -271,7 +271,7 @@
   ],
   "audio": {
     "bgm": {
-      "intro": "",
+      "intro": "audio/欸冷說_.mp3",
       "map": "audio/bgm-map.mp3"
     },
     "levels": {
