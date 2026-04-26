@@ -2530,13 +2530,6 @@ function renderActionBlock(lv) {
     if (lv.id === 'L4') {
       appendVillageProgress(body);
       appendEndgameEmailCTA(body);
-      // 闖完 EP1 → 引導玩家去 EP2 未發行倉庫(不然他不知道要切 EP picker tab)
-      const goEp2 = document.createElement('button');
-      goEp2.className = 'action-btn';
-      goEp2.style.marginTop = '12px';
-      goEp2.textContent = '→ 去 EP2 未發行倉庫(投票決定下一首)';
-      goEp2.addEventListener('click', () => switchEp('ep2'));
-      body.appendChild(goEp2);
       appendSubmitButton(body, 'L4 闖完 · 任意投稿', '📨 想丟東西給 hao? (寫字 / 照片 / 錄音都可以)');
     }
     return;
