@@ -1731,9 +1731,18 @@ const defaultState = {
 // state.perEp[epId]. Schema-driven dispatch by ep.type.
 // ============================================================
 function getEps() {
-  return Array.isArray(CONTENT.eps) && CONTENT.eps.length
+  const all = Array.isArray(CONTENT.eps) && CONTENT.eps.length
     ? CONTENT.eps
     : [{ id: 'ep1', type: 'level-quest', title: CONTENT.meta?.worldName || 'EP1', shortTag: 'EP1', useRootData: true }];
+  // Mode-gated EP visibility (per haohao spec):
+  //   free / pre-order → 玩家只看到 EP1 闖關
+  //   paid             → 玩家只看到 EP2 未發行倉庫(付費才解鎖)
+  // 關主登入(有 admin token)= 全 EPs visible 方便預覽/編輯
+  if (localStorage.getItem('hao-admin-token-v1')) return all;
+  const mode = (CONTENT.paywall && (CONTENT.paywall.mode || (CONTENT.paywall.enabled === false ? 'free' : 'paid'))) || 'free';
+  const m = String(mode).toLowerCase();
+  if (m === 'paid') return all.filter(e => e.id !== 'ep1');
+  return all.filter(e => e.id !== 'ep2');
 }
 function getCurrentEp() {
   const eps = getEps();
@@ -2364,8 +2373,8 @@ function renderSong(ep, songId) {
   if (endgameSrc) {
     appendVaultEndgameCTA(body, endgameSrc);
   }
-  // (Submit button removed from EP2 — vault-vote is purely a voting channel.
-  //  Lyrics-wall style submission only belongs in L3.)
+  // EP2 paid mode → show paywall ✦ button on each song (per haohao spec).
+  appendPaywallJoinBtn(body, song.id);
   // Devlog entries attached to this song (e.g. lyric drafts, voice memos).
   renderDevlog('devlogLevel', devlogFilterForItem(ep.id, song.id));
 }
@@ -2725,12 +2734,15 @@ function appendPaywallJoinBtn(body, levelId) {
   // 關主 (admin token present) = owner previewing the site, don't
   // show a 'pay me' CTA since the owner is the payee.
   if (localStorage.getItem('hao-admin-token-v1')) return;
-  // Paywall sells the EP1 完整版 product only. EP2 is a free vault-vote
-  // channel — no paywall button there even in paid mode.
-  const ep = getCurrentEp();
-  if (ep && ep.id !== 'ep1') return;
+  // Mode-gated paywall button placement (per haohao spec):
+  //   free → no paywall button anywhere
+  //   pre-order → EP1 levels (sell EP1 完整版 預訂)
+  //   paid → EP2 songs (sell access to vault, 跳綠界)
   const mode = paywallMode();
   if (mode === 'free') return;
+  const ep = getCurrentEp();
+  if (mode === 'paid' && (!ep || ep.id !== 'ep2')) return;
+  if (mode === 'pre-order' && (!ep || ep.id !== 'ep1')) return;
   // Skip this level if its teaser is empty — lets 關主 hide the CTA
   // on specific levels (e.g. L0 is an invitation, no sale pitch there).
   const teaser = p.perLevelTeaser && p.perLevelTeaser[levelId];
