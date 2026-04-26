@@ -120,6 +120,16 @@
       }
     }
   ],
+  "marquee": {
+    "enabled": true,
+    "speed": "normal",
+    "items": [
+      { "text": "📣 EP2「未發行倉庫」上線了 — 投票決定哪首先做完" },
+      { "text": "🗓 EP2 投票截止 2026/8/1" },
+      { "text": "🎤 11 月低成本演出 · 台北/桃園/台中/台南/高雄 flag 立著" },
+      { "text": "💌 留 email 進村莊,新 EP 我寄信告訴你" }
+    ]
+  },
   "devlog": {
     "title": "📓 製作日誌",
     "subtitle": "我邊做邊丟。最新的在最上面。",

@@ -23,14 +23,14 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build-version" content="2.1.1">
+<meta name="build-version" content="2.2">
 <script>
   // iOS Safari aggressive cache buster.
   // On load, compare the version this page thinks it is vs the last version
   // stored locally. If they differ on a CACHED page (i.e. localStorage has
   // newer version than current HTML), force a hard reload with fresh query.
   (function() {
-    const CURRENT = '2.1.1';
+    const CURRENT = '2.2';
     const LAST = localStorage.getItem('hao-rpg-build');
     if (LAST && LAST !== CURRENT && !location.search.includes('_nocache=')) {
       const sep = location.search ? '&' : '?';
@@ -289,6 +289,48 @@
 
   /* ========== SCENE 2: Map ========== */
   .scene-map { background: var(--paper); }
+
+  /* Sticky marquee — sits above EP tabs, scrolls horizontally */
+  .marquee {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background: var(--gb-darkest);
+    color: var(--gb-lightest);
+    border-bottom: 2px solid var(--gold);
+    padding: 8px 0;
+    overflow: hidden;
+    font-family: "VT323", monospace;
+    font-size: 16px;
+    letter-spacing: 1px;
+    box-shadow: 0 2px 0 var(--paper-edge);
+  }
+  .marquee-track {
+    display: inline-block;
+    white-space: nowrap;
+    padding-left: 100%;
+    animation: marqueeScroll var(--marquee-duration, 40s) linear infinite;
+  }
+  .marquee:hover .marquee-track,
+  .marquee:active .marquee-track { animation-play-state: paused; }
+  .marquee-item {
+    display: inline-block;
+    padding: 0 28px;
+    border-right: 1px dashed var(--gold-deep);
+  }
+  .marquee-item a {
+    color: var(--gold);
+    text-decoration: none;
+    border-bottom: 1px solid var(--gold);
+  }
+  .marquee-item a:hover { color: var(--gb-lightest); }
+  @keyframes marqueeScroll {
+    0%   { transform: translate3d(0, 0, 0); }
+    100% { transform: translate3d(-100%, 0, 0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .marquee-track { animation: none; padding-left: 0; }
+  }
 
   .map-topbar {
     display: flex;
@@ -1411,6 +1453,7 @@
 
 <!-- ============ SCENE 2: MAP ============ -->
 <section class="scene scene-map" data-scene="map">
+  <div class="marquee" id="mapMarquee" hidden></div>
   <div class="wrap">
     <div class="map-topbar">
       <button class="map-back-intro" id="btnBackToIntro" type="button" title="回開場對話">← 回 INTRO</button>
@@ -1460,7 +1503,7 @@
 
     <footer>
       <div id="socialsBlock" style="margin-bottom:14px;"></div>
-      <p class="credits">BUILD 2.1 · haohao.unzip · 多 EP + 製作日誌</p>
+      <p class="credits">BUILD 2.2 · haohao.unzip · 跑馬燈 + 多 EP + 製作日誌</p>
       <p><a href="admin.html" class="admin-link-footer">關主登入 →</a></p>
     </footer>
   </div>
@@ -1909,6 +1952,40 @@ function isUnlocked(level) {
   return state.cleared.includes(level.unlockedBy);
 }
 
+// ============================================================
+// MARQUEE — sticky horizontal ticker on the map scene.
+// Items repeat 2x in the track so the loop reads continuously
+// before wrapping back to the start.
+// ============================================================
+const MARQUEE_SPEED = { slow: 60, normal: 40, fast: 22 };
+
+function renderMarquee() {
+  const box = document.getElementById('mapMarquee');
+  if (!box) return;
+  const m = CONTENT.marquee || {};
+  const items = (m.items || []).filter(it => it && (it.text || '').trim());
+  // Admin select round-trips the bool through a string, so accept both.
+  const disabled = m.enabled === false || m.enabled === 'false';
+  if (disabled || !items.length) {
+    box.hidden = true;
+    box.innerHTML = '';
+    return;
+  }
+  // Duration scales with content length so longer feeds don't speed up the type.
+  const charCount = items.reduce((n, it) => n + (it.text || '').length, 0);
+  const baseSec = MARQUEE_SPEED[m.speed] || MARQUEE_SPEED.normal;
+  const dur = Math.max(15, Math.round(baseSec * (charCount / 60)));
+  const cells = items.map(it => {
+    const txt = escapeHtml(it.text);
+    return it.link
+      ? `<span class="marquee-item"><a href="${escapeHtml(it.link)}" target="_blank" rel="noopener">${txt}</a></span>`
+      : `<span class="marquee-item">${txt}</span>`;
+  }).join('');
+  // Repeat once so the visual loop reads as continuous.
+  box.hidden = false;
+  box.innerHTML = `<div class="marquee-track" style="--marquee-duration:${dur}s">${cells}${cells}</div>`;
+}
+
 function renderEpTabs() {
   const box = document.getElementById('epTabs');
   if (!box) return;
@@ -1929,7 +2006,8 @@ function renderEpTabs() {
 }
 
 function renderNodes() {
-  // Always rebuild the EP picker first — it's the same on every map render.
+  // Always rebuild the marquee + EP picker first — they're map-scoped chrome.
+  renderMarquee();
   renderEpTabs();
   const ep = getCurrentEp();
   // Per-EP intro blurb (vault-vote uses this; level-quest hides it).

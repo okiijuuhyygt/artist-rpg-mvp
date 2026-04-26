@@ -776,6 +776,34 @@
       </div>
     </details>
 
+    <!-- Marquee (置頂跑馬燈) -->
+    <details class="editor-section">
+      <summary>📣 跑馬燈(map 頂部置頂,玩家滑也看得到)</summary>
+      <div class="section-body">
+        <p class="hint" style="margin-bottom:10px;">
+          只在 <b>map scene</b> 顯示,sticky 在最上方。每條 item 一段文字 + 可選連結。<br>
+          速度自動依字數調整,hover/touch 會暫停讓人讀。空 items 或關閉開關 = 不顯示。
+        </p>
+        <label class="field">
+          <span class="label-text">⚙ 啟用跑馬燈</span>
+          <select data-path="marquee.enabled">
+            <option value="true">✅ 開</option>
+            <option value="false">❌ 關</option>
+          </select>
+        </label>
+        <label class="field">
+          <span class="label-text">速度</span>
+          <select data-path="marquee.speed">
+            <option value="slow">🐢 慢</option>
+            <option value="normal">🚶 一般</option>
+            <option value="fast">🏃 快</option>
+          </select>
+        </label>
+        <div id="marqueeEditor"></div>
+        <button class="add-row-btn" id="addMarqueeItem" type="button">+ 加一條跑馬燈 item</button>
+      </div>
+    </details>
+
     <!-- Devlog (邊做邊丟動態) -->
     <details class="editor-section" open>
       <summary>📓 製作日誌(邊做邊丟 · murmur / lyric / audio / link)</summary>
@@ -1057,6 +1085,8 @@ function renderEditor() {
   renderLyricsWall();
   // Devlog
   renderDevlogEditor();
+  // Marquee
+  renderMarqueeEditor();
   // Levels
   renderLevels();
   // Audio uploads
@@ -1500,6 +1530,44 @@ function renderDevlogEditor() {
     box.appendChild(wrap);
   });
 }
+
+// =======================================================
+// MARQUEE EDITOR — flat list of items {text, link?}
+// =======================================================
+function renderMarqueeEditor() {
+  const box = $('marqueeEditor');
+  if (!box) return;
+  box.innerHTML = '';
+  contentData.marquee = contentData.marquee || {};
+  const items = contentData.marquee.items = contentData.marquee.items || [];
+  items.forEach((it, idx) => {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap;';
+    row.innerHTML = `
+      <span class="row-num" style="min-width:24px;">${idx + 1}.</span>
+      <input type="text" class="mq-text" value="${escapeHtml(it.text || '')}" placeholder="跑馬燈文字" style="flex:2;min-width:180px;padding:6px;border:1px solid #ccc;">
+      <input type="text" class="mq-link" value="${escapeHtml(it.link || '')}" placeholder="點擊去哪(可空)" style="flex:1;min-width:140px;padding:6px;border:1px solid #ccc;font-family:monospace;font-size:12px;">
+      <button class="remove-btn mq-del" type="button" title="刪此條">✕</button>
+    `;
+    row.querySelector('.mq-text').addEventListener('input', ev => { it.text = ev.target.value; updateSaveBar(); });
+    row.querySelector('.mq-link').addEventListener('input', ev => { it.link = ev.target.value.trim(); updateSaveBar(); });
+    row.querySelector('.mq-del').addEventListener('click', () => {
+      if (!confirm(`刪掉這條?「${(it.text || '').slice(0, 40)}」`)) return;
+      items.splice(idx, 1);
+      renderMarqueeEditor();
+      updateSaveBar();
+    });
+    box.appendChild(row);
+  });
+}
+
+$('addMarqueeItem').addEventListener('click', () => {
+  contentData.marquee = contentData.marquee || {};
+  contentData.marquee.items = contentData.marquee.items || [];
+  contentData.marquee.items.push({ text: '新的一則...', link: '' });
+  renderMarqueeEditor();
+  updateSaveBar();
+});
 
 $('addDevlogEntry').addEventListener('click', () => {
   contentData.devlog = contentData.devlog || {};
