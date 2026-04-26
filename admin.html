@@ -776,6 +776,28 @@
       </div>
     </details>
 
+    <!-- Lyrics Wall (L3 cleared 後展示) -->
+    <details class="editor-section">
+      <summary>✍ 歌詞牆(L3 闖完顯示)</summary>
+      <div class="section-body">
+        <p class="hint" style="margin-bottom:10px;">L3 是「寫一句影響過你的歌詞」。闖完後會看到這面牆 — 玩家自己寫的標 ★ 在最上,下面是你 curate 的 lines。空白 = L3 完成後不顯示這個 block。</p>
+        <label class="field">
+          <span class="label-text">標題</span>
+          <input type="text" data-path="lyricsWall.title" placeholder="✍ 歌詞牆 · 收進來了">
+        </label>
+        <label class="field">
+          <span class="label-text">說明文字</span>
+          <textarea data-path="lyricsWall.intro" rows="2"></textarea>
+        </label>
+        <label class="field">
+          <span class="label-text">空牆訊息(items 沒東西時、玩家自己寫了才會顯示)</span>
+          <input type="text" data-path="lyricsWall.emptyMsg" placeholder="歌詞牆現在還空著。你寫的會是第一個。">
+        </label>
+        <div class="intro-lines" id="lyricsWallEditor"></div>
+        <button class="add-row-btn" id="addLyricsLine" type="button">+ 加一條歌詞</button>
+      </div>
+    </details>
+
     <!-- Socials footer (外面找我) -->
     <details class="editor-section">
       <summary>外面找我(footer 連結)</summary>
@@ -1007,6 +1029,8 @@ function renderEditor() {
   });
   // Intro lines
   renderIntroLines();
+  // Lyrics wall
+  renderLyricsWall();
   // Levels
   renderLevels();
   // Audio uploads
@@ -1375,6 +1399,44 @@ $('addIntroLine').addEventListener('click', () => {
   contentData.intro = contentData.intro || [];
   contentData.intro.push('新的一行...');
   renderIntroLines();
+  updateSaveBar();
+});
+
+function renderLyricsWall() {
+  const box = $('lyricsWallEditor');
+  if (!box) return;
+  box.innerHTML = '';
+  contentData.lyricsWall = contentData.lyricsWall || {};
+  const items = contentData.lyricsWall.items = contentData.lyricsWall.items || [];
+  items.forEach((line, idx) => {
+    const row = document.createElement('div');
+    row.className = 'intro-line-row';
+    row.innerHTML = `
+      <span class="row-num">${idx + 1}.</span>
+      <input type="text" value="" placeholder="「一句歌詞...」" />
+      <button class="remove-btn" title="刪除這條">✕</button>
+    `;
+    const inp = row.querySelector('input');
+    inp.value = line;
+    inp.addEventListener('input', () => {
+      items[idx] = inp.value;
+      updateSaveBar();
+    });
+    row.querySelector('.remove-btn').addEventListener('click', () => {
+      if (!confirm(`刪掉這條?「${line}」`)) return;
+      items.splice(idx, 1);
+      renderLyricsWall();
+      updateSaveBar();
+    });
+    box.appendChild(row);
+  });
+}
+
+$('addLyricsLine').addEventListener('click', () => {
+  contentData.lyricsWall = contentData.lyricsWall || {};
+  contentData.lyricsWall.items = contentData.lyricsWall.items || [];
+  contentData.lyricsWall.items.push('「新的歌詞...」');
+  renderLyricsWall();
   updateSaveBar();
 });
 

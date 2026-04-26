@@ -64,13 +64,23 @@
     "title": "EP1 · haohao.unzip",
     "shortTag": "EP1"
   },
+  "lyricsWall": {
+    "title": "✍ 歌詞牆 · 收進來了",
+    "intro": "你寫的會放在最上面(★)。下面是已經收進這章封面底圖的歌詞,耗耗手動 curate。",
+    "items": [
+      "「以前的事,今晚不再提」",
+      "「我不是英雄,只是想陪你走一段」",
+      "「世界很大,但我先把這條街走完」"
+    ],
+    "emptyMsg": "歌詞牆現在還空著。你寫的會是第一個。"
+  },
   "socials": {
     "heading": "→ 外面找我",
-    "podcast": "https://open.firstory.me/user/haohao-unzip",
-    "spotify": "",
-    "ig": "https://instagram.com/haohao.zip",
-    "threads": "https://www.threads.net/@haohao.zip",
-    "applePodcasts": "",
+    "podcast": "https://open.firstory.me/user/haohao-zip/platforms",
+    "spotify": "https://open.spotify.com/artist/2td4gZxQongsxOty2EnlB5",
+    "ig": "https://www.instagram.com/haohao.zip",
+    "threads": "https://www.threads.com/@haohao.zip",
+    "applePodcasts": "https://podcasts.apple.com/us/podcast/haohao-unzip/id1811831632",
     "portaly": "https://portaly.cc/haohao.zip"
   },
   "levels": [

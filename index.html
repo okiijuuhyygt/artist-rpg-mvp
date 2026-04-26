@@ -23,14 +23,14 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build-version" content="1.5">
+<meta name="build-version" content="1.6">
 <script>
   // iOS Safari aggressive cache buster.
   // On load, compare the version this page thinks it is vs the last version
   // stored locally. If they differ on a CACHED page (i.e. localStorage has
   // newer version than current HTML), force a hard reload with fresh query.
   (function() {
-    const CURRENT = '1.5';
+    const CURRENT = '1.6';
     const LAST = localStorage.getItem('hao-rpg-build');
     if (LAST && LAST !== CURRENT && !location.search.includes('_nocache=')) {
       const sep = location.search ? '&' : '?';
@@ -1204,7 +1204,7 @@
 
     <footer>
       <div id="socialsBlock" style="margin-bottom:14px;"></div>
-      <p class="credits">MVP BUILD 1.5 · haohao.unzip</p>
+      <p class="credits">MVP BUILD 1.6 · haohao.unzip</p>
       <p><a href="admin.html" class="admin-link-footer">關主登入 →</a></p>
     </footer>
   </div>
@@ -1673,6 +1673,8 @@ function renderActionBlock(lv) {
     body.appendChild(cta);
     // Also append join CTA in cleared state (unified at end of function)
     appendPaywallJoinBtn(body, lv.id);
+    // L3 cleared → show curated lyrics wall (other players' lines).
+    if (lv.id === 'L3') appendLyricsWall(body);
     // L4 finale: peak-end moment to surface EP2 notification CTA.
     if (lv.id === 'L4') appendEndgameEmailCTA(body);
     return;
@@ -1893,6 +1895,55 @@ function openPaywall(levelId) {
   modal.classList.add('open');
   modal.setAttribute('aria-hidden', 'false');
   document.body.style.overflow = 'hidden';
+}
+
+function appendLyricsWall(body) {
+  const w = CONTENT.lyricsWall || {};
+  const items = Array.isArray(w.items) ? w.items.filter(s => s && String(s).trim()) : [];
+  const myLine = (state.texts && state.texts.L3) ? String(state.texts.L3).trim() : '';
+  // Nothing to show: skip the block entirely.
+  if (!items.length && !myLine) return;
+
+  const card = document.createElement('div');
+  card.className = 'lyrics-wall';
+  card.style.cssText = 'margin-top:18px;padding:14px 16px;border:2px solid var(--gb-darkest);background:var(--paper-light);';
+
+  const h = document.createElement('div');
+  h.style.cssText = 'font-weight:bold;font-size:15px;margin-bottom:6px;color:var(--gb-darkest);';
+  h.textContent = w.title || '✍ 歌詞牆';
+  card.appendChild(h);
+
+  const intro = document.createElement('p');
+  intro.style.cssText = 'font-size:12px;line-height:1.55;margin:0 0 12px 0;color:var(--ink-soft);';
+  intro.textContent = w.intro || '';
+  if (intro.textContent) card.appendChild(intro);
+
+  const list = document.createElement('div');
+  list.style.cssText = 'display:flex;flex-direction:column;gap:6px;';
+
+  if (myLine) {
+    const mine = document.createElement('div');
+    mine.style.cssText = 'padding:10px 12px;border:2px solid var(--gold);background:var(--gb-lightest);font-size:14px;line-height:1.5;color:var(--gb-darkest);';
+    mine.innerHTML = '<span style="font-size:11px;color:var(--gold-deep);font-weight:bold;letter-spacing:.1em;">★ 你寫的</span><br>' + escapeHtml(myLine);
+    list.appendChild(mine);
+  }
+
+  if (!items.length && myLine) {
+    const empty = document.createElement('p');
+    empty.style.cssText = 'font-size:12px;color:var(--ink-soft);font-style:italic;margin:6px 0 0 0;';
+    empty.textContent = w.emptyMsg || '歌詞牆現在還空著。你寫的會是第一個。';
+    list.appendChild(empty);
+  } else {
+    items.forEach(line => {
+      const row = document.createElement('div');
+      row.style.cssText = 'padding:8px 12px;border-left:3px solid var(--gold);background:var(--paper);font-size:13px;line-height:1.55;color:var(--ink);';
+      row.textContent = line;
+      list.appendChild(row);
+    });
+  }
+
+  card.appendChild(list);
+  body.appendChild(card);
 }
 
 function appendEndgameEmailCTA(body) {
