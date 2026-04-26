@@ -49,8 +49,8 @@
     "comingSoonMsg": "結帳系統建置中,我還在跟綠界串。先填下面那個 email 名單,我這邊好了會寄信給你。",
     "preOrder": {
       "ctaLabel": "✦ 想第一個玩到完整版",
-      "headline": "EP 還在做。想第一個拿到嗎?",
-      "body": "現在玩到的是 demo 版。完整版上線(包含所有 demo、歌詞 PDF、podcast)會先寄給名單上的人。\n\n上面的 email 欄位填一下就好,不用付錢。EP1 完整版好了我會寄,EP2 上線也會通知你。",
+      "headline": "這張 EP 還在做。想第一個拿到完整版嗎?",
+      "body": "你現在玩到的是 demo 版。**這張 EP 的完整版**(完整 demo + 歌詞 PDF + 幕後 podcast)上線會先寄給名單上的人。\n\n上面 email 欄位填一下就好,不用付錢。\n\n(下一張 EP 的上線通知是另一回事 — 闖完最後一關會看到那個 CTA。)",
       "ctaToGate": "▶ 去填 email"
     },
     "endgame": {
