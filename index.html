@@ -23,14 +23,14 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build-version" content="2.2.3">
+<meta name="build-version" content="2.3">
 <script>
   // iOS Safari aggressive cache buster.
   // On load, compare the version this page thinks it is vs the last version
   // stored locally. If they differ on a CACHED page (i.e. localStorage has
   // newer version than current HTML), force a hard reload with fresh query.
   (function() {
-    const CURRENT = '2.2.3';
+    const CURRENT = '2.3';
     const LAST = localStorage.getItem('hao-rpg-build');
     if (LAST && LAST !== CURRENT && !location.search.includes('_nocache=')) {
       const sep = location.search ? '&' : '?';
@@ -1250,6 +1250,54 @@
     animation: fadeIn 0.25s ease;
   }
   .paywall-modal.open { display: flex; }
+
+  /* Submit modal — Tally form embed (玩家投稿 textarea + 檔案上傳) */
+  .submit-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 56, 15, 0.7);
+    backdrop-filter: blur(3px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1100;
+    padding: 24px 12px;
+    animation: fadeIn 0.25s ease;
+  }
+  .submit-modal.open { display: flex; }
+  .submit-card {
+    width: 100%;
+    max-width: 640px;
+    height: 88vh;
+    max-height: 760px;
+    background: var(--paper-light);
+    border: 3px solid var(--gb-darkest);
+    box-shadow: 6px 6px 0 var(--ink);
+    padding: 36px 8px 8px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  .submit-card iframe {
+    flex: 1;
+    width: 100%;
+    border: none;
+    background: var(--paper-light);
+  }
+  .submit-close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 32px;
+    height: 32px;
+    background: var(--paper);
+    border: 2px solid var(--gb-darkest);
+    font-family: "Press Start 2P", monospace;
+    font-size: 14px;
+    cursor: pointer;
+    z-index: 2;
+  }
+  .submit-close:hover { background: var(--gb-lightest); }
   .paywall-card {
     max-width: 440px;
     width: 100%;
@@ -1514,7 +1562,7 @@
 
     <footer>
       <div id="socialsBlock" style="margin-bottom:14px;"></div>
-      <p class="credits">BUILD 2.2 · haohao.unzip · 跑馬燈 + 多 EP + 製作日誌</p>
+      <p class="credits">BUILD 2.3 · haohao.unzip · 玩家投稿 + 跑馬燈 + 多 EP</p>
       <p><a href="admin.html" class="admin-link-footer">關主登入 →</a></p>
     </footer>
   </div>
@@ -1562,6 +1610,14 @@
     <div id="devlogLevel"></div>
   </div>
 </section>
+
+<!-- ============ Submit Modal (玩家投稿 — Tally embed) ============ -->
+<div class="submit-modal" id="submitModal" aria-hidden="true">
+  <div class="submit-card">
+    <button class="submit-close" id="submitClose" aria-label="關閉">×</button>
+    <iframe id="submitIframe" src="about:blank" title="玩家投稿表單" loading="lazy"></iframe>
+  </div>
+</div>
 
 <!-- ============ Paywall Modal (加入製作委員會) ============ -->
 <div class="paywall-modal" id="paywallModal" aria-hidden="true">
@@ -2261,6 +2317,12 @@ function renderSong(ep, songId) {
   if (endgameSrc) {
     appendVaultEndgameCTA(body, endgameSrc);
   }
+  // Submit button — let players send feedback / file for this specific demo.
+  appendSubmitButton(
+    body,
+    (ep.shortTag || ep.id.toUpperCase()) + ' · ' + song.title,
+    '📤 給這首 demo 留言 / 上傳東西'
+  );
   // Devlog entries attached to this song (e.g. lyric drafts, voice memos).
   renderDevlog('devlogLevel', devlogFilterForItem(ep.id, song.id));
 }
@@ -2367,10 +2429,7 @@ function clearLevel(id, msg) {
   if (activeLevel && activeLevel.id === id) {
     renderActionBlock(activeLevel);
     // Sync missing-piece UI to filled state (the ??? block)
-    if (activeLevel.hasMissingPiece) {
-      const mpEl = document.getElementById('missingPiece');
-      if (mpEl) mpEl.classList.toggle('filled', state.filled.includes(id));
-    }
+    // (v0 missingPiece UI is force-hidden in renderLevel — no toggle needed.)
     stopTone();
     // (No auto-return — renderActionBlock draws a 繼續 → CTA button
     //  so the player decides when to move on. Keeps room for
@@ -2414,6 +2473,12 @@ function renderActionBlock(lv) {
     body.appendChild(cta);
     // Also append join CTA in cleared state (unified at end of function)
     appendPaywallJoinBtn(body, lv.id);
+    // Submit button — L1 (寫一句進 MV) and L3 (送字) need a way to actually
+    // reach haohao. Without it L3 textarea only saves to localStorage.
+    if (lv.id === 'L1' || lv.id === 'L3') {
+      const ctxLabel = lv.id === 'L1' ? 'L1 第一首歌' : 'L3 寫字關';
+      appendSubmitButton(body, ctxLabel, '📤 投稿給 hao (寫字 / 上傳照片錄音)');
+    }
     // L3 cleared → show curated lyrics wall (other players' lines).
     if (lv.id === 'L3') appendLyricsWall(body);
     // L4 finale: peak-end moment to surface EP2 notification CTA.
@@ -2468,6 +2533,11 @@ function renderActionBlock(lv) {
   }
   // Append join CTA in non-cleared state too (always offer the bundle).
   appendPaywallJoinBtn(body, lv.id);
+  // Submit button on uncleared L1/L3 too — players can投稿 without finishing.
+  if (lv.id === 'L1' || lv.id === 'L3') {
+    const ctxLabel = lv.id === 'L1' ? 'L1 第一首歌' : 'L3 寫字關';
+    appendSubmitButton(body, ctxLabel, '📤 投稿給 hao (寫字 / 上傳照片錄音)');
+  }
 }
 
 // ============================================================
@@ -2687,6 +2757,47 @@ function appendLyricsWall(body) {
   body.appendChild(card);
 }
 
+// ============================================================
+// SUBMIT MODAL — Tally form embed for player submissions
+// (text + file upload to Tally cloud, no leaving the site)
+// ============================================================
+const SUBMIT_FORM_ID = 'J9V8N4';
+
+function openSubmitModal(contextLabel) {
+  const iframe = document.getElementById('submitIframe');
+  const params = new URLSearchParams({
+    alignLeft: '1',
+    hideTitle: '0',
+    transparentBackground: '1',
+  });
+  iframe.src = `https://tally.so/embed/${SUBMIT_FORM_ID}?${params.toString()}#level=${encodeURIComponent(contextLabel || '')}`;
+  const modal = document.getElementById('submitModal');
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeSubmitModal() {
+  const modal = document.getElementById('submitModal');
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+  // Drop iframe src so audio/video doesn't keep loading in background.
+  document.getElementById('submitIframe').src = 'about:blank';
+}
+
+function appendSubmitButton(body, contextLabel, btnLabel) {
+  const btn = document.createElement('button');
+  btn.className = 'action-btn secondary';
+  btn.style.marginTop = '10px';
+  btn.textContent = btnLabel || '📤 投稿這關 (寫字 / 上傳照片錄音)';
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    openSubmitModal(contextLabel);
+  });
+  body.appendChild(btn);
+}
+
 function appendEndgameEmailCTA(body) {
   const eg = (CONTENT.paywall && CONTENT.paywall.endgame) || {};
   const card = document.createElement('div');
@@ -2725,6 +2836,11 @@ function closePaywall() {
   document.body.style.overflow = '';
 }
 
+document.getElementById('submitClose').addEventListener('click', closeSubmitModal);
+document.getElementById('submitModal').addEventListener('click', (e) => {
+  if (e.target.id === 'submitModal') closeSubmitModal();
+});
+
 document.getElementById('paywallClose').addEventListener('click', closePaywall);
 document.getElementById('paywallModal').addEventListener('click', (e) => {
   if (e.target.id === 'paywallModal') closePaywall();
@@ -2732,6 +2848,9 @@ document.getElementById('paywallModal').addEventListener('click', (e) => {
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && document.getElementById('paywallModal').classList.contains('open')) {
     closePaywall();
+  }
+  if (e.key === 'Escape' && document.getElementById('submitModal').classList.contains('open')) {
+    closeSubmitModal();
   }
 });
 
@@ -2765,15 +2884,11 @@ function renderLevel(levelId) {
   document.getElementById('levelStory').textContent = lv.story;
   document.getElementById('toneMeta').textContent = `${lv.toneNote} · ${lv.toneBpm} BPM · ${lv.toneMood}`;
 
+  // missingPiece UI is legacy v0 placeholder for a never-shipped
+  // "付費玩家上傳衛生紙手寫" feature. The 📤 投稿 button + Tally form
+  // is what actually accepts player submissions now. Hide unconditionally.
   const mpEl = document.getElementById('missingPiece');
-  const mpCap = document.getElementById('mpCaption');
-  if (lv.hasMissingPiece && lv.mpCaption) {
-    mpEl.style.display = 'block';
-    mpCap.textContent = lv.mpCaption;
-    mpEl.classList.toggle('filled', state.filled.includes(lv.id));
-  } else {
-    mpEl.style.display = 'none';
-  }
+  if (mpEl) mpEl.style.display = 'none';
 
   const branchBlock = document.getElementById('branchBlock');
   const branchLocked = document.getElementById('branchLocked');
