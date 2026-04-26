@@ -938,8 +938,48 @@
     </details>
 
     <!-- Levels -->
-    <h2 class="page-title" style="font-size: 13px; margin-top: 28px;">▸ 關卡</h2>
+    <h2 class="page-title" style="font-size: 13px; margin-top: 28px;">▸ EP1 關卡(level-quest)</h2>
     <div id="levelsEditor"></div>
+
+    <h2 class="page-title" style="font-size: 13px; margin-top: 32px;">▸ EP2 未發行倉庫(vault-vote)</h2>
+    <details class="editor-section" open>
+      <summary>EP2 元數據 + 歌曲清單</summary>
+      <div class="section-body">
+        <p class="hint" style="margin-bottom:10px;">EP2 是 vault-vote 類型(投票決定哪首先做完),跟 EP1 闖關不同。改完按底下「儲存到網站」。</p>
+        <label class="field">
+          <span class="label-text">EP2 副標</span>
+          <input type="text" id="ep2_subtitle" placeholder="我有 130 首沒上架的歌...">
+        </label>
+        <label class="field">
+          <span class="label-text">EP2 開場介紹(intro)</span>
+          <textarea id="ep2_intro" rows="6"></textarea>
+        </label>
+        <label class="field">
+          <span class="label-text">投票截止日(YYYY-MM-DD)</span>
+          <input type="text" id="ep2_voteDeadline" placeholder="2026-08-01">
+        </label>
+        <label class="field">
+          <span class="label-text">每人可投票數</span>
+          <input type="number" id="ep2_voteCap" min="1" max="20" value="3">
+        </label>
+        <h4 style="margin:20px 0 6px;border-top:1px solid var(--ink-soft);padding-top:14px;">── 歌曲清單(每首一張卡) ──</h4>
+        <div id="ep2SongsEditor"></div>
+        <button class="add-row-btn" id="addEp2Song" type="button">+ 加一首 demo 歌</button>
+        <h4 style="margin:20px 0 6px;border-top:1px solid var(--ink-soft);padding-top:14px;">── 投票結束 endgame CTA ──</h4>
+        <label class="field">
+          <span class="label-text">endgame 標題</span>
+          <input type="text" id="ep2_endgame_title" placeholder="🎵 投票結束時你會收到通知">
+        </label>
+        <label class="field">
+          <span class="label-text">endgame 內文</span>
+          <textarea id="ep2_endgame_body" rows="3"></textarea>
+        </label>
+        <label class="field">
+          <span class="label-text">endgame 按鈕文字</span>
+          <input type="text" id="ep2_endgame_ctaLabel" placeholder="▶ 留下 email 等通知">
+        </label>
+      </div>
+    </details>
 
     <!-- Audio uploads -->
     <h2 class="page-title" style="font-size: 13px; margin-top: 32px;">♪ 音檔上傳</h2>
@@ -1115,6 +1155,8 @@ function renderEditor() {
   renderDevlogEditor();
   // Marquee
   renderMarqueeEditor();
+  // EP2 vault-vote editor
+  renderEp2Editor();
   // Levels
   renderLevels();
   // Audio uploads
@@ -1599,6 +1641,111 @@ $('resetCountersBtn').addEventListener('click', () => {
   if (inp) inp.value = contentData.counterReset.namespace;
   updateSaveBar();
   alert('✓ 已換新 namespace = ' + contentData.counterReset.namespace + '\n按底下「儲存到網站」生效。');
+});
+
+// =======================================================
+// EP2 EDITOR (vault-vote type) — full editor for ep2 metadata + songs
+// =======================================================
+function findEp(id) {
+  return (contentData.eps || []).find(e => e.id === id);
+}
+
+function renderEp2Editor() {
+  const ep2 = findEp('ep2');
+  if (!ep2) return;
+  function bind(elId, getter, setter) {
+    const el = $(elId);
+    if (!el) return;
+    el.value = getter() != null ? getter() : '';
+    el.addEventListener('input', () => {
+      const v = el.type === 'number' ? Number(el.value) : el.value;
+      setter(v);
+      updateSaveBar();
+    });
+  }
+  bind('ep2_subtitle', () => ep2.subtitle, v => ep2.subtitle = v);
+  bind('ep2_intro', () => ep2.intro, v => ep2.intro = v);
+  bind('ep2_voteDeadline', () => ep2.voteDeadline, v => ep2.voteDeadline = v);
+  bind('ep2_voteCap', () => ep2.voteCap, v => ep2.voteCap = v);
+  ep2.endgame = ep2.endgame || {};
+  bind('ep2_endgame_title', () => ep2.endgame.title, v => ep2.endgame.title = v);
+  bind('ep2_endgame_body', () => ep2.endgame.body, v => ep2.endgame.body = v);
+  bind('ep2_endgame_ctaLabel', () => ep2.endgame.ctaLabel, v => ep2.endgame.ctaLabel = v);
+  renderEp2Songs();
+}
+
+function renderEp2Songs() {
+  const ep2 = findEp('ep2');
+  if (!ep2) return;
+  const box = $('ep2SongsEditor');
+  if (!box) return;
+  ep2.songs = ep2.songs || [];
+  box.innerHTML = '';
+  ep2.songs.forEach((song, idx) => {
+    const card = document.createElement('div');
+    card.style.cssText = 'margin-bottom:14px;padding:12px;background:#fafafa;border:1px solid #ddd;';
+    card.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <span style="font-weight:bold;">S${idx + 1} · <span class="ep2-title-preview">${escapeHtml(song.title || '(未命名)')}</span></span>
+        <button class="remove-btn ep2-song-del" type="button" title="刪此首">✕</button>
+      </div>
+      <label class="field"><span class="label-text">title(歌名)</span>
+        <input type="text" class="ep2-f-title" value="${escapeHtml(song.title || '')}"></label>
+      <label class="field"><span class="label-text">year</span>
+        <input type="text" class="ep2-f-year" value="${escapeHtml(song.year || '')}"></label>
+      <label class="field"><span class="label-text">status(詞曲完成 / Suno 編曲 / 卡 bridge ...)</span>
+        <input type="text" class="ep2-f-status" value="${escapeHtml(song.status || '')}"></label>
+      <label class="field"><span class="label-text">backstory(故事 / 為什麼還沒做完)</span>
+        <textarea class="ep2-f-backstory" rows="4">${escapeHtml(song.backstory || '')}</textarea></label>
+      <label class="field"><span class="label-text">demoUrl(audio 路徑 e.g. audio/ep2/S1.mp3,或外連 https://...)</span>
+        <input type="text" class="ep2-f-demoUrl" value="${escapeHtml(song.demoUrl || '')}"></label>
+      <label class="field"><span class="label-text">voteKey(abacus 計數器 key,英數)</span>
+        <input type="text" class="ep2-f-voteKey" value="${escapeHtml(song.voteKey || '')}"></label>
+    `;
+    const wire = (cls, key, livePreview) => {
+      const inp = card.querySelector('.' + cls);
+      if (!inp) return;
+      inp.addEventListener('input', () => {
+        song[key] = inp.value;
+        if (livePreview) {
+          const pv = card.querySelector('.ep2-title-preview');
+          if (pv) pv.textContent = song.title || '(未命名)';
+        }
+        updateSaveBar();
+      });
+    };
+    wire('ep2-f-title', 'title', true);
+    wire('ep2-f-year', 'year');
+    wire('ep2-f-status', 'status');
+    wire('ep2-f-backstory', 'backstory');
+    wire('ep2-f-demoUrl', 'demoUrl');
+    wire('ep2-f-voteKey', 'voteKey');
+    card.querySelector('.ep2-song-del').addEventListener('click', () => {
+      if (!confirm(`刪掉 S${idx + 1} 「${song.title}」?`)) return;
+      ep2.songs.splice(idx, 1);
+      renderEp2Songs();
+      updateSaveBar();
+    });
+    box.appendChild(card);
+  });
+}
+
+$('addEp2Song').addEventListener('click', () => {
+  const ep2 = findEp('ep2');
+  if (!ep2) return;
+  ep2.songs = ep2.songs || [];
+  const n = ep2.songs.length + 1;
+  ep2.songs.push({
+    id: 'S' + n,
+    title: '新的一首',
+    year: '',
+    status: '詞曲完成',
+    backstory: '',
+    demoUrl: '',
+    voteKey: 'song-' + Date.now().toString(36)
+  });
+  renderEp2Songs();
+  updateSaveBar();
 });
 
 $('addMarqueeItem').addEventListener('click', () => {
