@@ -14,11 +14,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build-version" content="haorio-0.8">
+<meta name="build-version" content="haorio-0.9">
 <script>
   // iOS Safari aggressive cache buster — force hard-reload if local cache holds older build
   (function() {
-    const CURRENT = 'haorio-0.8';
+    const CURRENT = 'haorio-0.9';
     const LAST = localStorage.getItem('haorio-build');
     if (LAST && LAST !== CURRENT && !location.search.includes('_nocache=')) {
       const sep = location.search ? '&' : '?';
@@ -1000,10 +1000,10 @@ function initInput() {
   // ---- Joystick
   bindJoystick();
 
-  // ---- HUD exit button
+  // ---- HUD exit button (use pointerdown for iOS; bindModalButton handles both)
   const exitBtn = $('hud-exit');
   if (exitBtn) {
-    exitBtn.addEventListener('click', () => {
+    bindModalButton(exitBtn, () => {
       if (scene === 'playing') goTitle();
     });
   }
@@ -1779,12 +1779,14 @@ function triggerStageEnd() {
 }
 
 // Bind a click handler that fires on iOS touch the moment the finger lands
-// (pointerdown), with a guard so click + pointerdown don't double-fire.
+// (pointerdown), with a 300ms debounce so click + pointerdown don't double-fire
+// but the button stays usable across multiple presses.
 function bindModalButton(btn, fn) {
-  let fired = false;
+  let lastFireTs = 0;
   const fire = (e) => {
-    if (fired) return;
-    fired = true;
+    const now = Date.now();
+    if (now - lastFireTs < 300) return;
+    lastFireTs = now;
     if (e) e.preventDefault();
     fn();
   };
