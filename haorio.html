@@ -105,22 +105,24 @@
   /* ========== touch controls ========== */
   #touch {
     position: fixed;
-    bottom: 16px; left: 0; right: 0;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    left: 0; right: 0;
     display: flex;
     justify-content: space-between;
+    align-items: flex-end;
     padding: 0 16px;
     z-index: 80;
     pointer-events: none;
   }
-  .touch-cluster { display: flex; gap: 12px; pointer-events: auto; }
+  .touch-cluster { display: flex; gap: 12px; pointer-events: auto; align-items: flex-end; }
   .touch-btn {
-    width: 76px; height: 76px;
-    background: rgba(255,255,255,0.18);
-    border: 3px solid rgba(255,255,255,0.6);
-    border-radius: 12px;
+    width: 80px; height: 80px;
+    background: rgba(255,255,255,0.2);
+    border: 3px solid rgba(255,255,255,0.7);
+    border-radius: 14px;
     color: #fff;
     font-family: 'Press Start 2P', monospace;
-    font-size: 22px;
+    font-size: 24px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -130,13 +132,48 @@
     transition: transform 0.05s, background 0.05s;
   }
   .touch-btn.active {
-    background: rgba(255,255,255,0.45);
+    background: rgba(255,255,255,0.5);
     transform: scale(0.92);
   }
-  #btn-jump { background: rgba(216,40,0,0.4); border-color: rgba(255,200,200,0.7); }
-  #btn-jump.active { background: rgba(216,40,0,0.7); }
-  @media (min-width: 800px) and (hover: hover) {
-    #touch.hide-on-desktop { display: none; }
+  #btn-jump { background: rgba(216,40,0,0.5); border-color: rgba(255,200,200,0.8); }
+  #btn-jump.active { background: rgba(216,40,0,0.8); }
+  #btn-fire { background: rgba(255,224,0,0.5); border-color: rgba(255,250,180,0.8); color: #1a1a1a; }
+  #btn-fire.active { background: rgba(255,224,0,0.8); }
+
+  /* ========== virtual joystick (left side) ========== */
+  .stick-base {
+    width: 130px; height: 130px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    border: 4px solid rgba(255,255,255,0.5);
+    position: relative;
+    pointer-events: auto;
+    backdrop-filter: blur(4px);
+    touch-action: none;
+  }
+  .stick {
+    position: absolute;
+    left: 50%; top: 50%;
+    width: 60px; height: 60px;
+    margin: -30px 0 0 -30px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.55);
+    border: 3px solid rgba(255,255,255,0.9);
+    transition: transform 0.08s ease-out;
+    pointer-events: none;
+  }
+  .stick.dragging { transition: none; }
+  .stick-base::after {
+    content: '◀ ▶';
+    position: absolute;
+    bottom: -22px;
+    left: 0; right: 0;
+    text-align: center;
+    color: rgba(255,255,255,0.55);
+    font-family: 'Press Start 2P', monospace;
+    font-size: 9px;
+    letter-spacing: 4px;
+    pointer-events: none;
   }
 
   /* ========== modal (stage start / clear / etc) ========== */
@@ -253,6 +290,12 @@
   .stage-tile.cleared::after {
     content: ' ★';
     color: var(--nes-red);
+  }
+  .stage-tile.selected {
+    outline: 4px solid var(--nes-yellow);
+    outline-offset: 2px;
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 var(--nes-red);
   }
   .stage-tile.locked { opacity: 0.4; cursor: not-allowed; }
   #title-scene .start-btn {
@@ -462,8 +505,8 @@
   <div class="stages" id="stage-grid"></div>
   <button class="start-btn" id="btn-continue">▶ 繼續</button>
   <div class="meta">
-    控制 ← → 移動 · ↑ / 空白鍵 跳<br>
-    手機點下方按鈕 · <a href="index.html">回經典版</a>
+    ← → 移動 · ↑/空白 跳 · B/X 發射 · ESC 回標題<br>
+    手機:左下搖桿 · 右下 A 跳 / B 射 · <a href="index.html">回經典版</a>
   </div>
 </section>
 
@@ -487,11 +530,13 @@
 
 <div id="touch" class="hidden">
   <div class="touch-cluster">
-    <div class="touch-btn" id="btn-left">◀</div>
-    <div class="touch-btn" id="btn-right">▶</div>
+    <div class="stick-base" id="stick-base">
+      <div class="stick" id="stick"></div>
+    </div>
   </div>
   <div class="touch-cluster">
-    <div class="touch-btn" id="btn-jump">A</div>
+    <div class="touch-btn" id="btn-fire" title="發射">B</div>
+    <div class="touch-btn" id="btn-jump" title="跳">A</div>
   </div>
 </div>
 
@@ -544,7 +589,10 @@ let npcs = [];
 let particles = [];
 let camera = { x: 0 };
 let keys = {};
-let touchKeys = { left: false, right: false, jump: false };
+let touchKeys = { left: false, right: false, jump: false, fire: false };
+let bullets = [];
+let fireCooldown = 0;
+let selectedStageIdx = 0;
 let modalOpen = false;
 let scene = 'loading';     // loading | title | playing
 let bgmAudio = null;
@@ -598,6 +646,43 @@ const GOOMBA_SPRITE = [
   '.OO........OO.'
 ];
 const GOOMBA_PALETTE = { K: '#8b5a2b', W: '#fff', B: '#1a1a1a', O: '#3d2410' };
+
+// Koopa walking sprite (12 wide x 16 tall) — green turtle on legs
+const KOOPA_SPRITE = [
+  '....KKKKKK..',
+  '...KKKKKKKK.',
+  '..KKDDDDKKKK',
+  '..KDWWBWWDKK',
+  '..KDWBKBWDKK',
+  '..KKDDDDKKKK',
+  '.KKGGKKGGKK.',
+  'KKGGGKKGGGKK',
+  'KGGGGGGGGGGG',
+  'KGGGGGGGGGGG',
+  '.GGGGGGGGGG.',
+  '.YGGGGGGGGY.',
+  '.YYYY..YYYY.',
+  '.YYYY..YYYY.',
+  '.YY......YY.',
+  '.YY......YY.'
+];
+const KOOPA_PALETTE = { K: '#1a6020', G: '#3aa040', D: '#205020', W: '#fff', B: '#1a1a1a', Y: '#ffd860' };
+
+// Koopa shell sprite (12 wide x 12 tall) — wider shell when stomped
+const KOOPA_SHELL_SPRITE = [
+  '..KKKKKKKK..',
+  '.KKKDDDDKKK.',
+  'KKDGGGGGGDKK',
+  'KDGGKKGGKGDK',
+  'KGGGKKGGKGGK',
+  'KGGGGGGGGGGK',
+  'KGGGKKGGKGGK',
+  'KDGGKKGGKGDK',
+  'KKDGGGGGGDKK',
+  '.KKKDDDDKKK.',
+  '..KKKKKKKK..',
+  '............'
+];
 
 function playerPalette() {
   const c = content.character;
@@ -706,38 +791,131 @@ function stopBGM() {
 function initInput() {
   window.addEventListener('keydown', e => {
     if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' '].includes(e.key)) e.preventDefault();
-    if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = true;
-    if (e.key === 'ArrowRight' || e.key === 'd') keys.right = true;
-    if (e.key === 'ArrowUp' || e.key === 'w' || e.key === ' ') keys.jump = true;
-    if (e.key === 'Escape' && scene === 'playing') goTitle();
+    const k = e.key;
+    // Title screen navigation
+    if (scene === 'title') {
+      if (k === 'ArrowLeft' || k === 'a') { titleSelect(-1); return; }
+      if (k === 'ArrowRight' || k === 'd') { titleSelect(1); return; }
+      if (k === 'Enter' || k === ' ') { startStage(selectedStageIdx); return; }
+      return;
+    }
+    // Playing
+    if (k === 'ArrowLeft' || k === 'a') keys.left = true;
+    if (k === 'ArrowRight' || k === 'd') keys.right = true;
+    if (k === 'ArrowUp' || k === 'w' || k === ' ') keys.jump = true;
+    if (k === 'b' || k === 'B' || k === 'x' || k === 'X') keys.fire = true;
+    if (k === 'Escape' && scene === 'playing') goTitle();
   });
   window.addEventListener('keyup', e => {
-    if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = false;
-    if (e.key === 'ArrowRight' || e.key === 'd') keys.right = false;
-    if (e.key === 'ArrowUp' || e.key === 'w' || e.key === ' ') keys.jump = false;
+    const k = e.key;
+    if (k === 'ArrowLeft' || k === 'a') keys.left = false;
+    if (k === 'ArrowRight' || k === 'd') keys.right = false;
+    if (k === 'ArrowUp' || k === 'w' || k === ' ') keys.jump = false;
+    if (k === 'b' || k === 'B' || k === 'x' || k === 'X') keys.fire = false;
   });
 
-  bindTouch('btn-left', 'left');
-  bindTouch('btn-right', 'right');
-  bindTouch('btn-jump', 'jump');
+  // ---- Touch buttons (Pointer Events + setPointerCapture)
+  bindButton('btn-jump', 'jump');
+  bindButton('btn-fire', 'fire');
+
+  // ---- Joystick
+  bindJoystick();
 }
-function bindTouch(id, action) {
+
+// Binds an on-screen button to a touchKeys flag using Pointer Events.
+// Pointer Events + setPointerCapture guarantees we get the up/cancel
+// even if the finger slides off the element — fixes stuck-key bug.
+function bindButton(id, action) {
   const el = $(id);
-  const press = e => { e.preventDefault(); touchKeys[action] = true; el.classList.add('active'); };
-  const rel = e => { e.preventDefault(); touchKeys[action] = false; el.classList.remove('active'); };
-  el.addEventListener('touchstart', press, { passive: false });
-  el.addEventListener('touchend', rel, { passive: false });
-  el.addEventListener('touchcancel', rel, { passive: false });
-  el.addEventListener('mousedown', press);
-  el.addEventListener('mouseup', rel);
-  el.addEventListener('mouseleave', rel);
+  if (!el) return;
+  el.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    try { el.setPointerCapture(e.pointerId); } catch {}
+    touchKeys[action] = true;
+    el.classList.add('active');
+  });
+  const release = e => {
+    touchKeys[action] = false;
+    el.classList.remove('active');
+  };
+  el.addEventListener('pointerup', release);
+  el.addEventListener('pointercancel', release);
+  el.addEventListener('lostpointercapture', release);
+  // Failsafe: if pointer leaves while NOT captured (rare), clear too
+  el.addEventListener('pointerleave', e => {
+    if (!el.hasPointerCapture || !el.hasPointerCapture(e.pointerId)) release();
+  });
+}
+
+function bindJoystick() {
+  const base = $('stick-base');
+  const stick = $('stick');
+  if (!base || !stick) return;
+  const STICK_MAX = 38;        // px from center
+  const DEADZONE = 8;          // px from center counts as no input
+  let activeId = null;
+  let centerX = 0, centerY = 0;
+
+  function start(e) {
+    e.preventDefault();
+    if (activeId !== null) return; // ignore second finger
+    activeId = e.pointerId;
+    try { base.setPointerCapture(e.pointerId); } catch {}
+    const rect = base.getBoundingClientRect();
+    centerX = rect.left + rect.width / 2;
+    centerY = rect.top + rect.height / 2;
+    stick.classList.add('dragging');
+    move(e);
+  }
+  function move(e) {
+    if (e.pointerId !== activeId) return;
+    let dx = e.clientX - centerX;
+    let dy = e.clientY - centerY;
+    const dist = Math.hypot(dx, dy);
+    if (dist > STICK_MAX) {
+      dx = dx / dist * STICK_MAX;
+      dy = dy / dist * STICK_MAX;
+    }
+    stick.style.transform = `translate(${dx}px, ${dy}px)`;
+    if (Math.abs(dx) < DEADZONE) {
+      touchKeys.left = false;
+      touchKeys.right = false;
+    } else if (dx < 0) {
+      touchKeys.left = true;
+      touchKeys.right = false;
+    } else {
+      touchKeys.right = true;
+      touchKeys.left = false;
+    }
+  }
+  function end(e) {
+    if (e.pointerId !== activeId) return;
+    activeId = null;
+    stick.style.transform = 'translate(0, 0)';
+    stick.classList.remove('dragging');
+    touchKeys.left = false;
+    touchKeys.right = false;
+  }
+
+  base.addEventListener('pointerdown', start);
+  base.addEventListener('pointermove', move);
+  base.addEventListener('pointerup', end);
+  base.addEventListener('pointercancel', end);
+  base.addEventListener('lostpointercapture', () => {
+    activeId = null;
+    stick.style.transform = 'translate(0, 0)';
+    stick.classList.remove('dragging');
+    touchKeys.left = false;
+    touchKeys.right = false;
+  });
 }
 
 function getInput() {
   return {
     left: keys.left || touchKeys.left,
     right: keys.right || touchKeys.right,
-    jump: keys.jump || touchKeys.jump
+    jump: keys.jump || touchKeys.jump,
+    fire: keys.fire || touchKeys.fire
   };
 }
 
@@ -749,18 +927,44 @@ function showTitle() {
   $('title-scene').classList.add('active');
   $('stage-wrap').classList.add('hidden');
   $('hud').classList.add('hidden');
-  $('touch').classList.add('hidden');
+  // Show touch controls on title too (joystick = stage select)
+  $('touch').classList.remove('hidden');
   $('title-name').textContent = (content.meta.worldName || 'HAOHAO.UNZIP').toUpperCase();
   $('title-sub').textContent = content.meta.subtitle || 'HAORIO 版';
   renderTitleBadges();
+
+  // Default selectedStageIdx = last played
+  selectedStageIdx = Math.min(progress.lastStage || 0, stages.length - 1);
   renderStageGrid();
 
-  // 「繼續」按鈕：上次玩到的關
   const btn = $('btn-continue');
-  const targetIdx = Math.min(progress.lastStage || 0, stages.length - 1);
-  btn.textContent = (progress.cleared.length > 0 ? '▶ 繼續 ' : '▶ 開始 ') + (stages[targetIdx]?.id || '1-1');
-  btn.onclick = () => startStage(targetIdx);
+  btn.textContent = (progress.cleared.length > 0 ? '▶ 繼續 ' : '▶ 開始 ') + (stages[selectedStageIdx]?.id || '1-1');
+  btn.onclick = () => startStage(selectedStageIdx);
   stopBGM();
+
+  // Wire title-screen joystick + A button (override game behavior on title)
+  // The joystick already updates touchKeys; we poll it via titleStickPoll.
+  startTitleStickPoll();
+}
+
+// Title-screen joystick polling: when scene === 'title', if touchKeys.left/right
+// transitions from false → true, fire titleSelect once. A button = enter.
+let _titleStickPrev = { left: false, right: false, jump: false, fire: false };
+let _titleStickRAF = null;
+function startTitleStickPoll() {
+  cancelAnimationFrame(_titleStickRAF);
+  function tick() {
+    if (scene !== 'title') { _titleStickPrev = { left: false, right: false, jump: false, fire: false }; return; }
+    if (touchKeys.left && !_titleStickPrev.left) titleSelect(-1);
+    if (touchKeys.right && !_titleStickPrev.right) titleSelect(1);
+    if ((touchKeys.jump && !_titleStickPrev.jump) || (touchKeys.fire && !_titleStickPrev.fire)) {
+      startStage(selectedStageIdx);
+      return;
+    }
+    _titleStickPrev = { left: touchKeys.left, right: touchKeys.right, jump: touchKeys.jump, fire: touchKeys.fire };
+    _titleStickRAF = requestAnimationFrame(tick);
+  }
+  _titleStickRAF = requestAnimationFrame(tick);
 }
 
 function renderStageGrid() {
@@ -768,11 +972,20 @@ function renderStageGrid() {
   grid.innerHTML = '';
   stages.forEach((s, i) => {
     const tile = document.createElement('div');
-    tile.className = 'stage-tile' + (progress.cleared.includes(s.id) ? ' cleared' : '');
+    tile.className = 'stage-tile' + (progress.cleared.includes(s.id) ? ' cleared' : '') + (i === selectedStageIdx ? ' selected' : '');
     tile.innerHTML = `<span class="num">${s.id}</span>${s.title || ''}`;
-    tile.onclick = () => startStage(i);
+    tile.onclick = () => { selectedStageIdx = i; startStage(i); };
     grid.appendChild(tile);
   });
+}
+
+// Title screen left/right navigation. dir = -1 or +1.
+function titleSelect(dir) {
+  selectedStageIdx = (selectedStageIdx + dir + stages.length) % stages.length;
+  renderStageGrid();
+  // also update continue button label
+  const btn = $('btn-continue');
+  if (btn) btn.textContent = '▶ 開始 ' + stages[selectedStageIdx].id;
 }
 
 function goTitle() {
@@ -789,16 +1002,22 @@ function startStage(idx) {
   stages[idx].tiles = parseLayout(stages[idx].layout);
   // spawn player
   player = makePlayer(80, 200);
-  // spawn enemies from G tiles + NPC from N tile
+  // spawn enemies from G/K tiles + NPC from N tile
   enemies = [];
   npcs = [];
+  bullets = [];
+  fireCooldown = 0;
   const stage = stages[idx];
   for (let ty = 0; ty < stage.tiles.length; ty++) {
     for (let tx = 0; tx < stage.tiles[ty].length; tx++) {
-      if (stage.tiles[ty][tx] === 'G') {
+      const c = stage.tiles[ty][tx];
+      if (c === 'G') {
         enemies.push(makeGoomba(tx * TILE, ty * TILE));
         stage.tiles[ty][tx] = '.';
-      } else if (stage.tiles[ty][tx] === 'N') {
+      } else if (c === 'K') {
+        enemies.push(makeKoopa(tx * TILE, ty * TILE));
+        stage.tiles[ty][tx] = '.';
+      } else if (c === 'N') {
         if (stage.npc) {
           npcs.push(makeNpc(tx * TILE, ty * TILE, stage.npc));
         }
@@ -852,6 +1071,20 @@ function makeNpc(x, y, data) {
     bobPhase: Math.random() * Math.PI * 2,
     data: data,
     triggered: false  // resets each stage start
+  };
+}
+function makeKoopa(x, y) {
+  return {
+    x: x + 4, y: y, w: 24, h: 32,
+    vx: -0.8, vy: 0,
+    grounded: false,
+    facing: -1,
+    bumpOnWall: true,
+    dead: false,
+    deathTimer: 0,
+    type: 'koopa',
+    state: 'walk',  // walk | shell | sliding
+    shellTimer: 0
   };
 }
 
@@ -921,6 +1154,7 @@ function moveAndCollide(entity, stage) {
         entity.y = (ty + 1) * TILE;
         entity.vy = 0;
         if (c === '?' && entity.canBumpBlocks) bumpBlock(stage, tx, ty);
+        else if (c === 'B' && entity.canBumpBlocks) breakBrick(stage, tx, ty);
         break;
       }
     }
@@ -938,6 +1172,90 @@ function bumpBlock(stage, tx, ty) {
   hud.coins++;
   $('hud-coins').textContent = '★ ' + hud.coins;
   saveProgress();
+}
+
+function breakBrick(stage, tx, ty) {
+  stage.tiles[ty][tx] = '.';
+  const color = stages[stageIdx].brickColor || '#a06030';
+  // 4 chunks flying out
+  for (let i = 0; i < 4; i++) {
+    spawnParticle(
+      tx * TILE + (i % 2 ? 22 : 6),
+      ty * TILE + (i < 2 ? 6 : 22),
+      '■',
+      color
+    );
+  }
+  spawnParticle(tx * TILE + TILE/2, ty * TILE - 6, '+10', '#fff');
+  hud.coins++;
+  $('hud-coins').textContent = '★ ' + hud.coins;
+}
+
+function killEnemy(e) {
+  e.dead = true;
+  e.deathTimer = 30;
+  spawnParticle(e.x + e.w/2, e.y - 4, '+50', '#ffe000');
+}
+
+// =====================================================
+// BULLETS
+// =====================================================
+function fireBullet() {
+  if (fireCooldown > 0 || !player || player.dead || modalOpen) return;
+  bullets.push({
+    x: player.x + (player.facing > 0 ? player.w : -10),
+    y: player.y + 18,
+    w: 10, h: 10,
+    vx: player.facing * 8.5,
+    life: 70
+  });
+  fireCooldown = 14;
+}
+
+function updateBullets() {
+  if (fireCooldown > 0) fireCooldown--;
+  const stage = stages[stageIdx];
+  for (const b of bullets) {
+    b.x += b.vx;
+    b.life--;
+    // Off-camera cull
+    if (b.x < camera.x - 100 || b.x > camera.x + GAME_W + 100) { b.life = 0; continue; }
+    // Tile collision
+    const tx = Math.floor((b.x + b.w/2) / TILE);
+    const ty = Math.floor((b.y + b.h/2) / TILE);
+    const c = tileAt(stage, tx, ty);
+    if (c === '#' || c === 'X') {
+      b.life = 0;
+    } else if (c === 'B') {
+      breakBrick(stage, tx, ty);
+      b.life = 0;
+    } else if (c === '?') {
+      bumpBlock(stage, tx, ty);
+      b.life = 0;
+    }
+    // Enemy collision
+    for (const e of enemies) {
+      if (e.dead) continue;
+      if (overlap(b, e)) {
+        killEnemy(e);
+        b.life = 0;
+        break;
+      }
+    }
+  }
+  bullets = bullets.filter(b => b.life > 0);
+}
+
+function drawBullets() {
+  for (const b of bullets) {
+    const px = Math.round(b.x - camera.x);
+    const py = Math.round(b.y);
+    // outer flicker
+    ctx.fillStyle = (Math.floor(performance.now() / 60) % 2) ? '#ff8800' : '#ffe000';
+    ctx.fillRect(px, py, b.w, b.h);
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(px + 3, py + 3, 4, 4);
+  }
 }
 
 function spawnParticle(x, y, text, color) {
@@ -989,6 +1307,9 @@ function updatePlayer() {
     player.grounded = false;
   }
 
+  // Fire bullet (B / X / on-screen B button)
+  if (inp.fire) fireBullet();
+
   // Gravity
   player.vy += phys.gravity;
   if (player.vy > phys.maxFallSpeed) player.vy = phys.maxFallSpeed;
@@ -1008,14 +1329,56 @@ function updatePlayer() {
     if (e.dead) continue;
     if (overlap(player, e)) {
       // Stomp: player falling, feet near top of enemy
-      if (player.vy > 1 && (player.y + player.h - e.y) < 24) {
-        e.dead = true;
-        e.deathTimer = 20;
-        player.vy = phys.jumpVelocity * 0.6;
-        spawnParticle(e.x + e.w/2, e.y - 4, '+50', '#fff');
-      } else if (player.invuln === 0) {
-        killPlayer();
-        return;
+      const isStomp = player.vy > 1 && (player.y + player.h - e.y) < 24;
+      if (e.type === 'koopa') {
+        if (e.state === 'walk') {
+          // Stomp turtle → into shell
+          if (isStomp) {
+            e.state = 'shell';
+            e.shellTimer = 240;  // 4 seconds
+            e.h = 22;            // crouch
+            e.y += 10;
+            e.vx = 0;
+            player.vy = phys.jumpVelocity * 0.6;
+            spawnParticle(e.x + e.w/2, e.y - 4, '殼!', '#3aa040');
+          } else if (player.invuln === 0) {
+            killPlayer();
+            return;
+          }
+        } else if (e.state === 'shell') {
+          // Touch standing shell → kick it
+          const dir = (player.x + player.w/2) < (e.x + e.w/2) ? 1 : -1;
+          e.state = 'sliding';
+          e.vx = dir * 6;
+          spawnParticle(e.x + e.w/2, e.y - 4, '踢!', '#ffe000');
+          if (isStomp) player.vy = phys.jumpVelocity * 0.6;
+          else {
+            // little bump back so we don't immediately re-collide
+            player.x -= dir * 4;
+          }
+        } else if (e.state === 'sliding') {
+          if (isStomp) {
+            // Stomp moving shell → stop
+            e.state = 'shell';
+            e.shellTimer = 240;
+            e.vx = 0;
+            player.vy = phys.jumpVelocity * 0.6;
+          } else if (player.invuln === 0) {
+            killPlayer();
+            return;
+          }
+        }
+      } else {
+        // Goomba (default)
+        if (isStomp) {
+          e.dead = true;
+          e.deathTimer = 20;
+          player.vy = phys.jumpVelocity * 0.6;
+          spawnParticle(e.x + e.w/2, e.y - 4, '+50', '#fff');
+        } else if (player.invuln === 0) {
+          killPlayer();
+          return;
+        }
       }
     }
   }
@@ -1069,11 +1432,59 @@ function updateEnemy(e) {
   if (e.x < camera.x - 200 || e.x > camera.x + GAME_W + 400) {
     return;
   }
+
+  // Koopa shell logic
+  if (e.type === 'koopa') {
+    if (e.state === 'shell') {
+      e.shellTimer--;
+      e.vx = 0;
+      // wakes up after 5 sec
+      if (e.shellTimer <= 0) {
+        e.state = 'walk';
+        e.h = 32;
+      }
+    } else if (e.state === 'sliding') {
+      // shell flies fast, kills other enemies on impact
+      const oldVx = e.vx;
+      e.bumpOnWall = false;
+      e.vy += content.physics.gravity;
+      if (e.vy > content.physics.maxFallSpeed) e.vy = content.physics.maxFallSpeed;
+      // wall bounce: if moveAndCollide stops vx, reverse
+      moveAndCollide(e, stages[stageIdx]);
+      if (e.vx === 0 && oldVx !== 0) e.vx = -oldVx;
+      // hit other enemies
+      for (const other of enemies) {
+        if (other === e || other.dead) continue;
+        if (overlap(e, other)) {
+          killEnemy(other);
+        }
+      }
+      return;
+    } else {
+      // walk
+      e.vx = e.facing * 0.8;
+      // edge reverse
+      if (e.grounded) {
+        const aheadX = e.facing > 0 ? e.x + e.w + 2 : e.x - 2;
+        const belowY = e.y + e.h + 4;
+        const tx = Math.floor(aheadX / TILE);
+        const ty = Math.floor(belowY / TILE);
+        if (!isSolid(tileAt(stages[stageIdx], tx, ty))) {
+          e.facing *= -1;
+        }
+      }
+      e.bumpOnWall = true;
+    }
+    e.vy += content.physics.gravity;
+    if (e.vy > content.physics.maxFallSpeed) e.vy = content.physics.maxFallSpeed;
+    moveAndCollide(e, stages[stageIdx]);
+    return;
+  }
+
+  // Goomba (default)
   e.vx = e.facing * 1.0;
   e.vy += content.physics.gravity;
   if (e.vy > content.physics.maxFallSpeed) e.vy = content.physics.maxFallSpeed;
-
-  // Reverse at edge
   if (e.grounded) {
     const aheadX = e.facing > 0 ? e.x + e.w + 2 : e.x - 2;
     const belowY = e.y + e.h + 4;
@@ -1294,6 +1705,7 @@ function render() {
   drawPlayer();
 
   // particles
+  drawBullets();
   for (const p of particles) drawParticle(p);
 }
 
@@ -1463,7 +1875,6 @@ function drawPlayer() {
 
 function drawEnemy(e) {
   if (e.dead) {
-    // squashed: flatten
     const px = Math.round(e.x - camera.x);
     const py = Math.round(e.y + e.h / 2);
     ctx.fillStyle = '#5a3a1a';
@@ -1472,7 +1883,23 @@ function drawEnemy(e) {
   }
   const px = Math.round(e.x - camera.x);
   const py = Math.round(e.y);
-  // 14x12 at scale 2 → 28x24, hitbox is 24x24, center
+  if (e.type === 'koopa') {
+    if (e.state === 'walk') {
+      // 12x16 sprite at scale 2 → 24x32, hitbox 24x32
+      drawSprite(KOOPA_SPRITE, KOOPA_PALETTE, px, py, 2, e.facing > 0);
+    } else {
+      // shell or sliding: 12x12 sprite scale 2 → 24x24
+      const offY = e.h - 24;
+      drawSprite(KOOPA_SHELL_SPRITE, KOOPA_PALETTE, px, py + offY, 2, false);
+      // wobble if about to wake
+      if (e.state === 'shell' && e.shellTimer < 60 && Math.floor(performance.now() / 80) % 2) {
+        ctx.fillStyle = 'rgba(255,255,255,0.3)';
+        ctx.fillRect(px, py + offY, 24, 24);
+      }
+    }
+    return;
+  }
+  // Goomba
   const offsetX = (e.w - 14*2) / 2;
   const offsetY = (e.h - 12*2);
   drawSprite(GOOMBA_SPRITE, GOOMBA_PALETTE, px + offsetX, py + offsetY, 2, e.facing > 0);
@@ -1548,6 +1975,7 @@ function loop(t) {
   if (scene === 'playing' && !modalOpen) {
     updatePlayer();
     for (const e of enemies) updateEnemy(e);
+    updateBullets();
     updateParticles();
     updateCamera();
   }
