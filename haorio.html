@@ -100,7 +100,21 @@
     pointer-events: none;
     z-index: 90;
   }
-  #hud .left, #hud .right { display: flex; gap: 18px; }
+  #hud .left, #hud .right { display: flex; gap: 18px; align-items: center; }
+  #hud-exit {
+    pointer-events: auto;
+    width: 36px; height: 36px;
+    border: 3px solid #fff;
+    background: rgba(216, 40, 0, 0.7);
+    color: #fff;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 14px;
+    cursor: pointer;
+    margin-left: 8px;
+    box-shadow: 2px 2px 0 #1a1a1a;
+  }
+  #hud-exit:hover { background: rgba(216,40,0,0.9); }
+  #hud-exit:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 #1a1a1a; }
 
   /* ========== touch controls ========== */
   #touch {
@@ -489,11 +503,62 @@
   /* ========== utility ========== */
   .hidden { display: none !important; }
   a { color: var(--nes-yellow); }
+
+  /* ========== mobile / touch tweaks ========== */
+  /* Hide desktop control hints on touch-only devices */
+  @media (hover: none) and (pointer: coarse) {
+    #title-scene .meta { display: none; }
+    #title-scene { padding-bottom: 200px; }  /* room for Chrome URL bar + touch buttons */
+  }
+
+  /* Portrait orientation warning — Mario-like games need landscape */
+  #rotate-warn {
+    position: fixed; inset: 0;
+    background: #000;
+    color: var(--nes-yellow);
+    z-index: 999;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    text-align: center;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 14px;
+    line-height: 1.8;
+  }
+  #rotate-warn .icon {
+    font-size: 64px;
+    margin-bottom: 18px;
+    animation: rotate-tip 2s infinite ease-in-out;
+  }
+  #rotate-warn .small {
+    font-family: 'VT323', monospace;
+    font-size: 18px;
+    margin-top: 18px;
+    color: #fff;
+    line-height: 1.5;
+  }
+  @keyframes rotate-tip {
+    0%, 100% { transform: rotate(-15deg); }
+    50% { transform: rotate(75deg); }
+  }
+  /* Show only on portrait + touch */
+  @media (orientation: portrait) and (hover: none) and (pointer: coarse) {
+    #rotate-warn { display: flex; }
+  }
 </style>
 </head>
 <body>
 
 <div id="marquee"><div class="track" id="marquee-track">載入中...</div></div>
+
+<div id="rotate-warn">
+  <div class="icon">📱</div>
+  HAORIO 是橫向遊戲<br>
+  把手機轉橫拿
+  <div class="small">(像玩 Super Mario 那樣)</div>
+</div>
 
 <div id="loading">LOADING...</div>
 
@@ -524,7 +589,8 @@
   </div>
   <div class="right">
     <span id="hud-coins">★ 0</span>
-    <span id="hud-lives">♥ 3</span>
+    <span id="hud-lives">♥ 10</span>
+    <button id="hud-exit" title="回標題 (ESC)">✕</button>
   </div>
 </div>
 
@@ -589,7 +655,7 @@ let npcs = [];
 let particles = [];
 let camera = { x: 0 };
 let keys = {};
-let touchKeys = { left: false, right: false, jump: false, fire: false };
+let touchKeys = { left: false, right: false, jump: false, fire: false, down: false };
 let bullets = [];
 let fireCooldown = 0;
 let selectedStageIdx = 0;
@@ -597,25 +663,28 @@ let modalOpen = false;
 let scene = 'loading';     // loading | title | playing
 let bgmAudio = null;
 let lastFrame = 0;
-let hud = { coins: 0, lives: 3 };
+let hud = { coins: 0, lives: 10 };
 let progress = { cleared: [], best: {}, lastStage: 0, badges: [] };
 let activeNpc = null;        // NPC the dialogue is currently for
 let dialogueOpen = false;
 
 // Player sprite (16w x 24h pixel grid)
+// 16w x 24h. H=hair, S=skin, G=glasses frame, L=lens highlight (white),
+// R=lips, J=jacket, W=shirt, P=pants, O=shoes.
+// Hair has two side-spikes + tousled top (like 我們這一家 yuzu vibe).
 const PLAYER_SPRITE = [
-  '....HHHHHHHH....',
-  '..HHHHHHHHHHHH..',
+  'HH..HHHHHHHH..HH',
   '.HHHHHHHHHHHHHH.',
+  'HHHHHHHHHHHHHHHH',
   'HHHHHHHHHHHHHHHH',
   'HHSSSSSSSSSSSSHH',
   'HSSSSSSSSSSSSSSH',
-  'HSSGGSSSSSGGSSSH',
-  'HSSGGSSSSSGGSSSH',
+  'HSSGGGSSSSGGGSSH',
+  'HSSGLGSSSSGLGSSH',
   'HSSSSSSRRSSSSSSH',
   'HSSSSSRRRRSSSSSH',
-  '.HSSSSSSSSSSSSSH',
-  '..HHSSSSSSSSHH..',
+  '.HSSSSSSSSSSSSH.',
+  '..HHHSSSSSSSHHH.',
   '...JJWWWWWWJJ...',
   '..JJJWWWWWWJJJ..',
   '.JJJJWWWWWWJJJJ.',
@@ -628,6 +697,24 @@ const PLAYER_SPRITE = [
   '..PPPP....PPPP..',
   '..OOOO....OOOO..',
   '.OOOOOO..OOOOOO.'
+];
+
+// Crouching sprite: 16w x 14h (hitbox 24x28 when ducking).
+const PLAYER_CROUCH_SPRITE = [
+  'HH..HHHHHHHH..HH',
+  'HHHHHHHHHHHHHHHH',
+  'HHHHHHHHHHHHHHHH',
+  'HHSSSSSSSSSSSSHH',
+  'HSSGGGSSSSGGGSSH',
+  'HSSGLGSSSSGLGSSH',
+  'HSSSSSRRRRSSSSSH',
+  '.HHSSSSSSSSSSHH.',
+  '..JJWWWWWWWWJJ..',
+  '.JJJWWWWWWWWJJJ.',
+  'JJJWWWWWWWWWWJJJ',
+  '.JPPPPPPPPPPPPJ.',
+  '.OOOOO....OOOOO.',
+  '.OOOOO....OOOOO.'
 ];
 
 // Goomba sprite (14w x 12h)
@@ -689,8 +776,9 @@ function playerPalette() {
   return {
     H: c.hair,
     S: c.skin,
-    G: '#1a1a1a',  // glasses always black
-    R: '#c8302c',  // lips red
+    G: '#1a1a1a',
+    L: '#ffffff',
+    R: '#c8302c',
     J: c.jacket,
     W: c.shirt,
     P: c.pants,
@@ -803,6 +891,7 @@ function initInput() {
     if (k === 'ArrowLeft' || k === 'a') keys.left = true;
     if (k === 'ArrowRight' || k === 'd') keys.right = true;
     if (k === 'ArrowUp' || k === 'w' || k === ' ') keys.jump = true;
+    if (k === 'ArrowDown' || k === 's') keys.down = true;
     if (k === 'b' || k === 'B' || k === 'x' || k === 'X') keys.fire = true;
     if (k === 'Escape' && scene === 'playing') goTitle();
   });
@@ -811,6 +900,7 @@ function initInput() {
     if (k === 'ArrowLeft' || k === 'a') keys.left = false;
     if (k === 'ArrowRight' || k === 'd') keys.right = false;
     if (k === 'ArrowUp' || k === 'w' || k === ' ') keys.jump = false;
+    if (k === 'ArrowDown' || k === 's') keys.down = false;
     if (k === 'b' || k === 'B' || k === 'x' || k === 'X') keys.fire = false;
   });
 
@@ -820,6 +910,14 @@ function initInput() {
 
   // ---- Joystick
   bindJoystick();
+
+  // ---- HUD exit button
+  const exitBtn = $('hud-exit');
+  if (exitBtn) {
+    exitBtn.addEventListener('click', () => {
+      if (scene === 'playing') goTitle();
+    });
+  }
 }
 
 // Binds an on-screen button to a touchKeys flag using Pointer Events.
@@ -877,15 +975,34 @@ function bindJoystick() {
       dy = dy / dist * STICK_MAX;
     }
     stick.style.transform = `translate(${dx}px, ${dy}px)`;
-    if (Math.abs(dx) < DEADZONE) {
-      touchKeys.left = false;
-      touchKeys.right = false;
-    } else if (dx < 0) {
-      touchKeys.left = true;
-      touchKeys.right = false;
+    // Joystick: in title scene any direction switches stage; in game only x is L/R.
+    if (scene === 'title') {
+      // Pick dominant axis. Up / Left = prev, Down / Right = next.
+      const usingY = Math.abs(dy) > Math.abs(dx);
+      const main = usingY ? dy : dx;
+      if (Math.abs(main) < DEADZONE) {
+        touchKeys.left = false;
+        touchKeys.right = false;
+      } else if (main < 0) {
+        touchKeys.left = true;   // up or left → prev
+        touchKeys.right = false;
+      } else {
+        touchKeys.right = true;  // down or right → next
+        touchKeys.left = false;
+      }
     } else {
-      touchKeys.right = true;
-      touchKeys.left = false;
+      // In-game: X for move, +Y for crouch.
+      if (Math.abs(dx) < DEADZONE) {
+        touchKeys.left = false;
+        touchKeys.right = false;
+      } else if (dx < 0) {
+        touchKeys.left = true;
+        touchKeys.right = false;
+      } else {
+        touchKeys.right = true;
+        touchKeys.left = false;
+      }
+      touchKeys.down = (dy > DEADZONE + 4);  // pull down → crouch
     }
   }
   function end(e) {
@@ -915,7 +1032,8 @@ function getInput() {
     left: keys.left || touchKeys.left,
     right: keys.right || touchKeys.right,
     jump: keys.jump || touchKeys.jump,
-    fire: keys.fire || touchKeys.fire
+    fire: keys.fire || touchKeys.fire,
+    down: keys.down || touchKeys.down
   };
 }
 
@@ -1050,7 +1168,8 @@ function makePlayer(x, y) {
     dead: false,
     deathTimer: 0,
     canBumpBlocks: true,
-    invuln: 0
+    invuln: 0,
+    crouching: false
   };
 }
 function makeGoomba(x, y) {
@@ -1279,8 +1398,8 @@ function updatePlayer() {
       hud.lives--;
       $('hud-lives').textContent = '♥ ' + hud.lives;
       if (hud.lives <= 0) {
-        hud.lives = 3;
-        $('hud-lives').textContent = '♥ 3';
+        hud.lives = 10;
+        $('hud-lives').textContent = '♥ 10';
         goTitle();
         return;
       }
@@ -1289,20 +1408,45 @@ function updatePlayer() {
     return;
   }
 
-  // Horizontal
+  // Crouch toggle (must run before jump check; can't jump while crouched)
+  const wantCrouch = inp.down && player.grounded;
+  if (wantCrouch && !player.crouching) {
+    player.crouching = true;
+    const dh = 44 - 28;
+    player.h = 28;
+    player.y += dh;  // sink so feet stay on ground
+  } else if (!wantCrouch && player.crouching) {
+    // Stand up only if there's headroom above
+    const dh = 44 - 28;
+    const newY = player.y - dh;
+    const headTy = Math.floor(newY / TILE);
+    let blocked = false;
+    for (let tx = Math.floor(player.x / TILE); tx <= Math.floor((player.x + player.w - 1) / TILE); tx++) {
+      if (isSolid(tileAt(stage, tx, headTy))) { blocked = true; break; }
+    }
+    if (!blocked) {
+      player.crouching = false;
+      player.h = 44;
+      player.y = newY;
+    }
+    // else stay crouched until headroom clears
+  }
+
+  // Horizontal (half speed when crouching = crawl)
+  const speedMul = player.crouching ? 0.5 : 1;
   let ax = 0;
   if (inp.left) ax -= 1;
   if (inp.right) ax += 1;
   if (ax !== 0) {
-    player.vx = ax * phys.moveSpeed;
+    player.vx = ax * phys.moveSpeed * speedMul;
     player.facing = ax;
   } else {
     player.vx *= phys.friction;
     if (Math.abs(player.vx) < 0.1) player.vx = 0;
   }
 
-  // Jump
-  if (inp.jump && player.grounded) {
+  // Jump (no jump while crouching)
+  if (inp.jump && player.grounded && !player.crouching) {
     player.vy = phys.jumpVelocity;
     player.grounded = false;
   }
@@ -1324,45 +1468,44 @@ function updatePlayer() {
   }
 
   // Enemy collision
+  // Lenient stomp: while falling at all (vy > 0.5), ANY contact = stomp.
+  // Fixes "two enemies stuck together, you stomp one but the second hits you."
+  // Also: after a stomp, brief invuln so the next adjacent enemy doesn't insta-kill.
   if (player.invuln > 0) player.invuln--;
   for (const e of enemies) {
     if (e.dead) continue;
     if (overlap(player, e)) {
-      // Stomp: player falling, feet near top of enemy
-      const isStomp = player.vy > 1 && (player.y + player.h - e.y) < 24;
+      const isStomp = player.vy > 0.5;  // falling = stomp, no positional check
       if (e.type === 'koopa') {
         if (e.state === 'walk') {
-          // Stomp turtle → into shell
           if (isStomp) {
             e.state = 'shell';
-            e.shellTimer = 240;  // 4 seconds
-            e.h = 22;            // crouch
+            e.shellTimer = 240;
+            e.h = 22;
             e.y += 10;
             e.vx = 0;
             player.vy = phys.jumpVelocity * 0.6;
+            player.invuln = 18;
             spawnParticle(e.x + e.w/2, e.y - 4, '殼!', '#3aa040');
           } else if (player.invuln === 0) {
             killPlayer();
             return;
           }
         } else if (e.state === 'shell') {
-          // Touch standing shell → kick it
           const dir = (player.x + player.w/2) < (e.x + e.w/2) ? 1 : -1;
           e.state = 'sliding';
           e.vx = dir * 6;
+          player.invuln = 18;
           spawnParticle(e.x + e.w/2, e.y - 4, '踢!', '#ffe000');
           if (isStomp) player.vy = phys.jumpVelocity * 0.6;
-          else {
-            // little bump back so we don't immediately re-collide
-            player.x -= dir * 4;
-          }
+          else player.x -= dir * 4;
         } else if (e.state === 'sliding') {
           if (isStomp) {
-            // Stomp moving shell → stop
             e.state = 'shell';
             e.shellTimer = 240;
             e.vx = 0;
             player.vy = phys.jumpVelocity * 0.6;
+            player.invuln = 18;
           } else if (player.invuln === 0) {
             killPlayer();
             return;
@@ -1374,6 +1517,7 @@ function updatePlayer() {
           e.dead = true;
           e.deathTimer = 20;
           player.vy = phys.jumpVelocity * 0.6;
+          player.invuln = 18;  // prevents adjacent Goomba killing on the same frame
           spawnParticle(e.x + e.w/2, e.y - 4, '+50', '#fff');
         } else if (player.invuln === 0) {
           killPlayer();
@@ -1858,19 +2002,16 @@ function drawPlayer() {
   if (!player) return;
   const px = Math.round(player.x - camera.x);
   const py = Math.round(player.y);
-  // walking bob
-  const bob = (Math.abs(player.vx) > 0.5 && player.grounded)
+  const bob = (Math.abs(player.vx) > 0.5 && player.grounded && !player.crouching)
     ? Math.floor(performance.now() / 120) % 2
     : 0;
-  // flicker if invuln
   if (player.invuln > 0 && player.invuln % 4 < 2) return;
-  // Draw character: 16x24 sprite at scale 2 → 32x48 (h=44, w=24 hitbox is smaller than sprite, that's intended for Mario feel)
-  // Center sprite over hitbox
-  const spriteW = 16 * 2;  // 32
-  const spriteH = 24 * 2;  // 48
-  const offsetX = (player.w - spriteW) / 2;  // -4
-  const offsetY = (player.h - spriteH);      // -4
-  drawSprite(PLAYER_SPRITE, playerPalette(), px + offsetX, py + offsetY - bob, 2, player.facing < 0);
+  const sprite = player.crouching ? PLAYER_CROUCH_SPRITE : PLAYER_SPRITE;
+  const spriteW = 16 * 2;
+  const spriteH = sprite.length * 2;
+  const offsetX = (player.w - spriteW) / 2;
+  const offsetY = (player.h - spriteH);
+  drawSprite(sprite, playerPalette(), px + offsetX, py + offsetY - bob, 2, player.facing < 0);
 }
 
 function drawEnemy(e) {
@@ -1947,8 +2088,9 @@ function npcPalette() {
     H: c.hair,
     S: c.skin,
     G: '#1a1a1a',
+    L: '#ffffff',
     R: '#c8302c',
-    J: shade(c.jacket, -30),  // darker jacket = "another era H"
+    J: shade(c.jacket, -30),
     W: c.shirt,
     P: c.pants,
     O: c.shoes
