@@ -14,11 +14,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build-version" content="haorio-1.1">
+<meta name="build-version" content="haorio-1.2">
 <script>
   // iOS Safari aggressive cache buster — force hard-reload if local cache holds older build
   (function() {
-    const CURRENT = 'haorio-1.1';
+    const CURRENT = 'haorio-1.2';
     const LAST = localStorage.getItem('haorio-build');
     if (LAST && LAST !== CURRENT && !location.search.includes('_nocache=')) {
       const sep = location.search ? '&' : '?';
@@ -1053,24 +1053,36 @@ function bindJoystick() {
   const base = $('stick-base');
   const stick = $('stick');
   if (!base || !stick) return;
-  const STICK_MAX = 38;        // px from center
-  const DEADZONE = 8;          // px from center counts as no input
+  const STICK_MAX = 38;
+  const DEADZONE = 8;
   let activeId = null;
   let centerX = 0, centerY = 0;
+  let lastMoveTs = 0;
+
+  function reset() {
+    activeId = null;
+    stick.style.transform = 'translate(0, 0)';
+    stick.classList.remove('dragging');
+    touchKeys.left = false;
+    touchKeys.right = false;
+  }
 
   function start(e) {
     e.preventDefault();
-    if (activeId !== null) return; // ignore second finger
+    // If a previous pointer never released (iOS bug), force-clear it before taking the new one.
+    if (activeId !== null && activeId !== e.pointerId) reset();
     activeId = e.pointerId;
     try { base.setPointerCapture(e.pointerId); } catch {}
     const rect = base.getBoundingClientRect();
     centerX = rect.left + rect.width / 2;
     centerY = rect.top + rect.height / 2;
     stick.classList.add('dragging');
+    lastMoveTs = performance.now();
     move(e);
   }
   function move(e) {
     if (e.pointerId !== activeId) return;
+    lastMoveTs = performance.now();
     let dx = e.clientX - centerX;
     let dy = e.clientY - centerY;
     const dist = Math.hypot(dx, dy);
@@ -1109,52 +1121,42 @@ function bindJoystick() {
     }
   }
   function end(e) {
-    if (e.pointerId !== activeId) return;
-    activeId = null;
-    stick.style.transform = 'translate(0, 0)';
-    stick.classList.remove('dragging');
-    touchKeys.left = false;
-    touchKeys.right = false;
+    if (e && e.pointerId !== activeId) return;
+    reset();
   }
 
   base.addEventListener('pointerdown', start);
   base.addEventListener('pointermove', move);
   base.addEventListener('pointerup', end);
   base.addEventListener('pointercancel', end);
-  base.addEventListener('lostpointercapture', () => {
-    activeId = null;
-    stick.style.transform = 'translate(0, 0)';
-    stick.classList.remove('dragging');
-    touchKeys.left = false;
-    touchKeys.right = false;
-  });
+  base.addEventListener('lostpointercapture', () => reset());
 
-  // SAFETY NET — sometimes iOS skips pointerup. Listen on window too:
-  // if a release event with our active pointerId arrives anywhere, clear state.
-  window.addEventListener('pointerup', e => {
-    if (activeId !== null && e.pointerId === activeId) end(e);
-  });
-  window.addEventListener('pointercancel', e => {
-    if (activeId !== null && e.pointerId === activeId) end(e);
-  });
-  // Tab hidden / window blur → release everything (iOS Safari often forgets to)
+  // SAFETY 1 — ANY pointerup anywhere on window releases joystick. Even if iOS
+  // gives us the wrong pointerId or skips the event entirely, the next time
+  // a finger lifts on screen we recover.
+  window.addEventListener('pointerup', () => { if (activeId !== null) reset(); });
+  window.addEventListener('pointercancel', () => { if (activeId !== null) reset(); });
+  window.addEventListener('touchend', () => { if (activeId !== null) reset(); }, { passive: true });
+  window.addEventListener('touchcancel', () => { if (activeId !== null) reset(); }, { passive: true });
+
+  // SAFETY 2 — heartbeat: if we haven't seen a pointermove in 800ms while
+  // claiming to be active, the pointer is stuck. Force release.
+  setInterval(() => {
+    if (activeId !== null && performance.now() - lastMoveTs > 800) {
+      reset();
+    }
+  }, 200);
+
+  // SAFETY 3 — tab hidden / blur clears everything
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
-      activeId = null;
-      stick.style.transform = 'translate(0, 0)';
-      stick.classList.remove('dragging');
-      touchKeys.left = false;
-      touchKeys.right = false;
+      reset();
       touchKeys.jump = false;
       touchKeys.fire = false;
     }
   });
   window.addEventListener('blur', () => {
-    activeId = null;
-    stick.style.transform = 'translate(0, 0)';
-    stick.classList.remove('dragging');
-    touchKeys.left = false;
-    touchKeys.right = false;
+    reset();
     touchKeys.jump = false;
     touchKeys.fire = false;
   });
@@ -1430,8 +1432,8 @@ function overlap(a, b) {
 
 function bumpBlock(stage, tx, ty) {
   stage.tiles[ty][tx] = 'X';
-  // 50% chance: pop a power-up. 50%: spawn a lyric particle.
-  if (Math.random() < 0.5) {
+  // 90% power-up, 10% lyric particle. Power-ups are the point now.
+  if (Math.random() < 0.9) {
     spawnPowerup(tx * TILE + TILE/2 - 12, ty * TILE - 24);
     addScore(50, tx * TILE + TILE/2, ty * TILE - 6);
   } else {
