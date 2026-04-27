@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>haohao.unzip · MARIO</title>
+<meta name="description" content="haohao.unzip 的橫向捲軸版。← → 移動,空白鍵跳,踩 Goomba 撞問號磚,衝旗杆。">
+<meta property="og:title" content="haohao.unzip · MARIO">
+<meta property="og:description" content="一個橫向捲軸的 8-bit 闖關遊戲,五關走完是 EP1。">
+<meta property="og:image" content="https://okiijuuhyygt.github.io/artist-rpg-mvp/og-image.png">
+<meta name="theme-color" content="#5c94fc">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta name="build-version" content="mario-0.1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --nes-black: #1a1a1a;
+    --nes-white: #fcfcfc;
+    --nes-red: #d82800;
+    --nes-yellow: #ffe000;
+    --nes-blue: #5c94fc;
+    --paper: #efe9de;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    height: 100%; width: 100%;
+    background: #000;
+    color: var(--nes-white);
+    font-family: 'VT323', monospace;
+    overflow: hidden;
+    overscroll-behavior: none;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+  }
+  .pixel { font-family: 'Press Start 2P', monospace; }
+
+  /* ========== top marquee ========== */
+  #marquee {
+    position: fixed; top: 0; left: 0; right: 0;
+    height: 28px; line-height: 28px;
+    background: rgba(0,0,0,0.85);
+    color: var(--nes-yellow);
+    font-family: 'Press Start 2P', monospace;
+    font-size: 11px;
+    overflow: hidden;
+    white-space: nowrap;
+    z-index: 100;
+    border-bottom: 2px solid var(--nes-yellow);
+  }
+  #marquee .track {
+    display: inline-block;
+    padding-left: 100%;
+    animation: scroll-left 28s linear infinite;
+    will-change: transform;
+  }
+  #marquee:hover .track { animation-play-state: paused; }
+  @keyframes scroll-left {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-100%); }
+  }
+
+  /* ========== game viewport ========== */
+  #stage-wrap {
+    position: fixed;
+    inset: 28px 0 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+  }
+  #game {
+    display: block;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    background: #5c94fc;
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    box-shadow: 0 0 0 4px #1a1a1a, 0 0 40px rgba(0,0,0,0.5);
+  }
+
+  /* ========== HUD overlay ========== */
+  #hud {
+    position: fixed;
+    top: 36px; left: 12px; right: 12px;
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 11px;
+    color: var(--nes-white);
+    text-shadow: 2px 2px 0 #000;
+    pointer-events: none;
+    z-index: 90;
+  }
+  #hud .left, #hud .right { display: flex; gap: 18px; }
+
+  /* ========== touch controls ========== */
+  #touch {
+    position: fixed;
+    bottom: 16px; left: 0; right: 0;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 16px;
+    z-index: 80;
+    pointer-events: none;
+  }
+  .touch-cluster { display: flex; gap: 12px; pointer-events: auto; }
+  .touch-btn {
+    width: 76px; height: 76px;
+    background: rgba(255,255,255,0.18);
+    border: 3px solid rgba(255,255,255,0.6);
+    border-radius: 12px;
+    color: #fff;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+    user-select: none;
+    -webkit-user-select: none;
+    transition: transform 0.05s, background 0.05s;
+  }
+  .touch-btn.active {
+    background: rgba(255,255,255,0.45);
+    transform: scale(0.92);
+  }
+  #btn-jump { background: rgba(216,40,0,0.4); border-color: rgba(255,200,200,0.7); }
+  #btn-jump.active { background: rgba(216,40,0,0.7); }
+  @media (min-width: 800px) and (hover: hover) {
+    #touch.hide-on-desktop { display: none; }
+  }
+
+  /* ========== modal (stage start / clear / etc) ========== */
+  .modal-back {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.78);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    padding: 20px;
+  }
+  .modal-back.open { display: flex; }
+  .modal {
+    background: var(--paper);
+    color: #1a1a1a;
+    border: 4px solid #1a1a1a;
+    box-shadow: 8px 8px 0 #1a1a1a;
+    padding: 24px;
+    max-width: 540px;
+    width: 100%;
+    max-height: 86vh;
+    overflow-y: auto;
+    font-family: 'VT323', monospace;
+    font-size: 22px;
+    line-height: 1.5;
+  }
+  .modal h2 {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 16px;
+    margin: 0 0 14px 0;
+    color: var(--nes-red);
+  }
+  .modal .body { white-space: pre-wrap; margin-bottom: 18px; }
+  .modal .row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .modal button {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 12px;
+    padding: 12px 18px;
+    border: 3px solid #1a1a1a;
+    background: var(--nes-yellow);
+    color: #1a1a1a;
+    cursor: pointer;
+    box-shadow: 4px 4px 0 #1a1a1a;
+    transition: transform 0.05s, box-shadow 0.05s;
+  }
+  .modal button:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 #1a1a1a; }
+  .modal button:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 #1a1a1a; }
+  .modal button.secondary { background: var(--paper); }
+
+  /* ========== loading ========== */
+  #loading {
+    position: fixed; inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+    color: var(--nes-yellow);
+    font-family: 'Press Start 2P', monospace;
+    font-size: 14px;
+    z-index: 300;
+  }
+
+  /* ========== title screen ========== */
+  #title-scene { display: none; }
+  #title-scene.active { display: flex; }
+  #title-scene {
+    position: fixed; inset: 28px 0 0 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(180deg, #5c94fc 0%, #2a5ab8 100%);
+    z-index: 110;
+    padding: 24px;
+    text-align: center;
+  }
+  #title-scene h1 {
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(20px, 5vw, 40px);
+    color: var(--nes-yellow);
+    text-shadow: 4px 4px 0 #1a1a1a;
+    margin: 0 0 8px;
+  }
+  #title-scene .sub {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 12px;
+    color: #fff;
+    text-shadow: 2px 2px 0 #1a1a1a;
+    margin: 0 0 28px;
+  }
+  #title-scene .stages {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    max-width: 600px;
+    width: 100%;
+    margin-bottom: 24px;
+  }
+  .stage-tile {
+    background: #1a1a1a;
+    border: 3px solid var(--nes-yellow);
+    color: var(--nes-yellow);
+    padding: 14px 8px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    text-align: center;
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.6);
+    transition: transform 0.05s, background 0.05s;
+  }
+  .stage-tile:hover { background: #2a2a2a; transform: translate(-1px,-1px); }
+  .stage-tile .num { font-size: 20px; display: block; margin-bottom: 6px; color: var(--nes-white); }
+  .stage-tile.cleared { border-color: var(--nes-red); }
+  .stage-tile.cleared::after {
+    content: ' ★';
+    color: var(--nes-red);
+  }
+  .stage-tile.locked { opacity: 0.4; cursor: not-allowed; }
+  #title-scene .start-btn {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 14px;
+    padding: 16px 28px;
+    border: 3px solid #1a1a1a;
+    background: var(--nes-red);
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 6px 6px 0 #1a1a1a;
+    text-shadow: 2px 2px 0 #1a1a1a;
+  }
+  #title-scene .start-btn:hover { transform: translate(-1px,-1px); box-shadow: 7px 7px 0 #1a1a1a; }
+  #title-scene .start-btn:active { transform: translate(3px,3px); box-shadow: 3px 3px 0 #1a1a1a; }
+  #title-scene .meta {
+    margin-top: 18px;
+    font-size: 14px;
+    color: rgba(255,255,255,0.85);
+    font-family: 'VT323', monospace;
+  }
+  #title-scene .meta a { color: var(--nes-yellow); text-decoration: underline; }
+
+  /* ========== utility ========== */
+  .hidden { display: none !important; }
+  a { color: var(--nes-yellow); }
+</style>
+</head>
+<body>
+
+<div id="marquee"><div class="track" id="marquee-track">載入中...</div></div>
+
+<div id="loading">LOADING...</div>
+
+<section id="title-scene">
+  <h1 id="title-name">HAOHAO.UNZIP</h1>
+  <p class="sub" id="title-sub">MARIO 版 · 橫向捲軸</p>
+  <div class="stages" id="stage-grid"></div>
+  <button class="start-btn" id="btn-continue">▶ 繼續</button>
+  <div class="meta">
+    控制 ← → 移動 · ↑ / 空白鍵 跳<br>
+    手機點下方按鈕 · <a href="index.html">回經典版</a>
+  </div>
+</section>
+
+<div id="stage-wrap" class="hidden">
+  <canvas id="game" width="1024" height="576"></canvas>
+</div>
+
+<div id="hud" class="hidden">
+  <div class="left">
+    <span id="hud-stage">1-1</span>
+    <span id="hud-title"></span>
+  </div>
+  <div class="right">
+    <span id="hud-coins">★ 0</span>
+    <span id="hud-lives">♥ 3</span>
+  </div>
+</div>
+
+<div id="touch" class="hidden">
+  <div class="touch-cluster">
+    <div class="touch-btn" id="btn-left">◀</div>
+    <div class="touch-btn" id="btn-right">▶</div>
+  </div>
+  <div class="touch-cluster">
+    <div class="touch-btn" id="btn-jump">A</div>
+  </div>
+</div>
+
+<div class="modal-back" id="modal">
+  <div class="modal">
+    <h2 id="modal-title"></h2>
+    <div class="body" id="modal-body"></div>
+    <div class="row" id="modal-row"></div>
+  </div>
+</div>
+
+<script>
+// =====================================================
+// CONFIG / STATE
+// =====================================================
+const TILE = 32;
+const GAME_W = 1024;
+const GAME_H = 576;
+const LS_KEY = 'hao-mario-v1';
+const POLL_API = 'https://abacus.jasoncameron.dev';
+
+const $ = id => document.getElementById(id);
+const canvas = $('game');
+const ctx = canvas.getContext('2d');
+ctx.imageSmoothingEnabled = false;
+
+let content = null;        // mario-content.json
+let stages = [];           // parsed stage objects (with tiles[][])
+let stageIdx = 0;          // current stage index in world1
+let player = null;
+let enemies = [];
+let particles = [];
+let camera = { x: 0 };
+let keys = {};
+let touchKeys = { left: false, right: false, jump: false };
+let modalOpen = false;
+let scene = 'loading';     // loading | title | playing
+let bgmAudio = null;
+let lastFrame = 0;
+let hud = { coins: 0, lives: 3 };
+let progress = { cleared: [], best: {}, lastStage: 0 };
+
+// Player sprite (16w x 24h pixel grid)
+const PLAYER_SPRITE = [
+  '....HHHHHHHH....',
+  '..HHHHHHHHHHHH..',
+  '.HHHHHHHHHHHHHH.',
+  'HHHHHHHHHHHHHHHH',
+  'HHSSSSSSSSSSSSHH',
+  'HSSSSSSSSSSSSSSH',
+  'HSSGGSSSSSGGSSSH',
+  'HSSGGSSSSSGGSSSH',
+  'HSSSSSSRRSSSSSSH',
+  'HSSSSSRRRRSSSSSH',
+  '.HSSSSSSSSSSSSSH',
+  '..HHSSSSSSSSHH..',
+  '...JJWWWWWWJJ...',
+  '..JJJWWWWWWJJJ..',
+  '.JJJJWWWWWWJJJJ.',
+  'JJJJWWWWWWWWJJJJ',
+  'JJJJWWWWWWWWJJJJ',
+  '.JJJWWWWWWWWJJJ.',
+  '..PPWWWWWWWWPP..',
+  '..PPPPPPPPPPPP..',
+  '..PPPP....PPPP..',
+  '..PPPP....PPPP..',
+  '..OOOO....OOOO..',
+  '.OOOOOO..OOOOOO.'
+];
+
+// Goomba sprite (14w x 12h)
+const GOOMBA_SPRITE = [
+  '....KKKKKK....',
+  '..KKKKKKKKKK..',
+  '.KKKKKKKKKKKK.',
+  'KKWWKKKKKKWWKK',
+  'KKWBKKKKKKWBKK',
+  'KKKKKKKKKKKKKK',
+  'KKKKKK..KKKKKK',
+  'KKKKKKKKKKKKKK',
+  '.KKKKKKKKKKKK.',
+  '.KKKKKKKKKKKK.',
+  '.OO........OO.',
+  '.OO........OO.'
+];
+const GOOMBA_PALETTE = { K: '#8b5a2b', W: '#fff', B: '#1a1a1a', O: '#3d2410' };
+
+function playerPalette() {
+  const c = content.character;
+  return {
+    H: c.hair,
+    S: c.skin,
+    G: '#1a1a1a',  // glasses always black
+    R: '#c8302c',  // lips red
+    J: c.jacket,
+    W: c.shirt,
+    P: c.pants,
+    O: c.shoes
+  };
+}
+
+// =====================================================
+// LOAD
+// =====================================================
+async function boot() {
+  try {
+    const res = await fetch('mario-content.json?t=' + Date.now());
+    content = await res.json();
+  } catch (e) {
+    $('loading').textContent = 'load fail: ' + e.message;
+    return;
+  }
+  stages = content.world1.stages.map(s => ({
+    ...s,
+    tiles: parseLayout(s.layout)
+  }));
+
+  // Load progress
+  try {
+    const saved = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
+    if (saved.cleared) progress.cleared = saved.cleared;
+    if (saved.coins) hud.coins = saved.coins;
+    if (typeof saved.lastStage === 'number') progress.lastStage = saved.lastStage;
+  } catch {}
+
+  initMarquee();
+  initInput();
+  initBGM();
+  $('loading').classList.add('hidden');
+  showTitle();
+  requestAnimationFrame(loop);
+}
+
+function parseLayout(rows) {
+  // Returns 2D array [y][x] of chars
+  const tiles = [];
+  for (let y = 0; y < rows.length; y++) {
+    const row = [];
+    for (let x = 0; x < rows[y].length; x++) row.push(rows[y][x]);
+    tiles.push(row);
+  }
+  return tiles;
+}
+
+function saveProgress() {
+  try {
+    localStorage.setItem(LS_KEY, JSON.stringify({
+      cleared: progress.cleared,
+      coins: hud.coins,
+      lastStage: stageIdx
+    }));
+  } catch {}
+}
+
+// =====================================================
+// MARQUEE
+// =====================================================
+function initMarquee() {
+  if (!content.marquee || !content.marquee.enabled) {
+    $('marquee').classList.add('hidden');
+    return;
+  }
+  const items = content.marquee.items || [];
+  const text = items.map(i => typeof i === 'string' ? i : (i.text || '')).join('   ✦   ');
+  // duplicate so the loop has no gap
+  $('marquee-track').textContent = text + '   ✦   ' + text;
+}
+
+// =====================================================
+// BGM
+// =====================================================
+function initBGM() {
+  if (!content.audio || !content.audio.bgm) return;
+  bgmAudio = new Audio(content.audio.bgm);
+  bgmAudio.loop = true;
+  bgmAudio.volume = content.audio.bgmVolume || 0.4;
+}
+function startBGM() {
+  if (!bgmAudio) return;
+  bgmAudio.play().catch(() => { /* user gesture needed */ });
+}
+function stopBGM() {
+  if (!bgmAudio) return;
+  bgmAudio.pause();
+}
+
+// =====================================================
+// INPUT
+// =====================================================
+function initInput() {
+  window.addEventListener('keydown', e => {
+    if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' '].includes(e.key)) e.preventDefault();
+    if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = true;
+    if (e.key === 'ArrowRight' || e.key === 'd') keys.right = true;
+    if (e.key === 'ArrowUp' || e.key === 'w' || e.key === ' ') keys.jump = true;
+    if (e.key === 'Escape' && scene === 'playing') goTitle();
+  });
+  window.addEventListener('keyup', e => {
+    if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = false;
+    if (e.key === 'ArrowRight' || e.key === 'd') keys.right = false;
+    if (e.key === 'ArrowUp' || e.key === 'w' || e.key === ' ') keys.jump = false;
+  });
+
+  bindTouch('btn-left', 'left');
+  bindTouch('btn-right', 'right');
+  bindTouch('btn-jump', 'jump');
+}
+function bindTouch(id, action) {
+  const el = $(id);
+  const press = e => { e.preventDefault(); touchKeys[action] = true; el.classList.add('active'); };
+  const rel = e => { e.preventDefault(); touchKeys[action] = false; el.classList.remove('active'); };
+  el.addEventListener('touchstart', press, { passive: false });
+  el.addEventListener('touchend', rel, { passive: false });
+  el.addEventListener('touchcancel', rel, { passive: false });
+  el.addEventListener('mousedown', press);
+  el.addEventListener('mouseup', rel);
+  el.addEventListener('mouseleave', rel);
+}
+
+function getInput() {
+  return {
+    left: keys.left || touchKeys.left,
+    right: keys.right || touchKeys.right,
+    jump: keys.jump || touchKeys.jump
+  };
+}
+
+// =====================================================
+// TITLE / STAGE SELECT
+// =====================================================
+function showTitle() {
+  scene = 'title';
+  $('title-scene').classList.add('active');
+  $('stage-wrap').classList.add('hidden');
+  $('hud').classList.add('hidden');
+  $('touch').classList.add('hidden');
+  $('title-name').textContent = (content.meta.worldName || 'HAOHAO.UNZIP').toUpperCase();
+  $('title-sub').textContent = content.meta.subtitle || 'MARIO 版';
+  renderStageGrid();
+
+  // 「繼續」按鈕：上次玩到的關
+  const btn = $('btn-continue');
+  const targetIdx = Math.min(progress.lastStage || 0, stages.length - 1);
+  btn.textContent = (progress.cleared.length > 0 ? '▶ 繼續 ' : '▶ 開始 ') + (stages[targetIdx]?.id || '1-1');
+  btn.onclick = () => startStage(targetIdx);
+  stopBGM();
+}
+
+function renderStageGrid() {
+  const grid = $('stage-grid');
+  grid.innerHTML = '';
+  stages.forEach((s, i) => {
+    const tile = document.createElement('div');
+    tile.className = 'stage-tile' + (progress.cleared.includes(s.id) ? ' cleared' : '');
+    tile.innerHTML = `<span class="num">${s.id}</span>${s.title || ''}`;
+    tile.onclick = () => startStage(i);
+    grid.appendChild(tile);
+  });
+}
+
+function goTitle() {
+  showTitle();
+}
+
+// =====================================================
+// STAGE START
+// =====================================================
+function startStage(idx) {
+  if (idx < 0 || idx >= stages.length) return;
+  stageIdx = idx;
+  // reset stage tiles (re-parse so question blocks reset)
+  stages[idx].tiles = parseLayout(stages[idx].layout);
+  // spawn player
+  player = makePlayer(80, 200);
+  // spawn enemies from G tiles
+  enemies = [];
+  const stage = stages[idx];
+  for (let ty = 0; ty < stage.tiles.length; ty++) {
+    for (let tx = 0; tx < stage.tiles[ty].length; tx++) {
+      if (stage.tiles[ty][tx] === 'G') {
+        enemies.push(makeGoomba(tx * TILE, ty * TILE));
+        stage.tiles[ty][tx] = '.';  // clear it from tile grid
+      }
+    }
+  }
+  particles = [];
+  camera.x = 0;
+  scene = 'playing';
+  $('title-scene').classList.remove('active');
+  $('stage-wrap').classList.remove('hidden');
+  $('hud').classList.remove('hidden');
+  $('touch').classList.remove('hidden');
+  $('hud-stage').textContent = stage.id;
+  $('hud-title').textContent = stage.title || '';
+  $('hud-coins').textContent = '★ ' + hud.coins;
+  $('hud-lives').textContent = '♥ ' + hud.lives;
+  saveProgress();
+  startBGM();
+}
+
+function makePlayer(x, y) {
+  return {
+    x, y, w: 24, h: 44,
+    vx: 0, vy: 0,
+    grounded: false,
+    facing: 1,
+    dead: false,
+    deathTimer: 0,
+    canBumpBlocks: true,
+    invuln: 0
+  };
+}
+function makeGoomba(x, y) {
+  return {
+    x: x + 4, y: y + 8, w: 24, h: 24,
+    vx: -1, vy: 0,
+    grounded: false,
+    facing: -1,
+    bumpOnWall: true,
+    dead: false,
+    deathTimer: 0,
+    type: 'goomba'
+  };
+}
+
+// =====================================================
+// TILE / COLLISION HELPERS
+// =====================================================
+function tileAt(stage, tx, ty) {
+  if (ty < 0 || ty >= stage.tiles.length) return '.';
+  const row = stage.tiles[ty];
+  if (!row || tx < 0 || tx >= row.length) return '.';
+  return row[tx];
+}
+function isSolid(c) {
+  return c === '#' || c === 'B' || c === '?' || c === 'X';
+}
+function moveAndCollide(entity, stage) {
+  // Horizontal
+  entity.x += entity.vx;
+  if (entity.vx > 0) {
+    const tx = Math.floor((entity.x + entity.w - 1) / TILE);
+    const yStart = Math.floor(entity.y / TILE);
+    const yEnd = Math.floor((entity.y + entity.h - 1) / TILE);
+    for (let ty = yStart; ty <= yEnd; ty++) {
+      if (isSolid(tileAt(stage, tx, ty))) {
+        entity.x = tx * TILE - entity.w;
+        entity.vx = 0;
+        if (entity.bumpOnWall) entity.facing = -1;
+        break;
+      }
+    }
+  } else if (entity.vx < 0) {
+    const tx = Math.floor(entity.x / TILE);
+    const yStart = Math.floor(entity.y / TILE);
+    const yEnd = Math.floor((entity.y + entity.h - 1) / TILE);
+    for (let ty = yStart; ty <= yEnd; ty++) {
+      if (isSolid(tileAt(stage, tx, ty))) {
+        entity.x = (tx + 1) * TILE;
+        entity.vx = 0;
+        if (entity.bumpOnWall) entity.facing = 1;
+        break;
+      }
+    }
+  }
+
+  // Vertical
+  entity.y += entity.vy;
+  entity.grounded = false;
+  if (entity.vy > 0) {
+    const ty = Math.floor((entity.y + entity.h - 1) / TILE);
+    const xStart = Math.floor(entity.x / TILE);
+    const xEnd = Math.floor((entity.x + entity.w - 1) / TILE);
+    for (let tx = xStart; tx <= xEnd; tx++) {
+      if (isSolid(tileAt(stage, tx, ty))) {
+        entity.y = ty * TILE - entity.h;
+        entity.vy = 0;
+        entity.grounded = true;
+        break;
+      }
+    }
+  } else if (entity.vy < 0) {
+    const ty = Math.floor(entity.y / TILE);
+    const xStart = Math.floor(entity.x / TILE);
+    const xEnd = Math.floor((entity.x + entity.w - 1) / TILE);
+    for (let tx = xStart; tx <= xEnd; tx++) {
+      const c = tileAt(stage, tx, ty);
+      if (isSolid(c)) {
+        entity.y = (ty + 1) * TILE;
+        entity.vy = 0;
+        if (c === '?' && entity.canBumpBlocks) bumpBlock(stage, tx, ty);
+        break;
+      }
+    }
+  }
+}
+function overlap(a, b) {
+  return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+}
+
+function bumpBlock(stage, tx, ty) {
+  stage.tiles[ty][tx] = 'X';
+  const msgs = stages[stageIdx].questionBlockContent || ['+1'];
+  const msg = msgs[Math.floor(Math.random() * msgs.length)];
+  spawnParticle(tx * TILE + TILE/2, ty * TILE - 6, msg, '#ffe000');
+  hud.coins++;
+  $('hud-coins').textContent = '★ ' + hud.coins;
+  saveProgress();
+}
+
+function spawnParticle(x, y, text, color) {
+  particles.push({ x, y, text, color, life: 90, vy: -1.2 });
+}
+
+// =====================================================
+// UPDATE
+// =====================================================
+function updatePlayer() {
+  if (modalOpen) return;
+  const phys = content.physics;
+  const stage = stages[stageIdx];
+  const inp = getInput();
+
+  if (player.dead) {
+    player.deathTimer--;
+    player.vy += phys.gravity * 0.6;
+    player.y += player.vy;
+    if (player.deathTimer <= 0) {
+      hud.lives--;
+      $('hud-lives').textContent = '♥ ' + hud.lives;
+      if (hud.lives <= 0) {
+        hud.lives = 3;
+        $('hud-lives').textContent = '♥ 3';
+        goTitle();
+        return;
+      }
+      respawnPlayer();
+    }
+    return;
+  }
+
+  // Horizontal
+  let ax = 0;
+  if (inp.left) ax -= 1;
+  if (inp.right) ax += 1;
+  if (ax !== 0) {
+    player.vx = ax * phys.moveSpeed;
+    player.facing = ax;
+  } else {
+    player.vx *= phys.friction;
+    if (Math.abs(player.vx) < 0.1) player.vx = 0;
+  }
+
+  // Jump
+  if (inp.jump && player.grounded) {
+    player.vy = phys.jumpVelocity;
+    player.grounded = false;
+  }
+
+  // Gravity
+  player.vy += phys.gravity;
+  if (player.vy > phys.maxFallSpeed) player.vy = phys.maxFallSpeed;
+
+  // Move
+  moveAndCollide(player, stage);
+
+  // Fall off bottom
+  if (player.y > GAME_H + 100) {
+    killPlayer();
+    return;
+  }
+
+  // Enemy collision
+  if (player.invuln > 0) player.invuln--;
+  for (const e of enemies) {
+    if (e.dead) continue;
+    if (overlap(player, e)) {
+      // Stomp: player falling, feet near top of enemy
+      if (player.vy > 1 && (player.y + player.h - e.y) < 24) {
+        e.dead = true;
+        e.deathTimer = 20;
+        player.vy = phys.jumpVelocity * 0.6;
+        spawnParticle(e.x + e.w/2, e.y - 4, '+50', '#fff');
+      } else if (player.invuln === 0) {
+        killPlayer();
+        return;
+      }
+    }
+  }
+
+  // Flagpole
+  for (let ty = 0; ty < stage.tiles.length; ty++) {
+    for (let tx = 0; tx < stage.tiles[ty].length; tx++) {
+      if (stage.tiles[ty][tx] === 'F') {
+        const fx = tx * TILE, fy = ty * TILE;
+        if (player.x + player.w > fx && player.x < fx + TILE) {
+          // Check vertical overlap with flagpole height (4 tiles up)
+          const poleTop = fy - TILE * 3;
+          if (player.y + player.h > poleTop && player.y < fy + TILE) {
+            triggerStageEnd();
+            return;
+          }
+        }
+      }
+    }
+  }
+}
+
+function killPlayer() {
+  player.dead = true;
+  player.deathTimer = 60;
+  player.vy = -10;
+  player.vx = 0;
+  spawnParticle(player.x + player.w/2, player.y, 'KO', '#fff');
+}
+function respawnPlayer() {
+  player = makePlayer(80, 200);
+  camera.x = 0;
+}
+
+function updateEnemy(e) {
+  if (e.dead) {
+    e.deathTimer--;
+    return;
+  }
+  // Don't update if off-camera (left of camera by 200px)
+  if (e.x < camera.x - 200 || e.x > camera.x + GAME_W + 400) {
+    return;
+  }
+  e.vx = e.facing * 1.0;
+  e.vy += content.physics.gravity;
+  if (e.vy > content.physics.maxFallSpeed) e.vy = content.physics.maxFallSpeed;
+
+  // Reverse at edge
+  if (e.grounded) {
+    const aheadX = e.facing > 0 ? e.x + e.w + 2 : e.x - 2;
+    const belowY = e.y + e.h + 4;
+    const tx = Math.floor(aheadX / TILE);
+    const ty = Math.floor(belowY / TILE);
+    if (!isSolid(tileAt(stages[stageIdx], tx, ty))) {
+      e.facing *= -1;
+    }
+  }
+  moveAndCollide(e, stages[stageIdx]);
+}
+
+function updateParticles() {
+  for (const p of particles) {
+    p.y += p.vy;
+    p.life--;
+  }
+  particles = particles.filter(p => p.life > 0);
+}
+
+function updateCamera() {
+  if (!player) return;
+  const targetX = player.x - GAME_W / 2 + player.w / 2;
+  camera.x += (targetX - camera.x) * 0.18;
+  if (camera.x < 0) camera.x = 0;
+  const stage = stages[stageIdx];
+  const stageWidth = (stage.tiles[0]?.length || 80) * TILE;
+  const maxX = stageWidth - GAME_W;
+  if (camera.x > maxX) camera.x = maxX;
+}
+
+// =====================================================
+// STAGE END / MODAL
+// =====================================================
+function triggerStageEnd() {
+  if (modalOpen) return;
+  const stage = stages[stageIdx];
+  if (!progress.cleared.includes(stage.id)) {
+    progress.cleared.push(stage.id);
+    saveProgress();
+  }
+  spawnParticle(player.x + player.w/2, player.y, stage.endText || 'CLEAR', '#ffe000');
+  setTimeout(() => {
+    showStageClearModal();
+  }, 500);
+}
+
+function showStageClearModal() {
+  const stage = stages[stageIdx];
+  $('modal-title').textContent = stage.endModalTitle || stage.title || 'CLEAR';
+  $('modal-body').textContent = stage.endModalBody || '';
+  const row = $('modal-row');
+  row.innerHTML = '';
+  // Continue to next stage button
+  const isLast = stageIdx >= stages.length - 1;
+  if (!isLast) {
+    const next = document.createElement('button');
+    next.textContent = stage.endModalCta || ('▶ 下一關 ' + stages[stageIdx + 1].id);
+    next.onclick = () => { closeModal(); startStage(stageIdx + 1); };
+    row.appendChild(next);
+  } else {
+    const end = document.createElement('button');
+    end.textContent = (content.endgame && content.endgame.ctaLabel) || '▶ 結算';
+    end.onclick = () => { closeModal(); showEndgame(); };
+    row.appendChild(end);
+  }
+  // Back to title
+  const back = document.createElement('button');
+  back.className = 'secondary';
+  back.textContent = '↑ 回標題';
+  back.onclick = () => { closeModal(); goTitle(); };
+  row.appendChild(back);
+  openModal();
+}
+
+function showEndgame() {
+  const eg = content.endgame || {};
+  $('modal-title').textContent = eg.title || '🎮 GAME CLEAR';
+  $('modal-body').textContent = eg.body || 'Thank you for playing!';
+  const row = $('modal-row');
+  row.innerHTML = '';
+  if (eg.ctaUrl) {
+    const cta = document.createElement('button');
+    cta.textContent = eg.ctaLabel || '▶ 繼續';
+    cta.onclick = () => window.location.href = eg.ctaUrl;
+    row.appendChild(cta);
+  }
+  const back = document.createElement('button');
+  back.className = 'secondary';
+  back.textContent = '↑ 回標題';
+  back.onclick = () => { closeModal(); goTitle(); };
+  row.appendChild(back);
+  openModal();
+}
+
+function openModal() {
+  modalOpen = true;
+  $('modal').classList.add('open');
+}
+function closeModal() {
+  modalOpen = false;
+  $('modal').classList.remove('open');
+}
+
+// =====================================================
+// RENDER
+// =====================================================
+function render() {
+  if (scene !== 'playing') return;
+  const stage = stages[stageIdx];
+
+  // bg
+  ctx.fillStyle = stage.bgColor || '#5c94fc';
+  ctx.fillRect(0, 0, GAME_W, GAME_H);
+
+  // clouds (parallax)
+  drawClouds();
+  drawHills(stage);
+
+  // tiles
+  drawTiles(stage);
+
+  // enemies
+  for (const e of enemies) drawEnemy(e);
+
+  // player
+  drawPlayer();
+
+  // particles
+  for (const p of particles) drawParticle(p);
+}
+
+function drawClouds() {
+  ctx.fillStyle = 'rgba(255,255,255,0.85)';
+  const cloudOffset = (camera.x * 0.3) % 400;
+  for (let i = -1; i < 4; i++) {
+    const cx = i * 400 - cloudOffset + 80;
+    drawCloud(cx, 60);
+    drawCloud(cx + 220, 100);
+  }
+}
+function drawCloud(x, y) {
+  ctx.beginPath();
+  ctx.arc(x, y, 16, 0, Math.PI * 2);
+  ctx.arc(x + 18, y - 4, 18, 0, Math.PI * 2);
+  ctx.arc(x + 36, y, 16, 0, Math.PI * 2);
+  ctx.arc(x + 14, y + 8, 12, 0, Math.PI * 2);
+  ctx.fill();
+}
+function drawHills(stage) {
+  const hillColor = shade(stage.bgColor || '#5c94fc', -30);
+  ctx.fillStyle = hillColor;
+  const off = (camera.x * 0.5) % 360;
+  for (let i = -1; i < 4; i++) {
+    const hx = i * 360 - off;
+    ctx.beginPath();
+    ctx.moveTo(hx, GAME_H - 80);
+    ctx.quadraticCurveTo(hx + 180, GAME_H - 220, hx + 360, GAME_H - 80);
+    ctx.lineTo(hx + 360, GAME_H);
+    ctx.lineTo(hx, GAME_H);
+    ctx.fill();
+  }
+}
+function shade(hex, amt) {
+  // simple hex shade
+  const m = hex.match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
+  if (!m) return hex;
+  let r = parseInt(m[1], 16) + amt, g = parseInt(m[2], 16) + amt, b = parseInt(m[3], 16) + amt;
+  r = Math.max(0, Math.min(255, r));
+  g = Math.max(0, Math.min(255, g));
+  b = Math.max(0, Math.min(255, b));
+  return `rgb(${r},${g},${b})`;
+}
+
+function drawTiles(stage) {
+  const startX = Math.max(0, Math.floor(camera.x / TILE) - 1);
+  const endX = Math.min(stage.tiles[0].length, startX + Math.ceil(GAME_W / TILE) + 2);
+  for (let ty = 0; ty < stage.tiles.length; ty++) {
+    for (let tx = startX; tx < endX; tx++) {
+      const c = stage.tiles[ty][tx];
+      if (!c || c === '.') continue;
+      const px = Math.round(tx * TILE - camera.x);
+      const py = ty * TILE;
+      if (c === '#') drawGround(px, py, stage.groundColor);
+      else if (c === 'B') drawBrick(px, py, stage.brickColor);
+      else if (c === '?') drawQuestion(px, py);
+      else if (c === 'X') drawUsedBlock(px, py);
+      else if (c === 'F') drawFlag(px, py, ty, tx, stage);
+    }
+  }
+}
+
+function drawGround(px, py, color) {
+  ctx.fillStyle = color || '#c84c0c';
+  ctx.fillRect(px, py, TILE, TILE);
+  ctx.fillStyle = shade(color || '#c84c0c', 30);
+  ctx.fillRect(px, py, TILE, 4);
+  ctx.fillStyle = shade(color || '#c84c0c', -30);
+  ctx.fillRect(px, py + TILE - 4, TILE, 4);
+  ctx.fillRect(px, py, 4, TILE);
+}
+function drawBrick(px, py, color) {
+  ctx.fillStyle = color || '#a06030';
+  ctx.fillRect(px, py, TILE, TILE);
+  ctx.fillStyle = shade(color || '#a06030', -40);
+  ctx.fillRect(px, py + 14, TILE, 2);
+  ctx.fillRect(px + 14, py, 2, 14);
+  ctx.fillRect(px + 6, py + 16, 2, 14);
+  ctx.fillRect(px + 22, py + 16, 2, 14);
+  ctx.fillStyle = shade(color || '#a06030', 30);
+  ctx.fillRect(px, py, TILE, 2);
+  ctx.fillRect(px, py, 2, TILE);
+}
+function drawQuestion(px, py) {
+  // Animated yellow ? block
+  const t = Math.floor(performance.now() / 200) % 2;
+  ctx.fillStyle = t === 0 ? '#ffe000' : '#fdb000';
+  ctx.fillRect(px, py, TILE, TILE);
+  ctx.fillStyle = '#7a4a00';
+  ctx.fillRect(px, py, TILE, 3);
+  ctx.fillRect(px, py + TILE - 3, TILE, 3);
+  ctx.fillRect(px, py, 3, TILE);
+  ctx.fillRect(px + TILE - 3, py, 3, TILE);
+  // ? mark
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 22px monospace';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('?', px + TILE/2, py + TILE/2 + 1);
+  ctx.textAlign = 'start';
+  ctx.textBaseline = 'alphabetic';
+}
+function drawUsedBlock(px, py) {
+  ctx.fillStyle = '#7a4a00';
+  ctx.fillRect(px, py, TILE, TILE);
+  ctx.fillStyle = shade('#7a4a00', -20);
+  ctx.fillRect(px, py + TILE - 4, TILE, 4);
+  ctx.fillRect(px, py, TILE, 3);
+}
+function drawFlag(px, py, ty, tx, stage) {
+  // Pole goes up from this tile
+  const poleH = TILE * 4;
+  ctx.fillStyle = '#aaa';
+  ctx.fillRect(px + TILE/2 - 2, py - poleH, 4, poleH + TILE);
+  // top ball
+  ctx.fillStyle = '#fcd000';
+  ctx.beginPath();
+  ctx.arc(px + TILE/2, py - poleH, 6, 0, Math.PI * 2);
+  ctx.fill();
+  // flag waving
+  const wave = Math.sin(performance.now() / 300) * 3;
+  ctx.fillStyle = '#d82800';
+  ctx.beginPath();
+  ctx.moveTo(px + TILE/2 + 2, py - poleH + 4);
+  ctx.lineTo(px + TILE/2 + 28 + wave, py - poleH + 14);
+  ctx.lineTo(px + TILE/2 + 2, py - poleH + 24);
+  ctx.fill();
+  // base
+  ctx.fillStyle = '#666';
+  ctx.fillRect(px, py, TILE, 6);
+}
+
+function drawSprite(rows, palette, px, py, scale, flipH) {
+  const w = rows[0].length;
+  for (let y = 0; y < rows.length; y++) {
+    for (let x = 0; x < rows[y].length; x++) {
+      const c = rows[y][x];
+      if (c === '.' || c === ' ') continue;
+      const color = palette[c];
+      if (!color) continue;
+      ctx.fillStyle = color;
+      const dx = flipH ? px + (w - 1 - x) * scale : px + x * scale;
+      ctx.fillRect(Math.round(dx), Math.round(py + y * scale), scale, scale);
+    }
+  }
+}
+
+function drawPlayer() {
+  if (!player) return;
+  const px = Math.round(player.x - camera.x);
+  const py = Math.round(player.y);
+  // walking bob
+  const bob = (Math.abs(player.vx) > 0.5 && player.grounded)
+    ? Math.floor(performance.now() / 120) % 2
+    : 0;
+  // flicker if invuln
+  if (player.invuln > 0 && player.invuln % 4 < 2) return;
+  // Draw character: 16x24 sprite at scale 2 → 32x48 (h=44, w=24 hitbox is smaller than sprite, that's intended for Mario feel)
+  // Center sprite over hitbox
+  const spriteW = 16 * 2;  // 32
+  const spriteH = 24 * 2;  // 48
+  const offsetX = (player.w - spriteW) / 2;  // -4
+  const offsetY = (player.h - spriteH);      // -4
+  drawSprite(PLAYER_SPRITE, playerPalette(), px + offsetX, py + offsetY - bob, 2, player.facing < 0);
+}
+
+function drawEnemy(e) {
+  if (e.dead) {
+    // squashed: flatten
+    const px = Math.round(e.x - camera.x);
+    const py = Math.round(e.y + e.h / 2);
+    ctx.fillStyle = '#5a3a1a';
+    ctx.fillRect(px - 4, py, e.w + 8, e.h / 2);
+    return;
+  }
+  const px = Math.round(e.x - camera.x);
+  const py = Math.round(e.y);
+  // 14x12 at scale 2 → 28x24, hitbox is 24x24, center
+  const offsetX = (e.w - 14*2) / 2;
+  const offsetY = (e.h - 12*2);
+  drawSprite(GOOMBA_SPRITE, GOOMBA_PALETTE, px + offsetX, py + offsetY, 2, e.facing > 0);
+}
+
+function drawParticle(p) {
+  const alpha = Math.min(1, p.life / 60);
+  ctx.globalAlpha = alpha;
+  ctx.fillStyle = p.color || '#fff';
+  ctx.font = 'bold 16px "VT323", monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText(p.text, p.x - camera.x, p.y);
+  ctx.globalAlpha = 1;
+  ctx.textAlign = 'start';
+}
+
+// =====================================================
+// MAIN LOOP
+// =====================================================
+function loop(t) {
+  const dt = (t - lastFrame) / 16.67;
+  lastFrame = t;
+  if (scene === 'playing' && !modalOpen) {
+    updatePlayer();
+    for (const e of enemies) updateEnemy(e);
+    updateParticles();
+    updateCamera();
+  }
+  render();
+  requestAnimationFrame(loop);
+}
+
+// =====================================================
+// BOOT
+// =====================================================
+boot();
+
+// Reload on hash change → could be admin save trigger
+window.addEventListener('storage', e => {
+  if (e.key === LS_KEY) {
+    try {
+      const v = JSON.parse(e.newValue || '{}');
+      if (v.cleared) progress.cleared = v.cleared;
+    } catch {}
+  }
+});
+</script>
+</body>
+</html>

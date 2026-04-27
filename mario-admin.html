@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>haohao.unzip · MARIO ADMIN</title>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta name="theme-color" content="#1a1a1a">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gb-darkest: #0f380f;
+    --gb-dark: #306230;
+    --gb-mid: #8bac0f;
+    --gb-light: #9bbc0f;
+    --gb-lightest: #d0d88c;
+    --paper: #efe9de;
+    --paper-light: #fdfaf3;
+    --paper-edge: #cbc0ae;
+    --nes-red: #d82800;
+    --nes-yellow: #ffe000;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--paper);
+    color: #1a1a1a;
+    font-family: 'VT323', monospace;
+    font-size: 18px;
+    min-height: 100vh;
+    line-height: 1.5;
+  }
+  .pixel { font-family: 'Press Start 2P', monospace; }
+  .hidden { display: none !important; }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 24px 18px 140px; }
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 18px;
+    background: #1a1a1a;
+    color: var(--nes-yellow);
+    font-family: 'Press Start 2P', monospace;
+    font-size: 12px;
+    border-bottom: 4px solid var(--nes-red);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  header .left { display: flex; align-items: center; gap: 10px; }
+  header .badge {
+    background: var(--nes-red);
+    color: #fff;
+    padding: 2px 8px;
+    border: 2px solid #fff;
+    font-size: 10px;
+  }
+  header .right { font-size: 11px; color: var(--nes-yellow); }
+
+  /* ============ LOGIN ============ */
+  #sceneLogin {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 70vh;
+    padding: 20px;
+  }
+  .login-card {
+    background: var(--paper-light);
+    border: 4px solid var(--gb-darkest);
+    box-shadow: 8px 8px 0 var(--gb-darkest);
+    padding: 32px 24px;
+    max-width: 420px;
+    width: 100%;
+    text-align: center;
+  }
+  .login-card h1 {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 18px;
+    color: var(--gb-darkest);
+    margin: 0 0 6px;
+  }
+  .login-card .sub {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    color: var(--gb-dark);
+    margin: 0 0 22px;
+  }
+  .login-card .field { margin-bottom: 16px; text-align: left; }
+  .login-card .label-text {
+    display: block;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    color: var(--gb-darkest);
+    margin-bottom: 6px;
+  }
+  .login-card input[type="password"] {
+    width: 100%;
+    padding: 12px;
+    border: 3px solid var(--gb-darkest);
+    background: #fff;
+    font-family: 'VT323', monospace;
+    font-size: 22px;
+    color: #1a1a1a;
+  }
+  .login-card input[type="password"]:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--gb-mid);
+  }
+  .login-submit {
+    width: 100%;
+    padding: 14px;
+    border: 3px solid var(--gb-darkest);
+    background: var(--gb-mid);
+    color: var(--gb-darkest);
+    font-family: 'Press Start 2P', monospace;
+    font-size: 12px;
+    cursor: pointer;
+    box-shadow: 4px 4px 0 var(--gb-darkest);
+    transition: transform 0.05s, box-shadow 0.05s;
+  }
+  .login-submit:hover:not(:disabled) {
+    transform: translate(-1px, -1px);
+    box-shadow: 5px 5px 0 var(--gb-darkest);
+  }
+  .login-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+  .alert {
+    padding: 8px 10px;
+    border: 2px solid var(--nes-red);
+    background: #fff0f0;
+    color: var(--nes-red);
+    font-size: 16px;
+    margin-top: 12px;
+  }
+
+  /* ============ EDITOR ============ */
+  .section {
+    background: var(--paper-light);
+    border: 3px solid var(--gb-darkest);
+    box-shadow: 4px 4px 0 var(--gb-darkest);
+    margin-bottom: 22px;
+    padding: 18px;
+  }
+  .section h2 {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 14px;
+    color: var(--gb-darkest);
+    margin: 0 0 14px;
+    padding-bottom: 8px;
+    border-bottom: 2px dashed var(--paper-edge);
+  }
+  .section h3 {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 12px;
+    color: var(--gb-dark);
+    margin: 18px 0 10px;
+  }
+  .field { margin-bottom: 14px; }
+  .field label {
+    display: block;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    color: var(--gb-darkest);
+    margin-bottom: 6px;
+  }
+  .field input[type="text"], .field input[type="url"], .field textarea, .field select {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid var(--gb-darkest);
+    background: #fff;
+    font-family: 'VT323', monospace;
+    font-size: 18px;
+    color: #1a1a1a;
+  }
+  .field textarea { resize: vertical; min-height: 70px; }
+  .field textarea.layout-grid {
+    font-family: 'Courier New', 'Press Start 2P', monospace;
+    font-size: 12px;
+    line-height: 1.1;
+    white-space: pre;
+    overflow-x: auto;
+    min-height: 220px;
+    background: #1a1a1a;
+    color: var(--nes-yellow);
+    padding: 12px;
+    letter-spacing: 1px;
+  }
+  .field input:focus, .field textarea:focus, .field select:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--gb-mid);
+  }
+  .field-row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .field-row .field { flex: 1; min-width: 150px; }
+  .help { font-size: 14px; color: #666; margin-top: 4px; }
+
+  .color-row {
+    display: flex; gap: 14px; flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+  .color-pick {
+    flex: 1;
+    min-width: 120px;
+    text-align: center;
+  }
+  .color-pick label {
+    display: block;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    margin-bottom: 6px;
+  }
+  .color-pick input[type="color"] {
+    width: 100%;
+    height: 50px;
+    border: 2px solid var(--gb-darkest);
+    background: none;
+    cursor: pointer;
+  }
+  .color-pick .swatch-name {
+    font-size: 14px;
+    color: #666;
+    margin-top: 4px;
+  }
+
+  .slider-row { display: flex; gap: 14px; align-items: center; margin-bottom: 8px; }
+  .slider-row label {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    flex: 0 0 130px;
+  }
+  .slider-row input[type="range"] { flex: 1; }
+  .slider-row .val {
+    font-family: 'VT323', monospace;
+    font-size: 18px;
+    width: 50px;
+    text-align: right;
+    color: var(--gb-darkest);
+  }
+
+  .stage-block {
+    background: #fff;
+    border: 2px solid var(--gb-dark);
+    padding: 14px;
+    margin-bottom: 14px;
+  }
+  .stage-block .stage-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .stage-block .stage-id {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 14px;
+    color: var(--nes-red);
+    background: var(--gb-darkest);
+    padding: 4px 10px;
+  }
+  .stage-block .stage-title-text {
+    font-size: 18px;
+    color: var(--gb-darkest);
+  }
+
+  .legend {
+    background: #1a1a1a;
+    color: var(--nes-yellow);
+    padding: 8px 12px;
+    font-family: 'VT323', monospace;
+    font-size: 16px;
+    margin-bottom: 6px;
+  }
+  .legend code {
+    background: #333;
+    padding: 0 4px;
+    color: var(--nes-yellow);
+    margin: 0 2px;
+    font-family: 'Courier New', monospace;
+  }
+
+  /* marquee items */
+  .marquee-item, .qblock-item {
+    display: flex; gap: 8px; align-items: center;
+    margin-bottom: 6px;
+  }
+  .marquee-item input, .qblock-item input {
+    flex: 1;
+    padding: 8px;
+    border: 2px solid var(--gb-darkest);
+    font-family: 'VT323', monospace;
+    font-size: 18px;
+  }
+  .btn-mini {
+    padding: 6px 10px;
+    border: 2px solid var(--gb-darkest);
+    background: #fff;
+    cursor: pointer;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+  }
+  .btn-mini:hover { background: var(--gb-lightest); }
+  .btn-add {
+    padding: 8px 14px;
+    border: 2px solid var(--gb-darkest);
+    background: var(--gb-light);
+    color: var(--gb-darkest);
+    cursor: pointer;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+  }
+
+  /* save bar */
+  .save-bar {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: #1a1a1a;
+    color: #fff;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    border-top: 4px solid var(--nes-red);
+    z-index: 60;
+  }
+  .save-info {
+    font-family: 'VT323', monospace;
+    font-size: 18px;
+    color: var(--nes-yellow);
+  }
+  .save-btn {
+    padding: 12px 20px;
+    background: var(--nes-red);
+    color: #fff;
+    border: 3px solid #fff;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 12px;
+    cursor: pointer;
+    box-shadow: 4px 4px 0 #000;
+  }
+  .save-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .save-btn:hover:not(:disabled) {
+    transform: translate(-1px,-1px);
+    box-shadow: 5px 5px 0 #000;
+  }
+
+  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+  .btn-danger {
+    padding: 10px 16px;
+    background: #fff;
+    color: var(--nes-red);
+    border: 2px solid var(--nes-red);
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    cursor: pointer;
+  }
+  .btn-danger:hover { background: var(--nes-red); color: #fff; }
+
+  /* audio slot — copied/adapted from admin.html */
+  .audio-slot {
+    background: #fff;
+    border: 2px solid var(--gb-darkest);
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .audio-slot.has-file { border-color: var(--gb-dark); background: #f6fbe8; }
+  .audio-slot-label {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 11px;
+    color: var(--gb-darkest);
+    margin-right: 6px;
+  }
+  .audio-slot-current {
+    font-family: 'VT323', monospace;
+    font-size: 16px;
+    color: #555;
+    margin-left: 6px;
+  }
+  .audio-slot-actions { display: flex; gap: 6px; }
+  .audio-file-btn {
+    padding: 6px 10px;
+    border: 2px solid var(--gb-darkest);
+    background: var(--gb-lightest);
+    cursor: pointer;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+  }
+  .audio-file-btn:hover { background: var(--gb-light); }
+  .audio-clear-btn {
+    padding: 6px 10px;
+    border: 2px solid var(--nes-red);
+    background: #fff;
+    color: var(--nes-red);
+    cursor: pointer;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+  }
+
+  /* preview links bar */
+  .preview-bar {
+    background: var(--gb-lightest);
+    border: 2px solid var(--gb-dark);
+    padding: 10px 14px;
+    margin-bottom: 18px;
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    font-family: 'VT323', monospace;
+    font-size: 18px;
+  }
+  .preview-bar a {
+    color: var(--gb-darkest);
+    text-decoration: underline;
+    font-weight: bold;
+  }
+
+  /* loading */
+  #loadingContent {
+    text-align: center;
+    padding: 40px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 12px;
+    color: var(--gb-dark);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="left">
+    <span>🍄 MARIO ADMIN</span>
+    <span class="badge" id="statusBadge">未登入</span>
+  </div>
+  <div class="right">v0.1</div>
+</header>
+
+<!-- ====================== LOGIN ====================== -->
+<section id="sceneLogin">
+  <div class="login-card">
+    <h1>耗耗限定</h1>
+    <p class="sub">MARIO 後台</p>
+    <form id="loginForm">
+      <div class="field">
+        <span class="label-text">PASSWORD</span>
+        <input type="password" id="tokenInput" autocomplete="current-password" autofocus>
+      </div>
+      <button class="login-submit" id="btnVerifyToken" type="submit">▶ 登入</button>
+      <div class="alert hidden" id="tokenErr"></div>
+    </form>
+    <p style="font-size:14px;color:#666;margin-top:18px;">
+      跟舊 admin 同一組密碼 (GitHub PAT)。<br>
+      登過舊版的話這裡會自動帶。
+    </p>
+  </div>
+</section>
+
+<!-- ====================== EDITOR ====================== -->
+<div id="sceneEditor" class="hidden">
+  <div class="wrap">
+    <div id="loadingContent">載入中…</div>
+
+    <div id="editorBody" class="hidden">
+
+      <div class="preview-bar">
+        ▶ <a href="mario.html" target="_blank">玩家視角(mario.html)</a>
+        ▶ <a href="index.html" target="_blank">舊版經典版</a>
+        ▶ <a href="admin.html" target="_blank">舊版 admin</a>
+      </div>
+
+      <div class="section">
+        <h2>🌍 世界設定</h2>
+        <div class="field">
+          <label>WORLD NAME(標題)</label>
+          <input type="text" data-path="meta.worldName">
+        </div>
+        <div class="field">
+          <label>SUBTITLE(副標)</label>
+          <input type="text" data-path="meta.subtitle">
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>👤 角色配色</h2>
+        <p class="help">點色塊修改。改完按右下「儲存到網站」上傳。</p>
+        <div class="color-row" id="characterColors"></div>
+      </div>
+
+      <div class="section">
+        <h2>🎮 物理參數</h2>
+        <p class="help">Mario 手感的命脈。試到爽為止。</p>
+        <div id="physicsSliders"></div>
+      </div>
+
+      <div class="section">
+        <h2>📜 五個 STAGE</h2>
+        <div class="legend">
+          地圖符號:
+          <code>.</code>空 ·
+          <code>#</code>地 ·
+          <code>B</code>磚塊 ·
+          <code>?</code>問號磚 ·
+          <code>G</code>Goomba ·
+          <code>F</code>旗杆
+        </div>
+        <p class="help">每行 80 個字 = 一張關卡寬。可以把每一格當成 NES 一格,自己畫就好。</p>
+        <div id="stagesList"></div>
+      </div>
+
+      <div class="section">
+        <h2>📣 跑馬燈</h2>
+        <div class="field-row">
+          <div class="field" style="flex:0 0 130px;">
+            <label>ENABLED</label>
+            <select data-path="marquee.enabled">
+              <option value="true">on</option>
+              <option value="false">off</option>
+            </select>
+          </div>
+        </div>
+        <div id="marqueeItems"></div>
+        <button class="btn-add" id="btnAddMarquee">+ 新增一條</button>
+      </div>
+
+      <div class="section">
+        <h2>🎵 BGM</h2>
+        <div id="audioSlots"></div>
+        <p class="help">需要新音檔可以從 <a href="admin.html#audioUploads" target="_blank">舊 admin 音檔倉庫</a> 上傳,這邊只是選 audio/ 裡有什麼。</p>
+      </div>
+
+      <div class="section">
+        <h2>🏁 GAME CLEAR(全部過完顯示)</h2>
+        <div class="field">
+          <label>標題</label>
+          <input type="text" data-path="endgame.title">
+        </div>
+        <div class="field">
+          <label>內文</label>
+          <textarea data-path="endgame.body" rows="3"></textarea>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>CTA 按鈕文字</label>
+            <input type="text" data-path="endgame.ctaLabel">
+          </div>
+          <div class="field">
+            <label>CTA 連結</label>
+            <input type="url" data-path="endgame.ctaUrl">
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>⚠ 危險區</h2>
+        <div class="btn-row">
+          <button class="btn-danger" id="btnLogout">登出 + 清除 Token</button>
+        </div>
+        <p class="help" style="margin-top:12px;">玩家進度(★ / 過關紀錄)在玩家自己 browser 的 localStorage,後台改不到。要 reset 進度叫他自己清 cookie。</p>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="save-bar">
+    <div class="save-info" id="saveInfo">就緒</div>
+    <button class="save-btn" id="btnSave" disabled>儲存到網站</button>
+  </div>
+</div>
+
+<script>
+// =======================================================
+// CONFIG (mirrors admin.html: same repo, same token key)
+// =======================================================
+const REPO_OWNER = 'okiijuuhyygt';
+const REPO_NAME  = 'artist-rpg-mvp';
+const CONTENT_PATH = 'mario-content.json';
+const LS_TOKEN = 'hao-admin-token-v1';   // SHARED with old admin
+
+// =======================================================
+// UTILS
+// =======================================================
+const $ = id => document.getElementById(id);
+function show(id) { $(id).classList.remove('hidden'); }
+function hide(id) { $(id).classList.add('hidden'); }
+function setStatus(t) { $('statusBadge').textContent = t; }
+function escapeHtml(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function getPath(obj, path) {
+  return path.split('.').reduce((o, k) => (o == null ? o : o[k]), obj);
+}
+function setPath(obj, path, value) {
+  const keys = path.split('.');
+  const last = keys.pop();
+  const target = keys.reduce((o, k) => (o[k] = o[k] || {}), obj);
+  target[last] = value;
+}
+
+// =======================================================
+// ROUTER
+// =======================================================
+function route() {
+  const tok = localStorage.getItem(LS_TOKEN);
+  if (tok) {
+    setStatus('已登入');
+    show('sceneEditor');
+    hide('sceneLogin');
+    initEditor();
+  } else {
+    setStatus('未登入');
+    hide('sceneEditor');
+    show('sceneLogin');
+  }
+}
+
+// =======================================================
+// LOGIN
+// =======================================================
+$('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const tok = $('tokenInput').value.trim();
+  const errEl = $('tokenErr');
+  const btn = $('btnVerifyToken');
+  errEl.classList.add('hidden');
+  if (!tok) return;
+  btn.disabled = true;
+  btn.textContent = '驗證中...';
+  try {
+    const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${CONTENT_PATH}`, {
+      headers: { 'Authorization': `Bearer ${tok}`, 'Accept': 'application/vnd.github+json' }
+    });
+    if (!res.ok) throw new Error('auth-failed');
+    localStorage.setItem(LS_TOKEN, tok);
+    route();
+  } catch (err) {
+    errEl.textContent = '密碼不對(或 mario-content.json 不在 repo 裡)';
+    errEl.classList.remove('hidden');
+    $('tokenInput').value = '';
+    $('tokenInput').focus();
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '▶ 登入';
+  }
+});
+
+// =======================================================
+// EDITOR
+// =======================================================
+let contentData = null;
+let contentSha = null;
+let originalContent = null;
+
+const COLOR_FIELDS = [
+  { key: 'shirt', label: '上衣' },
+  { key: 'jacket', label: '外套' },
+  { key: 'pants', label: '褲子' },
+  { key: 'shoes', label: '小白鞋' },
+  { key: 'skin', label: '膚色' },
+  { key: 'hair', label: '頭髮' }
+];
+
+const PHYSICS_FIELDS = [
+  { key: 'gravity', label: '重力', min: 0.2, max: 1.5, step: 0.05 },
+  { key: 'jumpVelocity', label: '跳躍力', min: -20, max: -5, step: 0.5, neg: true },
+  { key: 'moveSpeed', label: '移動速度', min: 1, max: 8, step: 0.2 },
+  { key: 'maxFallSpeed', label: '最大落速', min: 5, max: 25, step: 1 },
+  { key: 'friction', label: '摩擦力', min: 0.5, max: 0.99, step: 0.01 }
+];
+
+async function initEditor() {
+  $('loadingContent').classList.remove('hidden');
+  $('editorBody').classList.add('hidden');
+  try {
+    const res = await fetch('mario-content.json?t=' + Date.now());
+    if (!res.ok) throw new Error('找不到 mario-content.json');
+    contentData = await res.json();
+    originalContent = JSON.stringify(contentData);
+    // Get SHA
+    const tok = localStorage.getItem(LS_TOKEN);
+    if (tok) {
+      try {
+        const apiRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${CONTENT_PATH}`, {
+          headers: { 'Authorization': `Bearer ${tok}`, 'Accept': 'application/vnd.github+json' }
+        });
+        if (apiRes.ok) {
+          const data = await apiRes.json();
+          contentSha = data.sha;
+        }
+      } catch {}
+    }
+    renderEditor();
+    $('loadingContent').classList.add('hidden');
+    $('editorBody').classList.remove('hidden');
+    markEditorClean();
+  } catch (e) {
+    $('loadingContent').textContent = '讀取失敗:' + e.message;
+  }
+}
+
+function renderEditor() {
+  // bind data-path inputs
+  document.querySelectorAll('[data-path]').forEach(inp => {
+    const path = inp.dataset.path;
+    const val = getPath(contentData, path);
+    if (inp.tagName === 'SELECT') {
+      inp.value = String(val);
+    } else {
+      inp.value = val == null ? '' : val;
+    }
+    inp.addEventListener('input', () => {
+      let v = inp.value;
+      if (inp.tagName === 'SELECT' && (v === 'true' || v === 'false')) v = (v === 'true');
+      setPath(contentData, path, v);
+      markDirty();
+    });
+  });
+
+  renderCharacterColors();
+  renderPhysicsSliders();
+  renderStages();
+  renderMarquee();
+  renderAudioSlots();
+}
+
+function renderCharacterColors() {
+  const box = $('characterColors');
+  box.innerHTML = '';
+  COLOR_FIELDS.forEach(f => {
+    const cur = (contentData.character && contentData.character[f.key]) || '#000000';
+    const div = document.createElement('div');
+    div.className = 'color-pick';
+    div.innerHTML = `
+      <label>${escapeHtml(f.label)}</label>
+      <input type="color" value="${escapeHtml(cur)}">
+      <div class="swatch-name">${escapeHtml(cur)}</div>
+    `;
+    const inp = div.querySelector('input');
+    const txt = div.querySelector('.swatch-name');
+    inp.addEventListener('input', () => {
+      contentData.character[f.key] = inp.value;
+      txt.textContent = inp.value;
+      markDirty();
+    });
+    box.appendChild(div);
+  });
+}
+
+function renderPhysicsSliders() {
+  const box = $('physicsSliders');
+  box.innerHTML = '';
+  PHYSICS_FIELDS.forEach(f => {
+    const cur = contentData.physics[f.key];
+    const row = document.createElement('div');
+    row.className = 'slider-row';
+    row.innerHTML = `
+      <label>${escapeHtml(f.label)}</label>
+      <input type="range" min="${f.min}" max="${f.max}" step="${f.step}" value="${cur}">
+      <div class="val">${cur}</div>
+    `;
+    const inp = row.querySelector('input');
+    const val = row.querySelector('.val');
+    inp.addEventListener('input', () => {
+      const v = parseFloat(inp.value);
+      contentData.physics[f.key] = v;
+      val.textContent = v;
+      markDirty();
+    });
+    box.appendChild(row);
+  });
+}
+
+function renderStages() {
+  const box = $('stagesList');
+  box.innerHTML = '';
+  const stages = (contentData.world1 && contentData.world1.stages) || [];
+  stages.forEach((s, idx) => {
+    const block = document.createElement('div');
+    block.className = 'stage-block';
+    const layoutText = (s.layout || []).join('\n');
+    const qblockText = (s.questionBlockContent || []).join('\n');
+    block.innerHTML = `
+      <div class="stage-head">
+        <span class="stage-id">${escapeHtml(s.id || '')}</span>
+        <span class="stage-title-text">${escapeHtml(s.title || '')}</span>
+      </div>
+      <div class="field">
+        <label>關卡標題</label>
+        <input type="text" class="s-title" value="${escapeHtml(s.title || '')}">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>背景色</label>
+          <input type="color" class="s-bg" value="${escapeHtml(s.bgColor || '#5c94fc')}">
+        </div>
+        <div class="field">
+          <label>地面色</label>
+          <input type="color" class="s-ground" value="${escapeHtml(s.groundColor || '#c84c0c')}">
+        </div>
+        <div class="field">
+          <label>磚塊色</label>
+          <input type="color" class="s-brick" value="${escapeHtml(s.brickColor || '#a06030')}">
+        </div>
+      </div>
+      <h3>地圖布局(LAYOUT)</h3>
+      <div class="field">
+        <textarea class="s-layout layout-grid" rows="14" wrap="off">${escapeHtml(layoutText)}</textarea>
+      </div>
+      <h3>問號磚會噴的字(隨機抽)</h3>
+      <div class="field">
+        <textarea class="s-qblock" rows="3" placeholder="一行一條">${escapeHtml(qblockText)}</textarea>
+      </div>
+      <h3>到達旗杆 → 顯示 modal</h3>
+      <div class="field">
+        <label>Modal 標題</label>
+        <input type="text" class="s-modal-title" value="${escapeHtml(s.endModalTitle || '')}">
+      </div>
+      <div class="field">
+        <label>Modal 內文</label>
+        <textarea class="s-modal-body" rows="4">${escapeHtml(s.endModalBody || '')}</textarea>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>下一關按鈕文字</label>
+          <input type="text" class="s-modal-cta" value="${escapeHtml(s.endModalCta || '')}">
+        </div>
+        <div class="field">
+          <label>過關時飛字</label>
+          <input type="text" class="s-end-text" value="${escapeHtml(s.endText || '')}">
+        </div>
+      </div>
+    `;
+    block.querySelector('.s-title').addEventListener('input', e => { s.title = e.target.value; markDirty(); });
+    block.querySelector('.s-bg').addEventListener('input', e => { s.bgColor = e.target.value; markDirty(); });
+    block.querySelector('.s-ground').addEventListener('input', e => { s.groundColor = e.target.value; markDirty(); });
+    block.querySelector('.s-brick').addEventListener('input', e => { s.brickColor = e.target.value; markDirty(); });
+    block.querySelector('.s-layout').addEventListener('input', e => {
+      s.layout = e.target.value.split('\n');
+      markDirty();
+    });
+    block.querySelector('.s-qblock').addEventListener('input', e => {
+      s.questionBlockContent = e.target.value.split('\n').filter(l => l.trim() !== '');
+      markDirty();
+    });
+    block.querySelector('.s-modal-title').addEventListener('input', e => { s.endModalTitle = e.target.value; markDirty(); });
+    block.querySelector('.s-modal-body').addEventListener('input', e => { s.endModalBody = e.target.value; markDirty(); });
+    block.querySelector('.s-modal-cta').addEventListener('input', e => { s.endModalCta = e.target.value; markDirty(); });
+    block.querySelector('.s-end-text').addEventListener('input', e => { s.endText = e.target.value; markDirty(); });
+    box.appendChild(block);
+  });
+}
+
+function renderMarquee() {
+  const box = $('marqueeItems');
+  box.innerHTML = '';
+  const items = (contentData.marquee && contentData.marquee.items) || [];
+  items.forEach((it, idx) => {
+    const text = typeof it === 'string' ? it : (it.text || '');
+    const row = document.createElement('div');
+    row.className = 'marquee-item';
+    row.innerHTML = `
+      <input type="text" value="${escapeHtml(text)}">
+      <button class="btn-mini" type="button">刪</button>
+    `;
+    row.querySelector('input').addEventListener('input', e => {
+      contentData.marquee.items[idx] = { text: e.target.value };
+      markDirty();
+    });
+    row.querySelector('button').addEventListener('click', () => {
+      contentData.marquee.items.splice(idx, 1);
+      renderMarquee();
+      markDirty();
+    });
+    box.appendChild(row);
+  });
+}
+$('btnAddMarquee').addEventListener('click', () => {
+  if (!contentData.marquee) contentData.marquee = { enabled: true, items: [] };
+  if (!Array.isArray(contentData.marquee.items)) contentData.marquee.items = [];
+  contentData.marquee.items.push({ text: '' });
+  renderMarquee();
+  markDirty();
+});
+
+// =======================================================
+// AUDIO SLOTS — browse audio/ folder, pick existing file
+// =======================================================
+async function renderAudioSlots() {
+  const box = $('audioSlots');
+  box.innerHTML = '';
+  const tok = localStorage.getItem(LS_TOKEN);
+  let files = [];
+  if (tok) {
+    try {
+      const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/audio`, {
+        headers: { 'Authorization': `Bearer ${tok}`, 'Accept': 'application/vnd.github+json' }
+      });
+      if (res.ok) files = (await res.json()).filter(f => f.type === 'file').map(f => f.path);
+    } catch {}
+  }
+
+  // BGM slot
+  const slot = document.createElement('div');
+  slot.className = 'audio-slot' + ((contentData.audio && contentData.audio.bgm) ? ' has-file' : '');
+  const cur = (contentData.audio && contentData.audio.bgm) || '';
+  const opts = ['<option value="">(無)</option>']
+    .concat(files.map(f => `<option value="${escapeHtml(f)}" ${f === cur ? 'selected' : ''}>${escapeHtml(f)}</option>`))
+    .join('');
+  slot.innerHTML = `
+    <div>
+      <span class="audio-slot-label">遊戲 BGM</span>
+      <span class="audio-slot-current">${cur ? '✓ ' + escapeHtml(cur) : '(無 — 靜音)'}</span>
+    </div>
+    <div class="audio-slot-actions">
+      <select style="padding:6px;font-family:'VT323',monospace;font-size:14px;">${opts}</select>
+    </div>
+  `;
+  const sel = slot.querySelector('select');
+  sel.addEventListener('change', e => {
+    if (!contentData.audio) contentData.audio = {};
+    contentData.audio.bgm = e.target.value;
+    markDirty();
+    renderAudioSlots();
+  });
+  box.appendChild(slot);
+
+  // Volume slider
+  const volRow = document.createElement('div');
+  volRow.className = 'slider-row';
+  const curVol = (contentData.audio && contentData.audio.bgmVolume) || 0.4;
+  volRow.innerHTML = `
+    <label>BGM 音量</label>
+    <input type="range" min="0" max="1" step="0.05" value="${curVol}">
+    <div class="val">${curVol}</div>
+  `;
+  const volInp = volRow.querySelector('input');
+  const volVal = volRow.querySelector('.val');
+  volInp.addEventListener('input', () => {
+    if (!contentData.audio) contentData.audio = {};
+    contentData.audio.bgmVolume = parseFloat(volInp.value);
+    volVal.textContent = volInp.value;
+    markDirty();
+  });
+  box.appendChild(volRow);
+}
+
+// =======================================================
+// SAVE BAR
+// =======================================================
+function markDirty() {
+  $('btnSave').disabled = false;
+  $('saveInfo').textContent = '有變更';
+}
+function markEditorClean(msg) {
+  $('btnSave').disabled = true;
+  $('saveInfo').textContent = msg || '就緒';
+}
+
+$('btnSave').addEventListener('click', async () => {
+  const tok = localStorage.getItem(LS_TOKEN);
+  if (!tok) { alert('Token 不見了,請重登'); route(); return; }
+  $('btnSave').disabled = true;
+  $('saveInfo').textContent = '儲存中...';
+  try {
+    // Re-fetch SHA
+    const shaRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${CONTENT_PATH}`, {
+      headers: { 'Authorization': `Bearer ${tok}`, 'Accept': 'application/vnd.github+json' }
+    });
+    let currentSha = contentSha;
+    if (shaRes.ok) {
+      const d = await shaRes.json();
+      currentSha = d.sha;
+    }
+    const json = JSON.stringify(contentData, null, 2);
+    const b64 = btoa(unescape(encodeURIComponent(json)));
+    const putRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${CONTENT_PATH}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${tok}`,
+        'Accept': 'application/vnd.github+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: 'admin: update mario-content.json',
+        content: b64,
+        sha: currentSha
+      })
+    });
+    if (!putRes.ok) {
+      const err = await putRes.text();
+      throw new Error('GitHub 拒絕:' + putRes.status + ' ' + err.slice(0, 100));
+    }
+    const result = await putRes.json();
+    contentSha = result.content && result.content.sha;
+    originalContent = JSON.stringify(contentData);
+    markEditorClean('✓ 已儲存!30 秒 - 2 分鐘內網站會更新。');
+  } catch (e) {
+    $('saveInfo').textContent = '✗ ' + e.message;
+    $('btnSave').disabled = false;
+  }
+});
+
+$('btnLogout').addEventListener('click', () => {
+  if (!confirm('登出會清掉這個瀏覽器的 Token(GitHub 上的 Token 不受影響)。確定?')) return;
+  localStorage.removeItem(LS_TOKEN);
+  route();
+});
+
+// =======================================================
+// BOOT
+// =======================================================
+route();
+</script>
+</body>
+</html>
