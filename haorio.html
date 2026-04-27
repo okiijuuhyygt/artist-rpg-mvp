@@ -14,11 +14,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build-version" content="haorio-1.0">
+<meta name="build-version" content="haorio-1.1">
 <script>
   // iOS Safari aggressive cache buster — force hard-reload if local cache holds older build
   (function() {
-    const CURRENT = 'haorio-1.0';
+    const CURRENT = 'haorio-1.1';
     const LAST = localStorage.getItem('haorio-build');
     if (LAST && LAST !== CURRENT && !location.search.includes('_nocache=')) {
       const sep = location.search ? '&' : '?';
@@ -530,6 +530,19 @@
   /* ========== utility ========== */
   .hidden { display: none !important; }
   a { color: var(--nes-yellow); }
+  /* Hidden admin entry: small dot, low-contrast — players can see but
+     they need the password to actually get in. */
+  #admin-link {
+    position: fixed;
+    bottom: 6px; right: 8px;
+    color: rgba(255,255,255,0.18);
+    font-family: 'Press Start 2P', monospace;
+    font-size: 12px;
+    text-decoration: none;
+    z-index: 200;
+    padding: 6px;
+  }
+  #admin-link:hover { color: rgba(255,224,0,0.6); }
 
   /* ========== mobile / touch tweaks ========== */
   /* Hide desktop control hints on touch-only devices */
@@ -650,8 +663,8 @@
     line-height: 1.5;
   }
   @keyframes rotate-tip {
-    0%, 100% { transform: rotate(-15deg); }
-    50% { transform: rotate(75deg); }
+    0%, 100% { transform: rotate(15deg); }
+    50% { transform: rotate(-75deg); }
   }
   @media (orientation: portrait) and (hover: none) and (pointer: coarse) {
     #rotate-warn { display: flex; }
@@ -666,7 +679,6 @@
   <div class="icon">📱</div>
   HAORIO 是橫向遊戲<br>
   把手機轉橫拿
-  <div class="small">如果你開了「直向鎖定」<br>(控制中心 → 右上鎖頭)<br>要先解鎖才會自動轉<br><br>(iOS web 沒辦法幫你解鎖,<br>所有 web 遊戲都這樣)</div>
 </div>
 
 
@@ -684,6 +696,8 @@
     手機:左下搖桿 · 右下 A 跳 / B 射 · <a href="index.html">回經典版</a>
   </div>
 </section>
+
+<a href="haorio-admin.html" id="admin-link" title="hao only">·</a>
 
 <div id="stage-wrap" class="hidden">
   <canvas id="game" width="1024" height="576"></canvas>
@@ -767,6 +781,7 @@ let camera = { x: 0 };
 let keys = {};
 let touchKeys = { left: false, right: false, jump: false, fire: false };
 let bullets = [];
+let powerups = [];
 let fireCooldown = 0;
 let selectedStageIdx = 0;
 let modalOpen = false;
@@ -1241,6 +1256,7 @@ function startStage(idx) {
   enemies = [];
   npcs = [];
   bullets = [];
+  powerups = [];
   fireCooldown = 0;
   const stage = stages[idx];
   for (let ty = 0; ty < stage.tiles.length; ty++) {
@@ -1285,7 +1301,8 @@ function makePlayer(x, y) {
     dead: false,
     deathTimer: 0,
     canBumpBlocks: true,
-    invuln: 0
+    invuln: 0,
+    power: null  // { type: 'nude'|'girl'|'berserk', until: ms }
   };
 }
 function makeGoomba(x, y) {
@@ -1305,7 +1322,8 @@ function makeNpc(x, y, data) {
     x: x + 4, y: y - 4, w: 24, h: 36,
     bobPhase: Math.random() * Math.PI * 2,
     data: data,
-    triggered: false  // resets each stage start
+    triggered: false,  // answered (locked)
+    touched: false     // currently in contact (per-frame)
   };
 }
 function makeKoopa(x, y) {
@@ -1412,18 +1430,22 @@ function overlap(a, b) {
 
 function bumpBlock(stage, tx, ty) {
   stage.tiles[ty][tx] = 'X';
-  const msgs = stages[stageIdx].questionBlockContent || ['+1'];
-  const msg = msgs[Math.floor(Math.random() * msgs.length)];
-  spawnParticle(tx * TILE + TILE/2, ty * TILE - 6, msg, '#ffe000');
-  hud.coins++;
-  $('hud-coins').textContent = '★ ' + hud.coins;
+  // 50% chance: pop a power-up. 50%: spawn a lyric particle.
+  if (Math.random() < 0.5) {
+    spawnPowerup(tx * TILE + TILE/2 - 12, ty * TILE - 24);
+    addScore(50, tx * TILE + TILE/2, ty * TILE - 6);
+  } else {
+    const msgs = stages[stageIdx].questionBlockContent || ['+50'];
+    const msg = msgs[Math.floor(Math.random() * msgs.length)];
+    spawnParticle(tx * TILE + TILE/2, ty * TILE - 6, msg, '#ffe000');
+    addScore(50);
+  }
   saveProgress();
 }
 
 function breakBrick(stage, tx, ty) {
   stage.tiles[ty][tx] = '.';
   const color = stages[stageIdx].brickColor || '#a06030';
-  // 4 chunks flying out
   for (let i = 0; i < 4; i++) {
     spawnParticle(
       tx * TILE + (i % 2 ? 22 : 6),
@@ -1432,15 +1454,21 @@ function breakBrick(stage, tx, ty) {
       color
     );
   }
-  spawnParticle(tx * TILE + TILE/2, ty * TILE - 6, '+10', '#fff');
-  hud.coins++;
-  $('hud-coins').textContent = '★ ' + hud.coins;
+  addScore(50, tx * TILE + TILE/2, ty * TILE - 6);
 }
 
 function killEnemy(e) {
   e.dead = true;
   e.deathTimer = 30;
-  spawnParticle(e.x + e.w/2, e.y - 4, '+50', '#ffe000');
+  addScore(150, e.x + e.w/2, e.y - 4);
+}
+
+function addScore(n, partX, partY) {
+  hud.coins += n;
+  $('hud-coins').textContent = '★ ' + hud.coins;
+  if (partX !== undefined) {
+    spawnParticle(partX, partY, '+' + n, '#ffe000');
+  }
 }
 
 // =====================================================
@@ -1496,12 +1524,113 @@ function drawBullets() {
   for (const b of bullets) {
     const px = Math.round(b.x - camera.x);
     const py = Math.round(b.y);
-    // outer flicker
     ctx.fillStyle = (Math.floor(performance.now() / 60) % 2) ? '#ff8800' : '#ffe000';
     ctx.fillRect(px, py, b.w, b.h);
     ctx.fillStyle = '#fff';
     ctx.fillRect(px + 3, py + 3, 4, 4);
   }
+}
+
+// =====================================================
+// POWER-UPS — pop out of ? blocks 50% of the time. Random one of 3 effects.
+// =====================================================
+const POWERUP_TYPES = ['nude', 'girl', 'berserk'];
+const POWERUP_EMOJI = { nude: '🍄', girl: '🌸', berserk: '⭐' };
+const POWERUP_LABEL = { nude: '🍄 裸體', girl: '🌸 性轉', berserk: '⭐ 跳超高 (前進超慢)' };
+const POWERUP_DURATION_MS = 6000;
+
+function spawnPowerup(x, y) {
+  const type = POWERUP_TYPES[Math.floor(Math.random() * POWERUP_TYPES.length)];
+  powerups.push({
+    x, y, w: 24, h: 24,
+    vx: Math.random() < 0.5 ? -1.4 : 1.4,
+    vy: -7,
+    grounded: false,
+    bumpOnWall: true,
+    facing: 1,
+    type,
+    dead: false
+  });
+}
+
+function updatePowerups() {
+  if (!player) return;
+  for (const p of powerups) {
+    if (p.dead) continue;
+    p.vy += content.physics.gravity;
+    if (p.vy > content.physics.maxFallSpeed) p.vy = content.physics.maxFallSpeed;
+    moveAndCollide(p, stages[stageIdx]);
+    // pickup
+    if (!player.dead && overlap(player, p)) {
+      activatePowerup(p.type);
+      p.dead = true;
+    }
+    // off-bottom
+    if (p.y > GAME_H + 200) p.dead = true;
+  }
+  powerups = powerups.filter(p => !p.dead);
+}
+
+function activatePowerup(type) {
+  player.power = { type, until: performance.now() + POWERUP_DURATION_MS };
+  spawnParticle(player.x + player.w/2, player.y - 10, POWERUP_LABEL[type] || '+1', '#ff66cc');
+}
+
+function drawPowerups() {
+  for (const p of powerups) {
+    if (p.dead) continue;
+    const px = Math.round(p.x - camera.x);
+    const py = Math.round(p.y);
+    // little background tile so emoji is readable
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(px, py, p.w, p.h);
+    ctx.fillStyle = '#1a1a1a';
+    ctx.fillRect(px, py, p.w, 2);
+    ctx.fillRect(px, py + p.h - 2, p.w, 2);
+    ctx.fillRect(px, py, 2, p.h);
+    ctx.fillRect(px + p.w - 2, py, 2, p.h);
+    ctx.font = '20px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(POWERUP_EMOJI[p.type] || '?', px + p.w/2, py + p.h/2 + 1);
+    ctx.textAlign = 'start';
+    ctx.textBaseline = 'alphabetic';
+  }
+}
+
+// Power palettes — variants applied to PLAYER_SPRITE during a power-up
+function nudePalette() {
+  const c = content.character;
+  return {
+    H: c.hair, S: c.skin, G: '#1a1a1a', L: '#fff', R: '#c8302c',
+    J: c.skin,    // jacket → skin (vanish)
+    W: c.skin,    // shirt → skin
+    P: '#1a1a1a', // pants → black (briefs)
+    O: c.skin     // shoes → skin (barefoot)
+  };
+}
+function girlPalette() {
+  return {
+    H: '#5a3520', S: '#f4c8a3', G: '#1a1a1a', L: '#fff', R: '#ff3088',
+    J: '#ffb0d4',  // jacket → light pink
+    W: '#ffffff',  // shirt → white
+    P: '#ff8fc7',  // pants → pink (skirt vibe)
+    O: '#ffffff'
+  };
+}
+function berserkPalette() {
+  // rainbow flicker
+  const t = Math.floor(performance.now() / 80);
+  const h = (t * 30) % 360;
+  return {
+    H: `hsl(${h}, 80%, 40%)`,
+    S: `hsl(${(h + 60) % 360}, 70%, 70%)`,
+    G: '#1a1a1a', L: '#fff', R: '#c8302c',
+    J: `hsl(${(h + 120) % 360}, 80%, 50%)`,
+    W: `hsl(${(h + 180) % 360}, 80%, 60%)`,
+    P: `hsl(${(h + 240) % 360}, 80%, 40%)`,
+    O: `hsl(${(h + 300) % 360}, 80%, 50%)`
+  };
 }
 
 function spawnParticle(x, y, text, color) {
@@ -1535,12 +1664,21 @@ function updatePlayer() {
     return;
   }
 
+  // Power-up expiry
+  if (player.power && performance.now() > player.power.until) {
+    player.power = null;
+  }
+  // Berserk modifies jump + speed
+  const berserk = player.power && player.power.type === 'berserk';
+  const speedMul = berserk ? 0.4 : 1.0;
+  const jumpMul = berserk ? 1.7 : 1.0;
+
   // Horizontal
   let ax = 0;
   if (inp.left) ax -= 1;
   if (inp.right) ax += 1;
   if (ax !== 0) {
-    player.vx = ax * phys.moveSpeed;
+    player.vx = ax * phys.moveSpeed * speedMul;
     player.facing = ax;
   } else {
     player.vx *= phys.friction;
@@ -1549,7 +1687,7 @@ function updatePlayer() {
 
   // Jump
   if (inp.jump && player.grounded) {
-    player.vy = phys.jumpVelocity;
+    player.vy = phys.jumpVelocity * jumpMul;
     player.grounded = false;
   }
 
@@ -1629,13 +1767,21 @@ function updatePlayer() {
     }
   }
 
-  // NPC overlap → trigger dialogue (once per stage entry)
+  // NPC overlap → trigger dialogue.
+  // .triggered = answered (locked forever)
+  // .touched = currently overlapping (prevents re-opening on every frame).
+  // If player closes dialogue without answering, walk away resets .touched
+  // so they can come back and re-open it.
   for (const n of npcs) {
     if (n.triggered) continue;
     if (overlap(player, n)) {
-      n.triggered = true;
-      openNpcDialogue(n);
-      return;
+      if (!n.touched) {
+        n.touched = true;
+        openNpcDialogue(n);
+        return;
+      }
+    } else {
+      n.touched = false;
     }
   }
 
@@ -1778,18 +1924,19 @@ function triggerStageEnd() {
   }, 500);
 }
 
-// Bind a click handler that fires on iOS touch the moment the finger lands
-// (pointerdown), with a 300ms debounce so click + pointerdown don't double-fire
-// but the button stays usable across multiple presses.
+// Three-layer button binding for iOS Safari/Chrome: touchstart fires earliest
+// and is most reliable, pointerdown covers Chrome desktop and most modern
+// browsers, click is the fallback. 300ms debounce so they don't triple-fire.
 function bindModalButton(btn, fn) {
   let lastFireTs = 0;
   const fire = (e) => {
     const now = Date.now();
     if (now - lastFireTs < 300) return;
     lastFireTs = now;
-    if (e) e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
     fn();
   };
+  btn.addEventListener('touchstart', fire, { passive: false });
   btn.addEventListener('pointerdown', fire);
   btn.addEventListener('click', fire);
 }
@@ -1883,6 +2030,8 @@ function npcChoose(opt) {
   const resp = $('npc-response');
   resp.textContent = opt.response || '';
   resp.classList.remove('hidden');
+  // Mark NPC as answered (won't re-trigger)
+  if (activeNpc) activeNpc.triggered = true;
   // Award badge
   const data = activeNpc && activeNpc.data;
   if (data && data.badgeId && !progress.badges.includes(data.badgeId)) {
@@ -1966,6 +2115,7 @@ function render() {
 
   // particles
   drawBullets();
+  drawPowerups();
   for (const p of particles) drawParticle(p);
 }
 
@@ -2125,7 +2275,13 @@ function drawPlayer() {
   const spriteH = 24 * 2;
   const offsetX = (player.w - spriteW) / 2;
   const offsetY = (player.h - spriteH);
-  drawSprite(PLAYER_SPRITE, playerPalette(), px + offsetX, py + offsetY - bob, 2, player.facing < 0);
+  let palette = playerPalette();
+  if (player.power) {
+    if (player.power.type === 'nude') palette = nudePalette();
+    else if (player.power.type === 'girl') palette = girlPalette();
+    else if (player.power.type === 'berserk') palette = berserkPalette();
+  }
+  drawSprite(PLAYER_SPRITE, palette, px + offsetX, py + offsetY - bob, 2, player.facing < 0);
 }
 
 function drawEnemy(e) {
@@ -2232,6 +2388,7 @@ function loop(t) {
     updatePlayer();
     for (const e of enemies) updateEnemy(e);
     updateBullets();
+    updatePowerups();
     updateParticles();
     updateCamera();
   }
