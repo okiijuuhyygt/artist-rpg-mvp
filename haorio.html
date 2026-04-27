@@ -14,11 +14,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build-version" content="haorio-1.3">
+<meta name="build-version" content="haorio-1.4">
 <script>
   // iOS Safari aggressive cache buster — force hard-reload if local cache holds older build
   (function() {
-    const CURRENT = 'haorio-1.3';
+    const CURRENT = 'haorio-1.4';
     const LAST = localStorage.getItem('haorio-build');
     if (LAST && LAST !== CURRENT && !location.search.includes('_nocache=')) {
       const sep = location.search ? '&' : '?';
@@ -789,7 +789,7 @@ let scene = 'loading';     // loading | title | playing
 let bgmAudio = null;
 let lastFrame = 0;
 let hud = { coins: 0, lives: 10 };
-let progress = { cleared: [], best: {}, lastStage: 0, badges: [] };
+let progress = { cleared: [], best: {}, lastStage: 0, badges: [], milestones: [] };
 let activeNpc = null;        // NPC the dialogue is currently for
 let dialogueOpen = false;
 
@@ -913,6 +913,7 @@ async function boot() {
     const saved = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
     if (saved.cleared) progress.cleared = saved.cleared;
     if (saved.badges)  progress.badges = saved.badges;
+    if (saved.milestones) progress.milestones = saved.milestones;
     if (saved.coins) hud.coins = saved.coins;
     if (typeof saved.lastStage === 'number') progress.lastStage = saved.lastStage;
   } catch {}
@@ -941,6 +942,7 @@ function saveProgress() {
     localStorage.setItem(LS_KEY, JSON.stringify({
       cleared: progress.cleared,
       badges: progress.badges,
+      milestones: progress.milestones,
       coins: hud.coins,
       lastStage: stageIdx
     }));
@@ -1131,13 +1133,14 @@ function bindJoystick() {
   base.addEventListener('pointercancel', end);
   base.addEventListener('lostpointercapture', () => reset());
 
-  // SAFETY 1 — ANY pointerup anywhere on window releases joystick. Even if iOS
-  // gives us the wrong pointerId or skips the event entirely, the next time
-  // a finger lifts on screen we recover.
-  window.addEventListener('pointerup', () => { if (activeId !== null) reset(); });
-  window.addEventListener('pointercancel', () => { if (activeId !== null) reset(); });
-  window.addEventListener('touchend', () => { if (activeId !== null) reset(); }, { passive: true });
-  window.addEventListener('touchcancel', () => { if (activeId !== null) reset(); }, { passive: true });
+  // SAFETY 1 — only release joystick when the matching pointer is released.
+  // (Releasing on ANY pointerup broke A/B buttons — pressing them released the joystick.)
+  window.addEventListener('pointerup', e => {
+    if (activeId !== null && e.pointerId === activeId) reset();
+  });
+  window.addEventListener('pointercancel', e => {
+    if (activeId !== null && e.pointerId === activeId) reset();
+  });
 
   // SAFETY 2 — heartbeat: if we haven't seen a pointermove in 800ms while
   // claiming to be active, the pointer is stuck. Force release.
@@ -1317,7 +1320,11 @@ function makePlayer(x, y) {
     deathTimer: 0,
     canBumpBlocks: true,
     invuln: 0,
-    power: null  // { type: 'nude'|'girl'|'berserk', until: ms }
+    power: null,
+    flagPhase: null,    // null | 'sliding' | 'walking' | 'entering'
+    flagPoleX: 0,
+    flagWalkTo: 0,
+    flagTimer: 0
   };
 }
 function makeGoomba(x, y) {
@@ -1479,11 +1486,86 @@ function killEnemy(e) {
 }
 
 function addScore(n, partX, partY) {
+  const before = hud.coins;
   hud.coins += n;
   $('hud-coins').textContent = '★ ' + hud.coins;
   if (partX !== undefined) {
     spawnParticle(partX, partY, '+' + n, '#ffe000');
   }
+  // Milestone check
+  for (const m of MILESTONES) {
+    if (before < m.score && hud.coins >= m.score && !progress.milestones.includes(m.score)) {
+      progress.milestones.push(m.score);
+      saveProgress();
+      showMilestone(m);
+    }
+  }
+}
+
+const MILESTONES = [
+  { score: 100,  label: '★ 100',  sub: '還可以' },
+  { score: 2500, label: '★ 2500', sub: '你來真的' },
+  { score: 5000, label: '★ 5000', sub: '你是村民模範' }
+];
+
+let activeMilestone = null;
+function showMilestone(m) {
+  const stars = [];
+  for (let i = 0; i < 50; i++) {
+    stars.push({
+      x: Math.random() * GAME_W,
+      y: -Math.random() * 300 - 20,
+      vy: 1.5 + Math.random() * 4,
+      vx: (Math.random() - 0.5) * 0.6,
+      r: 4 + Math.random() * 8,
+      hue: Math.floor(Math.random() * 60) + 40,  // yellow-ish
+      rot: Math.random() * Math.PI
+    });
+  }
+  activeMilestone = { m, until: performance.now() + 2200, stars };
+}
+
+function drawMilestone() {
+  if (!activeMilestone) return;
+  const now = performance.now();
+  if (now > activeMilestone.until) { activeMilestone = null; return; }
+  // dim background
+  ctx.fillStyle = 'rgba(0,0,0,0.45)';
+  ctx.fillRect(0, 0, GAME_W, GAME_H);
+  // star rain
+  for (const s of activeMilestone.stars) {
+    s.y += s.vy;
+    s.x += s.vx;
+    s.rot += 0.05;
+    ctx.save();
+    ctx.translate(s.x, s.y);
+    ctx.rotate(s.rot);
+    ctx.fillStyle = `hsl(${s.hue}, 90%, 65%)`;
+    ctx.fillRect(-s.r/2, -s.r/2, s.r, s.r);
+    ctx.restore();
+  }
+  // big label
+  const remaining = activeMilestone.until - now;
+  const popIn = Math.min(1, (2200 - remaining) / 200);
+  const scale = 0.7 + popIn * 0.3;
+  ctx.save();
+  ctx.translate(GAME_W/2, GAME_H/2);
+  ctx.scale(scale, scale);
+  ctx.font = 'bold 44px "Press Start 2P", monospace';
+  ctx.fillStyle = '#ffe000';
+  ctx.strokeStyle = '#1a1a1a';
+  ctx.lineWidth = 6;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.strokeText(activeMilestone.m.label, 0, -16);
+  ctx.fillText(activeMilestone.m.label, 0, -16);
+  ctx.font = 'bold 18px "Press Start 2P", monospace';
+  ctx.fillStyle = '#fff';
+  ctx.strokeText(activeMilestone.m.sub, 0, 28);
+  ctx.fillText(activeMilestone.m.sub, 0, 28);
+  ctx.restore();
+  ctx.textAlign = 'start';
+  ctx.textBaseline = 'alphabetic';
 }
 
 // =====================================================
@@ -1657,6 +1739,11 @@ function spawnParticle(x, y, text, color) {
 // =====================================================
 function updatePlayer() {
   if (modalOpen) return;
+  // Flag-sequence mode bypasses input + physics entirely
+  if (player && player.flagPhase) {
+    updatePlayerFlagSequence();
+    return;
+  }
   const phys = content.physics;
   const stage = stages[stageIdx];
   const inp = getInput();
@@ -1800,20 +1887,60 @@ function updatePlayer() {
     }
   }
 
-  // Flagpole
+  // Flagpole — start the SMB-style cinematic sequence
   for (let ty = 0; ty < stage.tiles.length; ty++) {
     for (let tx = 0; tx < stage.tiles[ty].length; tx++) {
       if (stage.tiles[ty][tx] === 'F') {
         const fx = tx * TILE, fy = ty * TILE;
         if (player.x + player.w > fx && player.x < fx + TILE) {
-          // Check vertical overlap with flagpole height (4 tiles up)
           const poleTop = fy - TILE * 3;
           if (player.y + player.h > poleTop && player.y < fy + TILE) {
-            triggerStageEnd();
+            startFlagSequence(fx, fy);
             return;
           }
         }
       }
+    }
+  }
+}
+
+function startFlagSequence(fx, fy) {
+  player.flagPhase = 'sliding';
+  player.flagPoleX = fx;
+  player.flagPoleGroundY = fy - player.h;  // ground beside pole
+  player.flagWalkTo = fx + TILE * 5 + 8;   // house door
+  player.x = fx + TILE/2 - player.w/2;
+  player.vx = 0;
+  player.vy = 0;
+  player.facing = 1;
+}
+
+function updatePlayerFlagSequence() {
+  const phys = content.physics;
+  if (player.flagPhase === 'sliding') {
+    player.vy = 5;
+    player.y += player.vy;
+    if (player.y >= player.flagPoleGroundY) {
+      player.y = player.flagPoleGroundY;
+      player.flagPhase = 'walking';
+      // small hop off the pole
+      player.x += 6;
+      spawnParticle(player.x + player.w/2, player.y, '★', '#ffe000');
+    }
+  } else if (player.flagPhase === 'walking') {
+    player.vx = 2.5;
+    player.x += player.vx;
+    player.facing = 1;
+    if (player.x >= player.flagWalkTo) {
+      player.flagPhase = 'entering';
+      player.flagTimer = 36;
+    }
+  } else if (player.flagPhase === 'entering') {
+    // fade into house — invisible during entering
+    player.flagTimer--;
+    if (player.flagTimer <= 0) {
+      player.flagPhase = null;
+      triggerStageEnd();
     }
   }
 }
@@ -2132,6 +2259,8 @@ function render() {
   drawBullets();
   drawPowerups();
   for (const p of particles) drawParticle(p);
+  // Milestone overlay last (above everything)
+  drawMilestone();
 }
 
 function drawClouds() {
@@ -2242,8 +2371,8 @@ function drawUsedBlock(px, py) {
   ctx.fillRect(px, py, TILE, 3);
 }
 function drawFlag(px, py, ty, tx, stage) {
-  // Pole goes up from this tile
   const poleH = TILE * 4;
+  // pole
   ctx.fillStyle = '#aaa';
   ctx.fillRect(px + TILE/2 - 2, py - poleH, 4, poleH + TILE);
   // top ball
@@ -2251,17 +2380,70 @@ function drawFlag(px, py, ty, tx, stage) {
   ctx.beginPath();
   ctx.arc(px + TILE/2, py - poleH, 6, 0, Math.PI * 2);
   ctx.fill();
-  // flag waving
+  // flag y position — slides down with player when sliding this very pole
+  const myFlagWorldX = tx * TILE;
+  let flagTop = py - poleH + 4;
+  const isThisPole = player && player.flagPhase &&
+    Math.abs(player.flagPoleX - myFlagWorldX) < 4;
+  if (isThisPole && player.flagPhase === 'sliding') {
+    // match player y
+    flagTop = player.y;
+  } else if (isThisPole && (player.flagPhase === 'walking' || player.flagPhase === 'entering')) {
+    // already at the bottom
+    flagTop = py - 24;
+  }
   const wave = Math.sin(performance.now() / 300) * 3;
   ctx.fillStyle = '#d82800';
   ctx.beginPath();
-  ctx.moveTo(px + TILE/2 + 2, py - poleH + 4);
-  ctx.lineTo(px + TILE/2 + 28 + wave, py - poleH + 14);
-  ctx.lineTo(px + TILE/2 + 2, py - poleH + 24);
+  ctx.moveTo(px + TILE/2 + 2, flagTop);
+  ctx.lineTo(px + TILE/2 + 28 + wave, flagTop + 10);
+  ctx.lineTo(px + TILE/2 + 2, flagTop + 20);
   ctx.fill();
   // base
   ctx.fillStyle = '#666';
   ctx.fillRect(px, py, TILE, 6);
+  // little house 5 tiles to the right
+  drawHouse(px + TILE * 5, py - TILE);
+}
+
+function drawHouse(px, py) {
+  // body
+  ctx.fillStyle = '#8b5a2b';
+  ctx.fillRect(px, py, 64, 64);
+  // wood grain edges
+  ctx.fillStyle = '#5a3a1a';
+  ctx.fillRect(px, py + 60, 64, 4);
+  ctx.fillRect(px, py, 4, 64);
+  ctx.fillRect(px + 60, py, 4, 64);
+  // roof (stepped triangle)
+  ctx.fillStyle = '#c84c0c';
+  ctx.fillRect(px - 4, py - 8, 72, 8);
+  ctx.fillRect(px + 4, py - 16, 56, 8);
+  ctx.fillRect(px + 12, py - 24, 40, 8);
+  ctx.fillRect(px + 20, py - 32, 24, 8);
+  // door
+  ctx.fillStyle = '#3a2010';
+  ctx.fillRect(px + 24, py + 32, 16, 32);
+  ctx.fillStyle = '#fcd000';
+  ctx.fillRect(px + 36, py + 48, 2, 2);  // doorknob
+  // windows
+  ctx.fillStyle = '#5c94fc';
+  ctx.fillRect(px + 8, py + 14, 14, 14);
+  ctx.fillRect(px + 42, py + 14, 14, 14);
+  ctx.fillStyle = '#1a1a1a';
+  // window cross
+  ctx.fillRect(px + 8, py + 20, 14, 2);
+  ctx.fillRect(px + 14, py + 14, 2, 14);
+  ctx.fillRect(px + 42, py + 20, 14, 2);
+  ctx.fillRect(px + 48, py + 14, 2, 14);
+  // chimney smoke (animated)
+  const t = performance.now() / 300;
+  ctx.fillStyle = 'rgba(220,220,220,0.7)';
+  for (let i = 0; i < 3; i++) {
+    const sy = py - 40 - i * 12 - (t * 4 + i * 7) % 12;
+    const sx = px + 50 + Math.sin(t + i) * 3;
+    ctx.fillRect(sx, sy, 6 - i, 6 - i);
+  }
 }
 
 function drawSprite(rows, palette, px, py, scale, flipH) {
@@ -2281,6 +2463,13 @@ function drawSprite(rows, palette, px, py, scale, flipH) {
 
 function drawPlayer() {
   if (!player) return;
+  // Hide player while entering the house
+  if (player.flagPhase === 'entering') {
+    // optional: shrink fade
+    const alpha = Math.max(0, player.flagTimer / 36);
+    if (alpha <= 0.05) return;
+    ctx.globalAlpha = alpha;
+  }
   const px = Math.round(player.x - camera.x);
   const py = Math.round(player.y);
   const bob = (Math.abs(player.vx) > 0.5 && player.grounded)
@@ -2297,6 +2486,7 @@ function drawPlayer() {
     else if (player.power.type === 'berserk') palette = berserkPalette();
   }
   drawSprite(PLAYER_SPRITE, palette, px + offsetX, py + offsetY - bob, 2, player.facing < 0);
+  ctx.globalAlpha = 1;
 }
 
 function drawEnemy(e) {
