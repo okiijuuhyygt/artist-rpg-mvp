@@ -438,7 +438,11 @@
     <span>✨ HAORIO ADMIN</span>
     <span class="badge" id="statusBadge">未登入</span>
   </div>
-  <div class="right">v0.1</div>
+  <div class="right" style="display:flex;align-items:center;gap:10px;">
+    <a href="haorio.html" id="hdr-play" style="color:var(--nes-yellow);text-decoration:none;font-size:11px;border:2px solid var(--nes-yellow);padding:4px 8px;">▶ 玩家視角</a>
+    <button id="hdr-logout" style="background:transparent;color:#fff;border:2px solid #fff;font-family:'Press Start 2P',monospace;font-size:10px;padding:4px 8px;cursor:pointer;">登出</button>
+    <span style="font-size:10px;opacity:0.6;">v0.2</span>
+  </div>
 </header>
 
 <!-- ====================== LOGIN ====================== -->
@@ -469,9 +473,9 @@
     <div id="editorBody" class="hidden">
 
       <div class="preview-bar">
-        ▶ <a href="haorio.html" target="_blank">玩家視角(haorio.html)</a>
-        ▶ <a href="index.html" target="_blank">舊版經典版</a>
-        ▶ <a href="admin.html" target="_blank">舊版 admin</a>
+        ▶ <a href="haorio.html">玩家視角</a>
+        ▶ <a href="index.html" target="_blank">舊版經典版(新分頁)</a>
+        ▶ <a href="admin.html" target="_blank">舊版 admin(新分頁)</a>
       </div>
 
       <div class="section">
@@ -1134,6 +1138,13 @@ $('btnSave').addEventListener('click', async () => {
 
 $('btnLogout').addEventListener('click', () => {
   if (!confirm('登出會清掉這個瀏覽器的 Token(GitHub 上的 Token 不受影響)。確定?')) return;
+  localStorage.removeItem(LS_TOKEN);
+  route();
+});
+
+// Header logout — same logic, mirrored in the sticky header
+$('hdr-logout').addEventListener('click', () => {
+  if (!confirm('登出會清掉這個瀏覽器的 Token。確定?')) return;
   localStorage.removeItem(LS_TOKEN);
   route();
 });
