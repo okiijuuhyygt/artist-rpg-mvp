@@ -14,11 +14,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build-version" content="haorio-1.5">
+<meta name="build-version" content="haorio-1.6">
 <script>
   // iOS Safari aggressive cache buster — force hard-reload if local cache holds older build
   (function() {
-    const CURRENT = 'haorio-1.5';
+    const CURRENT = 'haorio-1.6';
     const LAST = localStorage.getItem('haorio-build');
     if (LAST && LAST !== CURRENT && !location.search.includes('_nocache=')) {
       const sep = location.search ? '&' : '?';
@@ -1059,7 +1059,6 @@ function bindJoystick() {
   const DEADZONE = 8;
   let activeId = null;
   let centerX = 0, centerY = 0;
-  let lastMoveTs = 0;
 
   function reset() {
     activeId = null;
@@ -1071,20 +1070,17 @@ function bindJoystick() {
 
   function start(e) {
     e.preventDefault();
-    // If a previous pointer never released (iOS bug), force-clear it before taking the new one.
-    if (activeId !== null && activeId !== e.pointerId) reset();
+    if (activeId !== null) return;  // 第二指完全忽略
     activeId = e.pointerId;
     try { base.setPointerCapture(e.pointerId); } catch {}
     const rect = base.getBoundingClientRect();
     centerX = rect.left + rect.width / 2;
     centerY = rect.top + rect.height / 2;
     stick.classList.add('dragging');
-    lastMoveTs = performance.now();
     move(e);
   }
   function move(e) {
     if (e.pointerId !== activeId) return;
-    lastMoveTs = performance.now();
     let dx = e.clientX - centerX;
     let dy = e.clientY - centerY;
     const dist = Math.hypot(dx, dy);
