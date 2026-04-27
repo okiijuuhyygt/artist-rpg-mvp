@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>haohao.unzip · MARIO ADMIN</title>
+<title>haohao.unzip · HAORIO ADMIN</title>
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta name="theme-color" content="#1a1a1a">
-<link rel="icon" type="image/png" href="favicon.png">
+<link rel="icon" type="image/png" href="haohao-head.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
@@ -435,7 +435,7 @@
 
 <header>
   <div class="left">
-    <span>🍄 MARIO ADMIN</span>
+    <span>✨ HAORIO ADMIN</span>
     <span class="badge" id="statusBadge">未登入</span>
   </div>
   <div class="right">v0.1</div>
@@ -445,7 +445,7 @@
 <section id="sceneLogin">
   <div class="login-card">
     <h1>耗耗限定</h1>
-    <p class="sub">MARIO 後台</p>
+    <p class="sub">HAORIO 後台</p>
     <form id="loginForm">
       <div class="field">
         <span class="label-text">PASSWORD</span>
@@ -507,6 +507,7 @@
           <code>B</code>磚塊 ·
           <code>?</code>問號磚 ·
           <code>G</code>Goomba ·
+          <code>N</code>NPC(每關 1 個) ·
           <code>F</code>旗杆
         </div>
         <p class="help">每行 80 個字 = 一張關卡寬。可以把每一格當成 NES 一格,自己畫就好。</p>
@@ -579,7 +580,7 @@
 // =======================================================
 const REPO_OWNER = 'okiijuuhyygt';
 const REPO_NAME  = 'artist-rpg-mvp';
-const CONTENT_PATH = 'mario-content.json';
+const CONTENT_PATH = 'haorio-content.json';
 const LS_TOKEN = 'hao-admin-token-v1';   // SHARED with old admin
 
 // =======================================================
@@ -641,7 +642,7 @@ $('loginForm').addEventListener('submit', async (e) => {
     localStorage.setItem(LS_TOKEN, tok);
     route();
   } catch (err) {
-    errEl.textContent = '密碼不對(或 mario-content.json 不在 repo 裡)';
+    errEl.textContent = '密碼不對(或 haorio-content.json 不在 repo 裡)';
     errEl.classList.remove('hidden');
     $('tokenInput').value = '';
     $('tokenInput').focus();
@@ -679,8 +680,8 @@ async function initEditor() {
   $('loadingContent').classList.remove('hidden');
   $('editorBody').classList.add('hidden');
   try {
-    const res = await fetch('mario-content.json?t=' + Date.now());
-    if (!res.ok) throw new Error('找不到 mario-content.json');
+    const res = await fetch('haorio-content.json?t=' + Date.now());
+    if (!res.ok) throw new Error('找不到 haorio-content.json');
     contentData = await res.json();
     originalContent = JSON.stringify(contentData);
     // Get SHA
@@ -817,6 +818,8 @@ function renderStages() {
       <div class="field">
         <textarea class="s-qblock" rows="3" placeholder="一行一條">${escapeHtml(qblockText)}</textarea>
       </div>
+      <h3>📢 NPC 對話(layout 用 N 標位置)</h3>
+      <div class="npc-editor-wrap"></div>
       <h3>到達旗杆 → 顯示 modal</h3>
       <div class="field">
         <label>Modal 標題</label>
@@ -853,8 +856,128 @@ function renderStages() {
     block.querySelector('.s-modal-body').addEventListener('input', e => { s.endModalBody = e.target.value; markDirty(); });
     block.querySelector('.s-modal-cta').addEventListener('input', e => { s.endModalCta = e.target.value; markDirty(); });
     block.querySelector('.s-end-text').addEventListener('input', e => { s.endText = e.target.value; markDirty(); });
+    renderNpcEditor(s, block.querySelector('.npc-editor-wrap'));
     box.appendChild(block);
   });
+}
+
+// =======================================================
+// NPC EDITOR (per stage)
+// =======================================================
+function renderNpcEditor(stage, container) {
+  if (!stage.npc) {
+    stage.npc = { name: '', yearTag: '', prompt: '', options: [], badgeId: '', badgeUnlockMsg: '' };
+  }
+  const npc = stage.npc;
+  const badges = (contentData.badges || []);
+  container.innerHTML = '';
+
+  const wrap = document.createElement('div');
+  wrap.style.background = '#fff8e0';
+  wrap.style.border = '2px dashed #d82800';
+  wrap.style.padding = '12px';
+
+  // name + year
+  const nameRow = document.createElement('div');
+  nameRow.className = 'field-row';
+  nameRow.innerHTML = `
+    <div class="field">
+      <label>NPC 名字</label>
+      <input type="text" class="n-name" value="${escapeHtml(npc.name || '')}" placeholder="小學的 H">
+    </div>
+    <div class="field">
+      <label>年代標籤</label>
+      <input type="text" class="n-year" value="${escapeHtml(npc.yearTag || '')}" placeholder="1998 · 8 歲">
+    </div>
+  `;
+  nameRow.querySelector('.n-name').addEventListener('input', e => { npc.name = e.target.value; markDirty(); });
+  nameRow.querySelector('.n-year').addEventListener('input', e => { npc.yearTag = e.target.value; markDirty(); });
+  wrap.appendChild(nameRow);
+
+  // prompt
+  const promptDiv = document.createElement('div');
+  promptDiv.className = 'field';
+  promptDiv.innerHTML = `
+    <label>NPC 開場白(\\n 換行)</label>
+    <textarea class="n-prompt" rows="3">${escapeHtml(npc.prompt || '')}</textarea>
+  `;
+  promptDiv.querySelector('.n-prompt').addEventListener('input', e => { npc.prompt = e.target.value; markDirty(); });
+  wrap.appendChild(promptDiv);
+
+  // options list
+  const optsTitle = document.createElement('h3');
+  optsTitle.style.fontSize = '11px';
+  optsTitle.style.margin = '14px 0 8px';
+  optsTitle.textContent = '對話選項';
+  wrap.appendChild(optsTitle);
+
+  const optsBox = document.createElement('div');
+  wrap.appendChild(optsBox);
+
+  function rerenderOpts() {
+    optsBox.innerHTML = '';
+    if (!Array.isArray(npc.options)) npc.options = [];
+    npc.options.forEach((opt, i) => {
+      const optDiv = document.createElement('div');
+      optDiv.style.background = '#fff';
+      optDiv.style.border = '1px solid #ccc';
+      optDiv.style.padding = '8px';
+      optDiv.style.marginBottom = '6px';
+      optDiv.innerHTML = `
+        <div class="field-row">
+          <div class="field" style="flex: 1;">
+            <label>選項 ${String.fromCharCode(65 + i)} · 文字</label>
+            <input type="text" class="o-label" value="${escapeHtml(opt.label || '')}">
+          </div>
+          <button class="btn-mini o-del" style="margin-top:18px;">刪</button>
+        </div>
+        <div class="field">
+          <label>H 的回應</label>
+          <textarea class="o-resp" rows="2">${escapeHtml(opt.response || '')}</textarea>
+        </div>
+      `;
+      optDiv.querySelector('.o-label').addEventListener('input', e => { opt.label = e.target.value; markDirty(); });
+      optDiv.querySelector('.o-resp').addEventListener('input', e => { opt.response = e.target.value; markDirty(); });
+      optDiv.querySelector('.o-del').addEventListener('click', () => {
+        npc.options.splice(i, 1);
+        markDirty();
+        rerenderOpts();
+      });
+      optsBox.appendChild(optDiv);
+    });
+    const addBtn = document.createElement('button');
+    addBtn.className = 'btn-add';
+    addBtn.textContent = '+ 加選項';
+    addBtn.onclick = () => {
+      npc.options.push({ label: '', response: '' });
+      markDirty();
+      rerenderOpts();
+    };
+    optsBox.appendChild(addBtn);
+  }
+  rerenderOpts();
+
+  // badge
+  const badgeRow = document.createElement('div');
+  badgeRow.className = 'field-row';
+  const badgeOpts = ['<option value="">(無徽章)</option>']
+    .concat(badges.map(b => `<option value="${escapeHtml(b.id)}" ${b.id === npc.badgeId ? 'selected' : ''}>${escapeHtml(b.icon || '·')} ${escapeHtml(b.label)}</option>`))
+    .join('');
+  badgeRow.innerHTML = `
+    <div class="field" style="flex: 0 0 200px;">
+      <label>解鎖徽章</label>
+      <select class="n-badge">${badgeOpts}</select>
+    </div>
+    <div class="field" style="flex: 1;">
+      <label>徽章解鎖文案</label>
+      <input type="text" class="n-bmsg" value="${escapeHtml(npc.badgeUnlockMsg || '')}" placeholder="★ 國小同代 GET — 你跟我同一個下課時間">
+    </div>
+  `;
+  badgeRow.querySelector('.n-badge').addEventListener('change', e => { npc.badgeId = e.target.value; markDirty(); });
+  badgeRow.querySelector('.n-bmsg').addEventListener('input', e => { npc.badgeUnlockMsg = e.target.value; markDirty(); });
+  wrap.appendChild(badgeRow);
+
+  container.appendChild(wrap);
 }
 
 function renderMarquee() {
@@ -988,7 +1111,7 @@ $('btnSave').addEventListener('click', async () => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        message: 'admin: update mario-content.json',
+        message: 'admin: update haorio-content.json',
         content: b64,
         sha: currentSha
       })

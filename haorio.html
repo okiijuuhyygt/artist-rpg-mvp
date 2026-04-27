@@ -3,16 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-<title>haohao.unzip · MARIO</title>
-<meta name="description" content="haohao.unzip 的橫向捲軸版。← → 移動,空白鍵跳,踩 Goomba 撞問號磚,衝旗杆。">
-<meta property="og:title" content="haohao.unzip · MARIO">
-<meta property="og:description" content="一個橫向捲軸的 8-bit 闖關遊戲,五關走完是 EP1。">
+<title>haohao.unzip · HAORIO</title>
+<meta name="description" content="haohao.unzip · HAORIO 是一個橫向捲軸的 8-bit 遊戲,五關走完 = 34 歲音樂人時代教學。← → 移動,空白鍵跳,撞磚踩 Goomba,跟 NPC 講話收徽章。">
+<meta property="og:title" content="haohao.unzip · HAORIO">
+<meta property="og:description" content="34 歲音樂人時代教學遊戲。撞磚收歌詞,踩 Goomba,跟年代 NPC 收徽章。">
 <meta property="og:image" content="https://okiijuuhyygt.github.io/artist-rpg-mvp/og-image.png">
 <meta name="theme-color" content="#5c94fc">
-<link rel="icon" type="image/png" href="favicon.png">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="haohao-head.png">
+<link rel="apple-touch-icon" href="haohao-head-64.png">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta name="build-version" content="mario-0.1">
+<meta name="build-version" content="haorio-0.2">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
@@ -276,6 +276,173 @@
   }
   #title-scene .meta a { color: var(--nes-yellow); text-decoration: underline; }
 
+  /* ========== badges row ========== */
+  .badges-row {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    margin-bottom: 22px;
+    flex-wrap: wrap;
+  }
+  .badge {
+    width: 54px;
+    height: 54px;
+    border: 3px solid #1a1a1a;
+    background: rgba(0,0,0,0.4);
+    color: #555;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 3px 3px 0 #1a1a1a;
+    filter: grayscale(100%);
+    opacity: 0.5;
+    transition: all 0.2s;
+  }
+  .badge.got {
+    background: var(--nes-yellow);
+    color: #1a1a1a;
+    filter: none;
+    opacity: 1;
+    box-shadow: 4px 4px 0 var(--nes-red);
+  }
+  .badge .tooltip {
+    position: absolute;
+    background: #000;
+    color: var(--nes-yellow);
+    font-size: 10px;
+    padding: 4px 6px;
+    transform: translateY(60px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s;
+    white-space: nowrap;
+  }
+  .badge:hover .tooltip { opacity: 1; }
+
+  #hud .middle { display: flex; gap: 6px; align-items: center; }
+  #hud-badges { display: flex; gap: 4px; font-size: 16px; }
+  #hud-badges .b {
+    display: inline-block;
+    width: 22px; height: 22px;
+    line-height: 22px;
+    text-align: center;
+    background: rgba(0,0,0,0.6);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: #555;
+    font-size: 13px;
+    filter: grayscale(100%);
+  }
+  #hud-badges .b.got {
+    background: var(--nes-yellow);
+    color: #1a1a1a;
+    border-color: var(--nes-red);
+    filter: none;
+  }
+
+  /* ========== NPC dialogue modal ========== */
+  .npc-modal-back {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.78);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 220;
+    padding: 20px;
+  }
+  .npc-modal-back.open { display: flex; }
+  .npc-modal {
+    background: var(--paper);
+    color: #1a1a1a;
+    border: 4px solid #1a1a1a;
+    box-shadow: 8px 8px 0 var(--nes-red);
+    padding: 24px;
+    max-width: 560px;
+    width: 100%;
+    max-height: 86vh;
+    overflow-y: auto;
+    font-family: 'VT323', monospace;
+    font-size: 22px;
+    line-height: 1.5;
+  }
+  .npc-modal .speaker {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 14px;
+    border-bottom: 3px dashed #1a1a1a;
+    padding-bottom: 10px;
+  }
+  .npc-modal .speaker img {
+    width: 56px; height: 56px;
+    image-rendering: pixelated;
+    border: 2px solid #1a1a1a;
+    background: var(--paper-light);
+  }
+  .npc-modal .speaker .who {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 13px;
+    color: var(--nes-red);
+  }
+  .npc-modal .speaker .when {
+    font-family: 'VT323', monospace;
+    font-size: 16px;
+    color: #666;
+    margin-top: 2px;
+  }
+  .npc-modal .prompt { white-space: pre-wrap; margin-bottom: 16px; }
+  .npc-modal .opts { display: flex; flex-direction: column; gap: 10px; }
+  .npc-modal .opt {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 11px;
+    padding: 12px 16px;
+    border: 3px solid #1a1a1a;
+    background: #fff;
+    color: #1a1a1a;
+    cursor: pointer;
+    text-align: left;
+    box-shadow: 3px 3px 0 #1a1a1a;
+    line-height: 1.6;
+  }
+  .npc-modal .opt:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--nes-red); }
+  .npc-modal .opt:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 #1a1a1a; }
+  .npc-modal .response {
+    background: #1a1a1a;
+    color: var(--nes-yellow);
+    padding: 14px 16px;
+    margin-top: 16px;
+    border-left: 4px solid var(--nes-red);
+    font-size: 20px;
+    font-family: 'VT323', monospace;
+    white-space: pre-wrap;
+  }
+  .npc-modal .badge-pop {
+    margin-top: 14px;
+    background: var(--nes-yellow);
+    color: #1a1a1a;
+    padding: 10px 14px;
+    text-align: center;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 11px;
+    border: 3px solid #1a1a1a;
+    box-shadow: 3px 3px 0 var(--nes-red);
+    animation: badge-pop 0.4s ease-out;
+  }
+  @keyframes badge-pop {
+    0% { transform: scale(0.7); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .npc-modal .close-btn {
+    margin-top: 16px;
+    padding: 10px 18px;
+    border: 3px solid #1a1a1a;
+    background: var(--nes-yellow);
+    color: #1a1a1a;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 12px;
+    cursor: pointer;
+    box-shadow: 3px 3px 0 #1a1a1a;
+  }
+
   /* ========== utility ========== */
   .hidden { display: none !important; }
   a { color: var(--nes-yellow); }
@@ -288,8 +455,10 @@
 <div id="loading">LOADING...</div>
 
 <section id="title-scene">
+  <img id="title-mascot" src="haohao-head-64.png" alt="H" style="width:120px;height:auto;image-rendering:pixelated;margin-bottom:14px;filter:drop-shadow(4px 4px 0 #1a1a1a);">
   <h1 id="title-name">HAOHAO.UNZIP</h1>
-  <p class="sub" id="title-sub">MARIO 版 · 橫向捲軸</p>
+  <p class="sub" id="title-sub">HAORIO · 橫向捲軸</p>
+  <div class="badges-row" id="badges-row"></div>
   <div class="stages" id="stage-grid"></div>
   <button class="start-btn" id="btn-continue">▶ 繼續</button>
   <div class="meta">
@@ -306,6 +475,9 @@
   <div class="left">
     <span id="hud-stage">1-1</span>
     <span id="hud-title"></span>
+  </div>
+  <div class="middle">
+    <span id="hud-badges"></span>
   </div>
   <div class="right">
     <span id="hud-coins">★ 0</span>
@@ -331,6 +503,23 @@
   </div>
 </div>
 
+<div class="npc-modal-back" id="npc-modal">
+  <div class="npc-modal">
+    <div class="speaker">
+      <img src="haohao-head-64.png" alt="H">
+      <div>
+        <div class="who" id="npc-who"></div>
+        <div class="when" id="npc-when"></div>
+      </div>
+    </div>
+    <div class="prompt" id="npc-prompt"></div>
+    <div class="opts" id="npc-opts"></div>
+    <div class="response hidden" id="npc-response"></div>
+    <div class="badge-pop hidden" id="npc-badgepop"></div>
+    <button class="close-btn hidden" id="npc-close">▶ 繼續</button>
+  </div>
+</div>
+
 <script>
 // =====================================================
 // CONFIG / STATE
@@ -338,7 +527,7 @@
 const TILE = 32;
 const GAME_W = 1024;
 const GAME_H = 576;
-const LS_KEY = 'hao-mario-v1';
+const LS_KEY = 'hao-haorio-v1';
 const POLL_API = 'https://abacus.jasoncameron.dev';
 
 const $ = id => document.getElementById(id);
@@ -346,11 +535,12 @@ const canvas = $('game');
 const ctx = canvas.getContext('2d');
 ctx.imageSmoothingEnabled = false;
 
-let content = null;        // mario-content.json
+let content = null;        // haorio-content.json
 let stages = [];           // parsed stage objects (with tiles[][])
 let stageIdx = 0;          // current stage index in world1
 let player = null;
 let enemies = [];
+let npcs = [];
 let particles = [];
 let camera = { x: 0 };
 let keys = {};
@@ -360,7 +550,9 @@ let scene = 'loading';     // loading | title | playing
 let bgmAudio = null;
 let lastFrame = 0;
 let hud = { coins: 0, lives: 3 };
-let progress = { cleared: [], best: {}, lastStage: 0 };
+let progress = { cleared: [], best: {}, lastStage: 0, badges: [] };
+let activeNpc = null;        // NPC the dialogue is currently for
+let dialogueOpen = false;
 
 // Player sprite (16w x 24h pixel grid)
 const PLAYER_SPRITE = [
@@ -426,7 +618,7 @@ function playerPalette() {
 // =====================================================
 async function boot() {
   try {
-    const res = await fetch('mario-content.json?t=' + Date.now());
+    const res = await fetch('haorio-content.json?t=' + Date.now());
     content = await res.json();
   } catch (e) {
     $('loading').textContent = 'load fail: ' + e.message;
@@ -441,6 +633,7 @@ async function boot() {
   try {
     const saved = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
     if (saved.cleared) progress.cleared = saved.cleared;
+    if (saved.badges)  progress.badges = saved.badges;
     if (saved.coins) hud.coins = saved.coins;
     if (typeof saved.lastStage === 'number') progress.lastStage = saved.lastStage;
   } catch {}
@@ -468,6 +661,7 @@ function saveProgress() {
   try {
     localStorage.setItem(LS_KEY, JSON.stringify({
       cleared: progress.cleared,
+      badges: progress.badges,
       coins: hud.coins,
       lastStage: stageIdx
     }));
@@ -557,7 +751,8 @@ function showTitle() {
   $('hud').classList.add('hidden');
   $('touch').classList.add('hidden');
   $('title-name').textContent = (content.meta.worldName || 'HAOHAO.UNZIP').toUpperCase();
-  $('title-sub').textContent = content.meta.subtitle || 'MARIO 版';
+  $('title-sub').textContent = content.meta.subtitle || 'HAORIO 版';
+  renderTitleBadges();
   renderStageGrid();
 
   // 「繼續」按鈕：上次玩到的關
@@ -594,14 +789,20 @@ function startStage(idx) {
   stages[idx].tiles = parseLayout(stages[idx].layout);
   // spawn player
   player = makePlayer(80, 200);
-  // spawn enemies from G tiles
+  // spawn enemies from G tiles + NPC from N tile
   enemies = [];
+  npcs = [];
   const stage = stages[idx];
   for (let ty = 0; ty < stage.tiles.length; ty++) {
     for (let tx = 0; tx < stage.tiles[ty].length; tx++) {
       if (stage.tiles[ty][tx] === 'G') {
         enemies.push(makeGoomba(tx * TILE, ty * TILE));
-        stage.tiles[ty][tx] = '.';  // clear it from tile grid
+        stage.tiles[ty][tx] = '.';
+      } else if (stage.tiles[ty][tx] === 'N') {
+        if (stage.npc) {
+          npcs.push(makeNpc(tx * TILE, ty * TILE, stage.npc));
+        }
+        stage.tiles[ty][tx] = '.';
       }
     }
   }
@@ -616,6 +817,7 @@ function startStage(idx) {
   $('hud-title').textContent = stage.title || '';
   $('hud-coins').textContent = '★ ' + hud.coins;
   $('hud-lives').textContent = '♥ ' + hud.lives;
+  renderHudBadges();
   saveProgress();
   startBGM();
 }
@@ -642,6 +844,14 @@ function makeGoomba(x, y) {
     dead: false,
     deathTimer: 0,
     type: 'goomba'
+  };
+}
+function makeNpc(x, y, data) {
+  return {
+    x: x + 4, y: y - 4, w: 24, h: 36,
+    bobPhase: Math.random() * Math.PI * 2,
+    data: data,
+    triggered: false  // resets each stage start
   };
 }
 
@@ -810,6 +1020,16 @@ function updatePlayer() {
     }
   }
 
+  // NPC overlap → trigger dialogue (once per stage entry)
+  for (const n of npcs) {
+    if (n.triggered) continue;
+    if (overlap(player, n)) {
+      n.triggered = true;
+      openNpcDialogue(n);
+      return;
+    }
+  }
+
   // Flagpole
   for (let ty = 0; ty < stage.tiles.length; ty++) {
     for (let tx = 0; tx < stage.tiles[ty].length; tx++) {
@@ -959,6 +1179,94 @@ function closeModal() {
 }
 
 // =====================================================
+// NPC DIALOGUE
+// =====================================================
+function openNpcDialogue(n) {
+  activeNpc = n;
+  dialogueOpen = true;
+  modalOpen = true;
+  const data = n.data;
+  $('npc-who').textContent = data.name || 'NPC';
+  $('npc-when').textContent = data.yearTag || '';
+  $('npc-prompt').textContent = data.prompt || '';
+  $('npc-response').classList.add('hidden');
+  $('npc-response').textContent = '';
+  $('npc-badgepop').classList.add('hidden');
+  $('npc-badgepop').textContent = '';
+  $('npc-close').classList.add('hidden');
+  const opts = $('npc-opts');
+  opts.innerHTML = '';
+  opts.classList.remove('hidden');
+  (data.options || []).forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'opt';
+    btn.textContent = (String.fromCharCode(65 + i)) + ' · ' + (opt.label || '');
+    btn.onclick = () => npcChoose(opt);
+    opts.appendChild(btn);
+  });
+  $('npc-modal').classList.add('open');
+}
+
+function npcChoose(opt) {
+  $('npc-opts').classList.add('hidden');
+  const resp = $('npc-response');
+  resp.textContent = opt.response || '';
+  resp.classList.remove('hidden');
+  // Award badge
+  const data = activeNpc && activeNpc.data;
+  if (data && data.badgeId && !progress.badges.includes(data.badgeId)) {
+    progress.badges.push(data.badgeId);
+    saveProgress();
+    const pop = $('npc-badgepop');
+    pop.textContent = data.badgeUnlockMsg || ('★ 徽章 GET');
+    pop.classList.remove('hidden');
+    renderHudBadges();
+  }
+  $('npc-close').classList.remove('hidden');
+}
+
+$('npc-close').addEventListener('click', () => closeNpcDialogue());
+$('npc-modal').addEventListener('click', (e) => {
+  if (e.target.id === 'npc-modal') closeNpcDialogue();
+});
+
+function closeNpcDialogue() {
+  dialogueOpen = false;
+  modalOpen = false;
+  activeNpc = null;
+  $('npc-modal').classList.remove('open');
+}
+
+// =====================================================
+// BADGES
+// =====================================================
+function renderHudBadges() {
+  const all = (content && content.badges) || [];
+  const got = progress.badges || [];
+  const html = all.map(b => {
+    const isGot = got.includes(b.id);
+    return `<span class="b ${isGot ? 'got' : ''}" title="${b.label || ''}">${b.icon || '·'}</span>`;
+  }).join('');
+  $('hud-badges').innerHTML = html;
+}
+
+function renderTitleBadges() {
+  const box = $('badges-row');
+  if (!box) return;
+  const all = (content && content.badges) || [];
+  const got = progress.badges || [];
+  box.innerHTML = '';
+  all.forEach(b => {
+    const isGot = got.includes(b.id);
+    const div = document.createElement('div');
+    div.className = 'badge' + (isGot ? ' got' : '');
+    div.title = b.label || '';
+    div.innerHTML = (b.icon || '·');
+    box.appendChild(div);
+  });
+}
+
+// =====================================================
 // RENDER
 // =====================================================
 function render() {
@@ -978,6 +1286,9 @@ function render() {
 
   // enemies
   for (const e of enemies) drawEnemy(e);
+
+  // NPCs
+  for (const n of npcs) drawNpc(n);
 
   // player
   drawPlayer();
@@ -1165,6 +1476,56 @@ function drawEnemy(e) {
   const offsetX = (e.w - 14*2) / 2;
   const offsetY = (e.h - 12*2);
   drawSprite(GOOMBA_SPRITE, GOOMBA_PALETTE, px + offsetX, py + offsetY, 2, e.facing > 0);
+}
+
+function drawNpc(n) {
+  const t = performance.now() / 400;
+  const bob = Math.sin(t + n.bobPhase) * 2;
+  const px = Math.round(n.x - camera.x);
+  const py = Math.round(n.y + bob);
+  // Body: smaller player sprite (scale 1.5, reduce body width)
+  // Use 16x24 sprite at scale 1.5 → 24x36 (hitbox is 24x36, perfect fit)
+  drawSprite(PLAYER_SPRITE, npcPalette(), px, py, 1.5, false);
+
+  // "!" speech bubble above (only if not yet triggered)
+  if (!n.triggered) {
+    const bubbleY = py - 26 + Math.sin(t * 1.5) * 2;
+    const bubbleX = px + n.w / 2 - 9;
+    // Bubble bg
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(bubbleX, bubbleY, 18, 20);
+    ctx.fillStyle = '#1a1a1a';
+    ctx.fillRect(bubbleX, bubbleY, 18, 2);
+    ctx.fillRect(bubbleX, bubbleY + 18, 18, 2);
+    ctx.fillRect(bubbleX, bubbleY, 2, 20);
+    ctx.fillRect(bubbleX + 16, bubbleY, 2, 20);
+    // ! mark
+    ctx.fillStyle = '#d82800';
+    ctx.font = 'bold 16px "Press Start 2P", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('!', bubbleX + 9, bubbleY + 16);
+    // arrow tail
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(bubbleX + 6, bubbleY + 20, 6, 3);
+    ctx.fillStyle = '#1a1a1a';
+    ctx.fillRect(bubbleX + 6, bubbleY + 22, 6, 1);
+    ctx.textAlign = 'start';
+  }
+}
+
+// NPC palette = same as player but jacket darker/different to suggest "another version"
+function npcPalette() {
+  const c = content.character;
+  return {
+    H: c.hair,
+    S: c.skin,
+    G: '#1a1a1a',
+    R: '#c8302c',
+    J: shade(c.jacket, -30),  // darker jacket = "another era H"
+    W: c.shirt,
+    P: c.pants,
+    O: c.shoes
+  };
 }
 
 function drawParticle(p) {
