@@ -539,43 +539,75 @@
     }
     .stage-tile .num { font-size: 16px; margin-bottom: 2px; }
     #title-scene .start-btn { font-size: 11px; padding: 10px 18px; }
+
+    /* === NPC dialogue modal: speaker left + content right === */
+    .npc-modal {
+      padding: 12px 14px;
+      font-size: 15px;
+      max-height: 92vh;
+      max-width: 92vw;
+      display: grid;
+      grid-template-columns: 90px 1fr;
+      column-gap: 12px;
+      grid-template-areas:
+        "speaker prompt"
+        "speaker opts"
+        "speaker response"
+        "speaker badge"
+        "speaker close";
+    }
+    .npc-modal .speaker {
+      grid-area: speaker;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      border-bottom: none;
+      border-right: 3px dashed #1a1a1a;
+      padding-bottom: 0;
+      padding-right: 8px;
+      margin-bottom: 0;
+      gap: 6px;
+    }
+    .npc-modal .speaker img { width: 56px; height: 56px; }
+    .npc-modal .speaker .who { font-size: 9px; }
+    .npc-modal .speaker .when { font-size: 11px; line-height: 1.2; }
+    .npc-modal .prompt { grid-area: prompt; margin-bottom: 6px; font-size: 15px; }
+    .npc-modal .opts { grid-area: opts; gap: 6px; }
+    .npc-modal .opt { padding: 8px 10px; font-size: 9px; box-shadow: 2px 2px 0 #1a1a1a; line-height: 1.4; }
+    .npc-modal .response { grid-area: response; padding: 8px 10px; font-size: 13px; margin-top: 6px; }
+    .npc-modal .badge-pop { grid-area: badge; padding: 6px 8px; font-size: 8px; margin-top: 6px; }
+    .npc-modal .close-btn { grid-area: close; margin-top: 6px; padding: 6px 12px; font-size: 9px; align-self: flex-start; box-shadow: 2px 2px 0 #1a1a1a; }
+
+    /* === Stage clear / endgame modal: compact === */
+    .modal {
+      padding: 14px 16px;
+      font-size: 16px;
+      max-height: 92vh;
+      max-width: 92vw;
+    }
+    .modal h2 { font-size: 13px; margin-bottom: 8px; }
+    .modal .body { font-size: 16px; margin-bottom: 10px; line-height: 1.4; }
+    .modal .row { gap: 6px; }
+    .modal button { padding: 8px 14px; font-size: 10px; box-shadow: 2px 2px 0 #1a1a1a; }
   }
 
-  /* Portrait orientation warning — Mario-like games need landscape */
-  #rotate-warn {
-    position: fixed; inset: 0;
-    background: #000;
-    color: var(--nes-yellow);
-    z-index: 999;
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-    text-align: center;
-    font-family: 'Press Start 2P', monospace;
-    font-size: 14px;
-    line-height: 1.8;
-  }
-  #rotate-warn .icon {
-    font-size: 64px;
-    margin-bottom: 18px;
-    animation: rotate-tip 2s infinite ease-in-out;
-  }
-  #rotate-warn .small {
-    font-family: 'VT323', monospace;
-    font-size: 18px;
-    margin-top: 18px;
-    color: #fff;
-    line-height: 1.5;
-  }
-  @keyframes rotate-tip {
-    0%, 100% { transform: rotate(-15deg); }
-    50% { transform: rotate(75deg); }
-  }
-  /* Show only on portrait + touch */
+  /* Portrait → forced landscape via CSS rotate (touch devices only).
+     Browser hit-tests against the post-transform bounding boxes, and
+     getBoundingClientRect returns post-transform coords too — so pointer
+     events Just Work as long as we never math against raw e.clientX/Y
+     without going through getBoundingClientRect (which the joystick does). */
   @media (orientation: portrait) and (hover: none) and (pointer: coarse) {
-    #rotate-warn { display: flex; }
+    html { overflow: hidden; height: 100%; }
+    body {
+      transform: rotate(90deg);
+      transform-origin: top left;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      width: 100vh;
+      height: 100vw;
+      overflow: hidden;
+    }
   }
 </style>
 </head>
@@ -583,12 +615,6 @@
 
 <div id="marquee"><div class="track" id="marquee-track">載入中...</div></div>
 
-<div id="rotate-warn">
-  <div class="icon">📱</div>
-  HAORIO 是橫向遊戲<br>
-  把手機轉橫拿
-  <div class="small">(像玩 Super Mario 那樣)</div>
-</div>
 
 <div id="loading">LOADING...</div>
 
@@ -1657,30 +1683,42 @@ function triggerStageEnd() {
   }, 500);
 }
 
+// Bind a click handler that fires on iOS touch the moment the finger lands
+// (pointerdown), with a guard so click + pointerdown don't double-fire.
+function bindModalButton(btn, fn) {
+  let fired = false;
+  const fire = (e) => {
+    if (fired) return;
+    fired = true;
+    if (e) e.preventDefault();
+    fn();
+  };
+  btn.addEventListener('pointerdown', fire);
+  btn.addEventListener('click', fire);
+}
+
 function showStageClearModal() {
   const stage = stages[stageIdx];
   $('modal-title').textContent = stage.endModalTitle || stage.title || 'CLEAR';
   $('modal-body').textContent = stage.endModalBody || '';
   const row = $('modal-row');
   row.innerHTML = '';
-  // Continue to next stage button
   const isLast = stageIdx >= stages.length - 1;
   if (!isLast) {
     const next = document.createElement('button');
     next.textContent = stage.endModalCta || ('▶ 下一關 ' + stages[stageIdx + 1].id);
-    next.onclick = () => { closeModal(); startStage(stageIdx + 1); };
+    bindModalButton(next, () => { closeModal(); startStage(stageIdx + 1); });
     row.appendChild(next);
   } else {
     const end = document.createElement('button');
     end.textContent = (content.endgame && content.endgame.ctaLabel) || '▶ 結算';
-    end.onclick = () => { closeModal(); showEndgame(); };
+    bindModalButton(end, () => { closeModal(); showEndgame(); });
     row.appendChild(end);
   }
-  // Back to title
   const back = document.createElement('button');
   back.className = 'secondary';
   back.textContent = '↑ 回標題';
-  back.onclick = () => { closeModal(); goTitle(); };
+  bindModalButton(back, () => { closeModal(); goTitle(); });
   row.appendChild(back);
   openModal();
 }
@@ -1694,13 +1732,13 @@ function showEndgame() {
   if (eg.ctaUrl) {
     const cta = document.createElement('button');
     cta.textContent = eg.ctaLabel || '▶ 繼續';
-    cta.onclick = () => window.location.href = eg.ctaUrl;
+    bindModalButton(cta, () => { window.location.href = eg.ctaUrl; });
     row.appendChild(cta);
   }
   const back = document.createElement('button');
   back.className = 'secondary';
   back.textContent = '↑ 回標題';
-  back.onclick = () => { closeModal(); goTitle(); };
+  bindModalButton(back, () => { closeModal(); goTitle(); });
   row.appendChild(back);
   openModal();
 }
@@ -1737,7 +1775,7 @@ function openNpcDialogue(n) {
     const btn = document.createElement('button');
     btn.className = 'opt';
     btn.textContent = (String.fromCharCode(65 + i)) + ' · ' + (opt.label || '');
-    btn.onclick = () => npcChoose(opt);
+    bindModalButton(btn, () => npcChoose(opt));
     opts.appendChild(btn);
   });
   $('npc-modal').classList.add('open');
@@ -1761,7 +1799,7 @@ function npcChoose(opt) {
   $('npc-close').classList.remove('hidden');
 }
 
-$('npc-close').addEventListener('click', () => closeNpcDialogue());
+bindModalButton($('npc-close'), () => closeNpcDialogue());
 $('npc-modal').addEventListener('click', (e) => {
   if (e.target.id === 'npc-modal') closeNpcDialogue();
 });
