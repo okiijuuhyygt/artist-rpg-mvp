@@ -14,11 +14,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build-version" content="haorio-1.51">
+<meta name="build-version" content="haorio-1.52">
 <script>
   // iOS Safari aggressive cache buster — force hard-reload if local cache holds older build
   (function() {
-    const CURRENT = 'haorio-1.51';
+    const CURRENT = 'haorio-1.52';
     const LAST = localStorage.getItem('haorio-build');
     if (LAST && LAST !== CURRENT && !location.search.includes('_nocache=')) {
       const sep = location.search ? '&' : '?';
@@ -397,6 +397,13 @@
   #title-scene .title-spotify svg {
     flex: 0 0 12px;
     display: block;
+  }
+
+  /* OG image generation mode (?og=1) — hide chrome that doesn't belong in social preview */
+  body.og-mode #marquee,
+  body.og-mode #title-scene .title-spotify,
+  body.og-mode #title-scene .meta {
+    display: none !important;
   }
 
   /* ========== badges row ========== */
@@ -1344,6 +1351,8 @@ async function boot() {
     if (typeof saved.lastStage === 'number') progress.lastStage = saved.lastStage;
   } catch {}
 
+  // OG image generation mode (?og=1): hide marquee + Spotify + meta, change btn text
+  if (location.search.includes('og=1')) document.body.classList.add('og-mode');
   initMarquee();
   initInput();
   initBGM();  // Boot init (revert v1.46 removal — was breaking BGM)
@@ -1634,7 +1643,11 @@ function showTitle() {
   renderStageGrid();
 
   const btn = $('btn-continue');
-  btn.textContent = (progress.cleared.length > 0 ? '▶ 繼續 ' : '▶ 開始 ') + (stages[selectedStageIdx]?.id || '1-1');
+  if (document.body.classList.contains('og-mode')) {
+    btn.textContent = '▶ 開始遊戲';
+  } else {
+    btn.textContent = (progress.cleared.length > 0 ? '▶ 繼續 ' : '▶ 開始 ') + (stages[selectedStageIdx]?.id || '1-1');
+  }
   btn.onclick = () => startStage(selectedStageIdx);
   // Spotify CTA — show only when admin set meta.spotifyUrl
   const spBtn = $('btn-spotify');
