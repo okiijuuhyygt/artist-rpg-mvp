@@ -14,11 +14,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build-version" content="haorio-1.29">
+<meta name="build-version" content="haorio-1.30">
 <script>
   // iOS Safari aggressive cache buster — force hard-reload if local cache holds older build
   (function() {
-    const CURRENT = 'haorio-1.29';
+    const CURRENT = 'haorio-1.30';
     const LAST = localStorage.getItem('haorio-build');
     if (LAST && LAST !== CURRENT && !location.search.includes('_nocache=')) {
       const sep = location.search ? '&' : '?';
@@ -2877,20 +2877,18 @@ function drawEraBlock(px, py) {
 }
 function drawFlag(px, py, ty, tx, stage) {
   const poleH = TILE * 4;
-  // pole — 4px wide white pole with darker shadow on right
-  ctx.fillStyle = '#dddddd';
+  // pole — silver vertical, like SMB
+  ctx.fillStyle = '#cccccc';
   ctx.fillRect(px + TILE/2 - 2, py - poleH, 4, poleH + TILE);
   ctx.fillStyle = '#888';
-  ctx.fillRect(px + TILE/2, py - poleH, 2, poleH + TILE);
-  // top knob — 8-bit pyramid (3 stacked rects)
-  ctx.fillStyle = '#fcd000';
-  ctx.fillRect(px + TILE/2 - 6, py - poleH - 4, 12, 4);
-  ctx.fillRect(px + TILE/2 - 4, py - poleH - 8, 8, 4);
-  ctx.fillRect(px + TILE/2 - 2, py - poleH - 12, 4, 4);
-  ctx.fillStyle = '#aa7700';
-  ctx.fillRect(px + TILE/2 - 6, py - poleH - 4, 12, 1);
+  ctx.fillRect(px + TILE/2 + 1, py - poleH, 1, poleH + TILE);  // shadow line
 
-  // Flag y — slides down with player on this pole
+  // top knob — single black ball, pure SMB
+  ctx.fillStyle = '#1a1a1a';
+  ctx.fillRect(px + TILE/2 - 4, py - poleH - 6, 8, 6);
+  ctx.fillRect(px + TILE/2 - 3, py - poleH - 8, 6, 2);
+
+  // Flag y — slides with player
   const myFlagWorldX = tx * TILE;
   let flagTop = py - poleH + 4;
   const isThisPole = player && player.flagPhase &&
@@ -2901,36 +2899,32 @@ function drawFlag(px, py, ty, tx, stage) {
     flagTop = py - 24;
   }
 
-  // 8-bit flag — solid rectangle with ★, wave by varying width
+  // Classic SMB triangle pennant — WHITE, pointing right, black outline
   const wave = Math.floor(Math.sin(performance.now() / 280) * 2);
-  const flagX = px + TILE/2 + 2;
-  const flagW = 22 + wave;
-  const flagH = 16;
-  // body
-  ctx.fillStyle = '#d82800';
-  ctx.fillRect(flagX, flagTop, flagW, flagH);
-  // shadow band (top + bottom edge for pixel feel)
-  ctx.fillStyle = '#7a1800';
-  ctx.fillRect(flagX, flagTop, flagW, 2);
-  ctx.fillRect(flagX, flagTop + flagH - 2, flagW, 2);
-  // attach point dark dot (where flag meets pole)
-  ctx.fillRect(flagX, flagTop + 2, 2, flagH - 4);
-  // ★ on flag
-  ctx.fillStyle = '#ffe000';
-  ctx.font = 'bold 11px "Press Start 2P", monospace';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('★', flagX + flagW/2, flagTop + flagH/2 + 1);
-  ctx.textAlign = 'start';
-  ctx.textBaseline = 'alphabetic';
+  const fx = px + TILE/2 + 2;
+  const flagW = 24 + wave;
+  // white fill
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath();
+  ctx.moveTo(fx, flagTop);
+  ctx.lineTo(fx + flagW, flagTop + 8);
+  ctx.lineTo(fx, flagTop + 16);
+  ctx.closePath();
+  ctx.fill();
+  // black outline
+  ctx.strokeStyle = '#1a1a1a';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(fx, flagTop);
+  ctx.lineTo(fx + flagW, flagTop + 8);
+  ctx.lineTo(fx, flagTop + 16);
+  ctx.closePath();
+  ctx.stroke();
 
-  // base / pedestal — 2-tone stack
-  ctx.fillStyle = '#999';
-  ctx.fillRect(px - 2, py, TILE + 4, 4);
-  ctx.fillStyle = '#666';
-  ctx.fillRect(px - 4, py + 4, TILE + 8, 4);
+  // base — single low pedestal, no stairs
+  ctx.fillStyle = '#888';
+  ctx.fillRect(px - 2, py, TILE + 4, 6);
 
-  // little house to the right
   drawHouse(px + TILE * 5, py - TILE);
 }
 
