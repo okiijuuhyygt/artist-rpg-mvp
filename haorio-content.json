@@ -2221,7 +2221,7 @@
       "note": "耗耗の聽眾知道",
       "questions": [
         {
-          "q": "選不對的",
+          "q": "“不是”白熊效應",
           "options": [
             {
               "a": "越是想戒掉想念 越是戒不掉他",
@@ -2261,6 +2261,27 @@
             }
           ],
           "spotifyEmbed": "https://open.spotify.com/track/1HnhLGNu9VXIluYZwfJf65?si=6veKoqxvRNi6a5WOchKuPQ"
+        },
+        {
+          "q": "於是乎啦!!!",
+          "options": [
+            {
+              "a": "這首歌今年已經國中啦!",
+              "correct": true,
+              "response": "大一謝的歌"
+            },
+            {
+              "a": "上架版的這首歌還是有前奏",
+              "correct": false,
+              "response": "表演版的才有前奏"
+            },
+            {
+              "a": "回到了高雄 一切都變了",
+              "correct": false,
+              "response": "基隆"
+            }
+          ],
+          "spotifyEmbed": "https://open.spotify.com/track/0WINYbctYz3CipUz3wD5jL?si=sBDqjyYWQf-nqZWF5k-xKA"
         }
       ],
       "intro": "身為 Haohao聽眾 /•᷅‎‎•᷄\\୭"
