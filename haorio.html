@@ -14,11 +14,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build-version" content="haorio-1.46">
+<meta name="build-version" content="haorio-1.47">
 <script>
   // iOS Safari aggressive cache buster — force hard-reload if local cache holds older build
   (function() {
-    const CURRENT = 'haorio-1.46';
+    const CURRENT = 'haorio-1.47';
     const LAST = localStorage.getItem('haorio-build');
     if (LAST && LAST !== CURRENT && !location.search.includes('_nocache=')) {
       const sep = location.search ? '&' : '?';
@@ -1343,8 +1343,7 @@ async function boot() {
 
   initMarquee();
   initInput();
-  // BGM init delayed to first startStage call — iOS Safari needs user gesture
-  // for new Audio().play() to resolve. Boot context = no gesture = silent.
+  initBGM();  // Boot init (revert v1.46 removal — was breaking BGM)
   $('loading').classList.add('hidden');
   showTitle();
   requestAnimationFrame(loop);
