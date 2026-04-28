@@ -14,11 +14,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build-version" content="haorio-1.26">
+<meta name="build-version" content="haorio-1.27">
 <script>
   // iOS Safari aggressive cache buster — force hard-reload if local cache holds older build
   (function() {
-    const CURRENT = 'haorio-1.26';
+    const CURRENT = 'haorio-1.27';
     const LAST = localStorage.getItem('haorio-build');
     if (LAST && LAST !== CURRENT && !location.search.includes('_nocache=')) {
       const sep = location.search ? '&' : '?';
@@ -1499,10 +1499,13 @@ function makePlayer(x, y) {
     canBumpBlocks: true,
     invuln: 0,
     power: null,
-    flagPhase: null,    // null | 'sliding' | 'walking' | 'entering'
+    flagPhase: null,
     flagPoleX: 0,
     flagWalkTo: 0,
-    flagTimer: 0
+    flagTimer: 0,
+    coyoteTime: 0,    // walk off edge → still able to jump for 6 frames
+    jumpBuffer: 0,    // press jump in air → auto-jump on landing within 6 frames
+    jumpWasPressed: false
   };
 }
 function makeGoomba(x, y) {
@@ -2151,9 +2154,18 @@ function updatePlayer() {
   }
 
   // Jump
-  if (inp.jump && player.grounded) {
+  // Coyote time + jump buffer (platforming feel — edge jumps + early-press)
+  if (player.grounded) player.coyoteTime = 6;
+  else if (player.coyoteTime > 0) player.coyoteTime--;
+  const jumpJustPressed = inp.jump && !player.jumpWasPressed;
+  player.jumpWasPressed = inp.jump;
+  if (jumpJustPressed) player.jumpBuffer = 6;
+  else if (player.jumpBuffer > 0) player.jumpBuffer--;
+  if (player.jumpBuffer > 0 && (player.grounded || player.coyoteTime > 0)) {
     player.vy = phys.jumpVelocity * jumpMul;
     player.grounded = false;
+    player.coyoteTime = 0;
+    player.jumpBuffer = 0;
   }
 
   // Fire bullet (B / X / on-screen B button)
