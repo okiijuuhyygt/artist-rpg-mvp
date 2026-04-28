@@ -7,7 +7,7 @@
   },
   "physics": {
     "gravity": 0.55,
-    "jumpVelocity": -15,
+    "jumpVelocity": -12.5,
     "moveSpeed": 3.2,
     "maxFallSpeed": 13,
     "friction": 0.82
