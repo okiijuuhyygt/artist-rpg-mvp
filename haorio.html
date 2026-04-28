@@ -14,11 +14,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build-version" content="haorio-1.8">
+<meta name="build-version" content="haorio-1.9">
 <script>
   // iOS Safari aggressive cache buster — force hard-reload if local cache holds older build
   (function() {
-    const CURRENT = 'haorio-1.8';
+    const CURRENT = 'haorio-1.9';
     const LAST = localStorage.getItem('haorio-build');
     if (LAST && LAST !== CURRENT && !location.search.includes('_nocache=')) {
       const sep = location.search ? '&' : '?';
@@ -1510,20 +1510,19 @@ function bumpEraBrick(stage, tx, ty) {
 function killEnemy(e) {
   e.dead = true;
   e.deathTimer = 30;
-  addScore(150, e.x + e.w/2, e.y - 4);
-  // Boss kill = vote for the song this stage is about
-  if (e.type === 'boss' && stages[stageIdx] && stages[stageIdx].voteKey) {
-    castVote(stages[stageIdx]);
-  }
+  addScore(e.type === 'boss' ? 500 : 150, e.x + e.w/2, e.y - 4);
+  // Boss kill no longer auto-votes — vote happens via explicit button in clear modal
 }
 
 function castVote(stage) {
-  // Hit the abacus shared counter
   try {
     const ns = (content.world2 && content.world2.voteAbacusNs) || 'haorio-ep2-vault';
     fetch(`https://abacus.jasoncameron.dev/hit/${ns}/${encodeURIComponent(stage.voteKey)}`).catch(() => {});
   } catch {}
-  spawnParticle(player.x + player.w/2, player.y - 30, '★ +1 票 ' + stage.songId, '#ffe000');
+  // Track per-browser to allow undo or just feedback
+  if (!progress.votes) progress.votes = [];
+  progress.votes.push({ key: stage.voteKey, at: Date.now() });
+  saveProgress();
 }
 
 function addScore(n, partX, partY) {
@@ -2140,6 +2139,24 @@ function showStageClearModal() {
   $('modal-body').textContent = stage.endModalBody || '';
   const row = $('modal-row');
   row.innerHTML = '';
+
+  // Vote button (only if stage has voteKey — i.e. World 2 stages)
+  if (stage.voteKey) {
+    const voted = (progress.votes || []).some(v => v.key === stage.voteKey);
+    const vote = document.createElement('button');
+    vote.style.background = voted ? '#aaa' : '#ff66cc';
+    vote.style.color = '#fff';
+    vote.textContent = voted ? '✓ 已投' : ('✦ 投這首一票');
+    if (!voted) {
+      bindModalButton(vote, () => {
+        castVote(stage);
+        vote.textContent = '✓ 已投 +1';
+        vote.style.background = '#aaa';
+      });
+    }
+    row.appendChild(vote);
+  }
+
   const isLast = stageIdx >= stages.length - 1;
   if (!isLast) {
     const next = document.createElement('button');
@@ -2148,8 +2165,15 @@ function showStageClearModal() {
     row.appendChild(next);
   } else {
     const end = document.createElement('button');
-    end.textContent = (content.endgame && content.endgame.ctaLabel) || '▶ 結算';
-    bindModalButton(end, () => { closeModal(); showEndgame(); });
+    end.textContent = stage.endModalCta || (content.endgame && content.endgame.ctaLabel) || '▶ 結算';
+    bindModalButton(end, () => {
+      // last stage CTA: jump straight to endgame URL if has voteKey, else show endgame modal
+      if (stage.voteKey && content.endgame && content.endgame.ctaUrl) {
+        window.location.href = content.endgame.ctaUrl;
+      } else {
+        closeModal(); showEndgame();
+      }
+    });
     row.appendChild(end);
   }
   const back = document.createElement('button');
