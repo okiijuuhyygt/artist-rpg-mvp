@@ -930,6 +930,14 @@
     <details class="editor-section">
       <summary>加入村民區塊(email 註冊)</summary>
       <div class="section-body">
+        <p class="hint" style="margin-bottom:10px;background:#fffae6;padding:10px;border-left:3px solid #c80;">
+          <b>切到 Tally 收 email:</b>下面填 Tally form ID(只 email 欄那種簡化版),site 會自動把 Kit form 換成「進村莊」按鈕 → 開 Tally modal。<br>
+          <b>留空</b> = fallback 到舊版 Kit form 9365865(transition-safe)。
+        </p>
+        <label class="field">
+          <span class="label-text">GATE 專用 Tally form ID(空 = 用 Kit)</span>
+          <input type="text" data-path="gate.tallyFormId" placeholder="例如 ABC123,Tally URL https://tally.so/r/【ABC123】">
+        </label>
         <label class="field">
           <span class="label-text">GATE TITLE</span>
           <input type="text" data-path="gate.title">
