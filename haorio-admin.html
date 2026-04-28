@@ -7,11 +7,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build-version" content="haorio-admin-0.7">
+<meta name="build-version" content="haorio-admin-0.8">
 <script>
   // Admin cache buster — force hard-reload if local cache holds older build
   (function() {
-    const CURRENT = 'haorio-admin-0.7';
+    const CURRENT = 'haorio-admin-0.8';
     const LAST = localStorage.getItem('haorio-admin-build');
     if (LAST && LAST !== CURRENT && !location.search.includes('_nocache=')) {
       const sep = location.search ? '&' : '?';
@@ -1463,6 +1463,44 @@ async function renderAudioSlots() {
     markDirty();
   });
   box.appendChild(volRow);
+
+  // Per-stage BGM overview (W1 + W2)
+  const stageSection = document.createElement('div');
+  stageSection.style.marginTop = '20px';
+  stageSection.style.paddingTop = '16px';
+  stageSection.style.borderTop = '2px dashed var(--paper-edge)';
+  stageSection.innerHTML = '<h3 style="font-size:11px;margin:0 0 10px;color:var(--gb-dark);">📍 每關 BGM (空 = 用上面的全域 BGM)</h3>';
+  const w1Stages = (contentData.world1 && contentData.world1.stages) || [];
+  const w2Stages = (contentData.world2 && contentData.world2.stages) || [];
+  const allStages = [
+    ...w1Stages.map(s => ({ stage: s, world: 'W1' })),
+    ...w2Stages.map(s => ({ stage: s, world: 'W2' }))
+  ];
+  allStages.forEach(({ stage, world }) => {
+    const row = document.createElement('div');
+    row.className = 'audio-slot';
+    row.style.padding = '8px 10px';
+    const stageCur = stage.bgm || '';
+    const stageOpts = ['<option value="">(用全域)</option>']
+      .concat(files.map(f => `<option value="${escapeHtml(f)}" ${f === stageCur ? 'selected' : ''}>${escapeHtml(f)}</option>`))
+      .join('');
+    row.innerHTML = `
+      <div style="flex:1;min-width:0;">
+        <span class="audio-slot-label">${world} · ${escapeHtml(stage.id || '?')}</span>
+        <span class="audio-slot-current" style="display:block;font-size:12px;opacity:0.7;">${escapeHtml(stage.title || '')}</span>
+      </div>
+      <div class="audio-slot-actions">
+        <select style="padding:6px;font-family:'VT323',monospace;font-size:13px;">${stageOpts}</select>
+      </div>
+    `;
+    const stageSel = row.querySelector('select');
+    stageSel.addEventListener('change', e => {
+      stage.bgm = e.target.value;
+      markDirty();
+    });
+    stageSection.appendChild(row);
+  });
+  box.appendChild(stageSection);
 
   // Upload new BGM file
   const upWrap = document.createElement('div');
