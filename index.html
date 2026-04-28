@@ -1816,6 +1816,7 @@ function applyContent() {
   renderNodes();
   renderSocials();
   updateClass();
+  setupGateTallyIfReady();
 }
 
 // ============================================================
@@ -3423,39 +3424,34 @@ function bgmOnFirstGesture() {
 // ============================================================
 // GATE (Email)
 // ============================================================
-// Gate Tally migration: if gate.tallyFormId is set in content.json, hide
-// the legacy Kit form and show a button → opens Tally modal. Empty fallback
-// keeps the Kit flow intact (transition-safe).
-(function setupGateTally() {
-  const tryWire = () => {
-    if (!window.CONTENT) return false;
-    const tallyId = (CONTENT.gate && CONTENT.gate.tallyFormId) || '';
-    if (!tallyId) return true; // no-op,Kit form stays visible
-    const form = document.getElementById('gateForm');
-    const btn = document.getElementById('gateTallyBtn');
-    if (form) form.style.display = 'none';
-    if (btn) {
-      btn.style.display = '';
-      btn.addEventListener('click', () => {
-        openSubmitModal('進村莊', tallyId);
-        // Mark villager optimistically — site doesn't know the actual email
-        // value (玩家 fills it inside Tally iframe across origin), but
-        // truthy state.email = villager class + L4 unlock.
-        if (!state.email) {
-          state.email = 'via-tally-' + Date.now();
-          if (state.class === 'guest') state.class = 'villager';
-          saveState();
-          document.getElementById('gateSuccess').classList.add('show');
-          updateClass();
-          renderNodes();
-        }
-      });
+// Gate Tally migration — wired by applyContent() once CONTENT is loaded.
+// (v3.3 bug: tried to read window.CONTENT but CONTENT is a module-level
+//  let, not on window. Fix: invoke from applyContent + idempotent flag.)
+let _gateTallyWired = false;
+function setupGateTallyIfReady() {
+  if (_gateTallyWired) return;
+  const tallyId = (CONTENT.gate && CONTENT.gate.tallyFormId) || '';
+  if (!tallyId) return; // no-op, Kit form stays visible
+  const form = document.getElementById('gateForm');
+  const btn = document.getElementById('gateTallyBtn');
+  if (!btn) return;
+  if (form) form.style.display = 'none';
+  btn.style.display = '';
+  btn.addEventListener('click', () => {
+    openSubmitModal('進村莊', tallyId);
+    // Mark villager optimistically — Tally iframe is cross-origin so site
+    // doesn't see the actual email; truthy state.email = villager + L4 unlock.
+    if (!state.email) {
+      state.email = 'via-tally-' + Date.now();
+      if (state.class === 'guest') state.class = 'villager';
+      saveState();
+      document.getElementById('gateSuccess').classList.add('show');
+      updateClass();
+      renderNodes();
     }
-    return true;
-  };
-  // Run after content loads. If too early, retry once on next tick.
-  if (!tryWire()) setTimeout(tryWire, 500);
-})();
+  });
+  _gateTallyWired = true;
+}
 
 document.getElementById('gateForm').addEventListener('submit', (e) => {
   const email = document.getElementById('gateEmail').value.trim();
