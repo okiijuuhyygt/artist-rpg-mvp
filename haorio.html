@@ -14,11 +14,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build-version" content="haorio-1.44">
+<meta name="build-version" content="haorio-1.45">
 <script>
   // iOS Safari aggressive cache buster — force hard-reload if local cache holds older build
   (function() {
-    const CURRENT = 'haorio-1.44';
+    const CURRENT = 'haorio-1.45';
     const LAST = localStorage.getItem('haorio-build');
     if (LAST && LAST !== CURRENT && !location.search.includes('_nocache=')) {
       const sep = location.search ? '&' : '?';
@@ -379,10 +379,12 @@
     font-size: 9px;
     text-decoration: none;
     letter-spacing: 0.5px;
-    z-index: 10;
+    z-index: 100;  /* 高過 marquee + 其他 fixed elements */
     display: inline-flex;
     align-items: center;
     gap: 5px;
+    cursor: pointer;
+    pointer-events: auto;
     transition: background 0.15s, color 0.15s;
   }
   #title-scene .title-spotify:hover {
@@ -1014,12 +1016,16 @@
     letter-spacing: 1px;
     transition: background 0.15s, color 0.15s;
   }
-  .gc-btn:hover { background: var(--nes-yellow); color: #000; }
+  @media (hover: hover) {
+    .gc-btn:hover { background: var(--nes-yellow); color: #000; }
+    .gc-btn.secondary:hover { background: rgba(255, 255, 255, 0.15); color: #fff; }
+  }
   .gc-btn.secondary {
     color: rgba(255, 255, 255, 0.65);
     border-color: rgba(255, 255, 255, 0.4);
   }
-  .gc-btn.secondary:hover { background: rgba(255, 255, 255, 0.15); color: #fff; }
+  .gc-btn:active { background: var(--nes-yellow); color: #000; }
+  .gc-btn.secondary:active { background: rgba(255, 255, 255, 0.15); color: #fff; }
 
   @keyframes gc-title-in {
     0%   { opacity: 0; transform: scale(0.85); letter-spacing: 18px; }
@@ -1032,9 +1038,14 @@
 
   @supports (padding: env(safe-area-inset-top)) {
     .gc-content {
-      padding-top: max(24px, env(safe-area-inset-top));
-      padding-bottom: max(24px, env(safe-area-inset-bottom));
+      padding-top: max(48px, calc(env(safe-area-inset-top) + 36px));
+      padding-bottom: max(48px, calc(env(safe-area-inset-bottom) + 36px));
     }
+  }
+  /* Allow scroll if content too tall for viewport (mobile landscape, address bar) */
+  #game-clear-screen {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
   @media (max-height: 500px) and (orientation: landscape) {
     .gc-title { font-size: clamp(28px, 6vw, 48px); }
@@ -1617,8 +1628,15 @@ function showTitle() {
     if (spUrl) {
       spBtn.href = spUrl;
       spBtn.classList.remove('hidden');
+      // Force window.open on click — iOS Safari sometimes blocks <a target="_blank">
+      // when fired from fixed elements with no native focus
+      spBtn.onclick = (e) => {
+        e.preventDefault();
+        window.open(spUrl, '_blank', 'noopener');
+      };
     } else {
       spBtn.classList.add('hidden');
+      spBtn.onclick = null;
     }
   }
   stopBGM();
@@ -2876,6 +2894,9 @@ function buildTallyUrl(baseUrl) {
 // GAME CLEAR SCREEN (全螢幕 dedicated 破關畫面)
 // =====================================================
 function showGameClearScreen() {
+  // Belt-and-suspenders: force-close any lingering modal so its yellow buttons
+  // don't bleed through the dedicated screen
+  closeModal();
   const eg = content.endgame || {};
   const allBadges = (content.badges || []).length > 0 &&
     (progress.badges || []).length >= (content.badges || []).length;
@@ -2900,14 +2921,15 @@ function showGameClearScreen() {
     cta.className = 'gc-btn primary';
     cta.textContent = eg.ctaLabel || '▶ 留 email + 帶上稱號';
     const targetUrl = eg.tallyEnabled ? buildTallyUrl(eg.ctaUrl) : eg.ctaUrl;
-    bindModalButton(cta, () => { window.location.href = targetUrl; });
+    // Open Tally in new tab so player can return to game (was overwriting old tab)
+    bindModalButton(cta, () => { window.open(targetUrl, '_blank', 'noopener'); });
     btnsEl.appendChild(cta);
   }
   if (eg.fallbackEnabled && eg.fallbackCtaUrl) {
     const fb = document.createElement('button');
     fb.className = 'gc-btn secondary';
     fb.textContent = eg.fallbackCtaLabel || '▶ 別處';
-    bindModalButton(fb, () => { window.location.href = eg.fallbackCtaUrl; });
+    bindModalButton(fb, () => { window.open(eg.fallbackCtaUrl, '_blank', 'noopener'); });
     btnsEl.appendChild(fb);
   }
   const back = document.createElement('button');
