@@ -38,11 +38,31 @@
     ]
   },
   "badges": [
-    { "id": "elementary", "label": "國小同代", "icon": "🎮" },
-    { "id": "middle",     "label": "國中同代", "icon": "💬" },
-    { "id": "highschool", "label": "高中寫歌", "icon": "🎵" },
-    { "id": "college",    "label": "大學樂團", "icon": "🎸" },
-    { "id": "army",       "label": "當兵時代", "icon": "🌊" }
+    {
+      "id": "elementary",
+      "label": "國小同代",
+      "icon": "🎮"
+    },
+    {
+      "id": "middle",
+      "label": "國中同代",
+      "icon": "💬"
+    },
+    {
+      "id": "highschool",
+      "label": "高中寫歌",
+      "icon": "🎵"
+    },
+    {
+      "id": "college",
+      "label": "大學樂團",
+      "icon": "🎸"
+    },
+    {
+      "id": "army",
+      "label": "當兵時代",
+      "icon": "🌊"
+    }
   ],
   "world1": {
     "title": "WORLD 1 · haohao.unzip",
@@ -79,9 +99,18 @@
           "yearTag": "1998 · 8 歲",
           "prompt": "我國小那年代下課大家都在玩什麼?\n(三選一,只有一個是 90 年代,其他都後來才有)",
           "options": [
-            { "label": "電子雞", "response": "對啦,90 年代的東西。我養死過三隻,還哭。" },
-            { "label": "Pokemon GO", "response": "Pokemon GO 是 2016 才出,我都 26 歲了。我國小那年蛋會自己長大,不用走路抓。" },
-            { "label": "任天堂 Switch", "response": "Switch 是 2017,我國小是 PS1 那個年代,任天堂還是 GameBoy 跟 N64。" }
+            {
+              "label": "電子雞",
+              "response": "對啦,90 年代的東西。我養死過三隻,還哭。"
+            },
+            {
+              "label": "Pokemon GO",
+              "response": "Pokemon GO 是 2016 才出,我都 26 歲了。我國小那年蛋會自己長大,不用走路抓。"
+            },
+            {
+              "label": "任天堂 Switch",
+              "response": "Switch 是 2017,我國小是 PS1 那個年代,任天堂還是 GameBoy 跟 N64。"
+            }
           ],
           "badgeId": "elementary",
           "badgeUnlockMsg": "★ 國小同代 GET — 你選對 / 沒選對都收下這個徽章,你來了就算數。"
@@ -123,9 +152,18 @@
           "yearTag": "2004 · 14 歲",
           "prompt": "我國中半夜偷上網,猜我用哪個聊天?\n(三選一,只有一個是 14 歲的我用過的)",
           "options": [
-            { "label": "奇摩聊天室", "response": "對! 我都用『冷淡的少年』當暱稱,沒人理我。那時候沒交友軟體,聊天室就是 Tinder。" },
-            { "label": "LINE", "response": "LINE 是 2011 才出的,我都大學畢業了。國中那年代我們還在傳簡訊,5 元一則。" },
-            { "label": "Discord", "response": "Discord 是 2015 之後了,你比我新一代。我們那年代是即時通 + MSN。" }
+            {
+              "label": "奇摩聊天室",
+              "response": "對! 我都用『冷淡的少年』當暱稱,沒人理我。那時候沒交友軟體,聊天室就是 Tinder。"
+            },
+            {
+              "label": "LINE",
+              "response": "LINE 是 2011 才出的,我都大學畢業了。國中那年代我們還在傳簡訊,5 元一則。"
+            },
+            {
+              "label": "Discord",
+              "response": "Discord 是 2015 之後了,你比我新一代。我們那年代是即時通 + MSN。"
+            }
           ],
           "badgeId": "middle",
           "badgeUnlockMsg": "★ 國中同代 GET — 你選對 / 沒選對都收下,你願意聽就算數。"
@@ -167,9 +205,18 @@
           "yearTag": "2007 · 17 歲",
           "prompt": "14 歲我寫了第一首歌。在浴室寫了一個小時,我媽叫我出來。\n你猜歌名?",
           "options": [
-            { "label": "《不夠好》", "response": "對! 就是那首。我一直覺得自己不夠好,結果歌名就直接寫出來了。" },
-            { "label": "《晚安》", "response": "沒,但這個方向我寫過 3 次,每次都被自己刪掉。太煽情。" },
-            { "label": "《關於你》", "response": "沒,但這個歌名後來被太多人用了,還好我那時沒寫。" }
+            {
+              "label": "《不夠好》",
+              "response": "對! 就是那首。我一直覺得自己不夠好,結果歌名就直接寫出來了。"
+            },
+            {
+              "label": "《晚安》",
+              "response": "沒,但這個方向我寫過 3 次,每次都被自己刪掉。太煽情。"
+            },
+            {
+              "label": "《關於你》",
+              "response": "沒,但這個歌名後來被太多人用了,還好我那時沒寫。"
+            }
           ],
           "badgeId": "highschool",
           "badgeUnlockMsg": "★ 寫歌起家 GET — 14 歲開始,到大學累積 100 首。"
@@ -211,9 +258,18 @@
           "yearTag": "2010 · 20 歲 · 海洋大學",
           "prompt": "大一下,我們團比海洋之星 acoustic 組,得了亞軍。\n猜我們做了什麼蠢事還能拿亞軍?",
           "options": [
-            { "label": "全團背對評審跟觀眾", "response": "對啦! 主歌一進就轉身,沒人知道為什麼,連我們自己都不知道。" },
-            { "label": "我們忘了前奏", "response": "也差不多,那場有一段我們真的進不來,大家空了 4 拍才開。" },
-            { "label": "主唱破音", "response": "主唱沒破音。是鼓手 click 沒上,開頭快了 8 拍,後面追回來。" }
+            {
+              "label": "全團背對評審跟觀眾",
+              "response": "對啦! 主歌一進就轉身,沒人知道為什麼,連我們自己都不知道。"
+            },
+            {
+              "label": "我們忘了前奏",
+              "response": "也差不多,那場有一段我們真的進不來,大家空了 4 拍才開。"
+            },
+            {
+              "label": "主唱破音",
+              "response": "主唱沒破音。是鼓手 click 沒上,開頭快了 8 拍,後面追回來。"
+            }
           ],
           "badgeId": "college",
           "badgeUnlockMsg": "★ 大學樂團 GET — 巷弄故事館 + Now 鬧樂團都是這時候開始。"
@@ -255,9 +311,18 @@
           "yearTag": "2014 · 24 歲 · 高雄漁業署替代役",
           "prompt": "我在漁業署頂樓寫歌。錄音時錄到一段奇怪的『靡靡之音』。\n而且 ——",
           "options": [
-            { "label": "跟我的拍子完全合", "response": "對! 那音檔我還留著。完全合拍,毛骨悚然。也許那是台灣海峽吹來的人。" },
-            { "label": "是別的兵在唱反共歌", "response": "沒,但那年代頂樓真的會有人唱古早歌,半夜聽超怪。" },
-            { "label": "是值星官在罵人", "response": "沒,值星官那天剛好不在,不然我會被處分『工作時間錄音』。" }
+            {
+              "label": "跟我的拍子完全合",
+              "response": "對! 那音檔我還留著。完全合拍,毛骨悚然。也許那是台灣海峽吹來的人。"
+            },
+            {
+              "label": "是別的兵在唱反共歌",
+              "response": "沒,但那年代頂樓真的會有人唱古早歌,半夜聽超怪。"
+            },
+            {
+              "label": "是值星官在罵人",
+              "response": "沒,值星官那天剛好不在,不然我會被處分『工作時間錄音』。"
+            }
           ],
           "badgeId": "army",
           "badgeUnlockMsg": "★ 當兵時代 GET — 替代役一年,最大產出是奇怪的 demo。"
@@ -301,15 +366,26 @@
           "################################################################################",
           "################################################################################"
         ],
-        "questionBlockContent": ["「我以為 33 是個門 結果 34 才知道,門根本沒開過」"],
+        "questionBlockContent": [
+          "「我以為 33 是個門 結果 34 才知道,門根本沒開過」"
+        ],
         "npc": {
           "name": "23 歲的 H",
           "yearTag": "2014 · 23 歲 · 寫《33歲我娶妳》那年",
           "prompt": "我 23 歲寫了《33歲我娶妳》。\n當時覺得「34 歲再來看這首歌會是什麼感覺」。\n結果現在 34 了 —— 你猜歌詞時間軸要不要更新?",
           "options": [
-            { "label": "更新到 43 歲(往前推 10 年)", "response": "也是個方向,但這樣原本那個 23 歲的我就不見了。" },
-            { "label": "保留 33 歲(時間封存)", "response": "對,我心裡是這樣想。33 歲的承諾就讓它過期吧。" },
-            { "label": "兩個版本都做", "response": "...這個我沒想到。可能真的可以。" }
+            {
+              "label": "更新到 43 歲(往前推 10 年)",
+              "response": "也是個方向,但這樣原本那個 23 歲的我就不見了。"
+            },
+            {
+              "label": "保留 33 歲(時間封存)",
+              "response": "對,我心裡是這樣想。33 歲的承諾就讓它過期吧。"
+            },
+            {
+              "label": "兩個版本都做",
+              "response": "...這個我沒想到。可能真的可以。"
+            }
           ],
           "badgeId": "",
           "badgeUnlockMsg": ""
@@ -346,15 +422,26 @@
           "################################################################################",
           "################################################################################"
         ],
-        "questionBlockContent": ["「想忘掉誰就會更想起誰」"],
+        "questionBlockContent": [
+          "「想忘掉誰就會更想起誰」"
+        ],
         "npc": {
           "name": "卡住的 H",
           "yearTag": "2024 · 寫《白熊效應》當下",
           "prompt": "白熊效應卡了 4 個版本都槍掉。\n主歌太抒情、副歌太爆,混不起來。怎辦?",
           "options": [
-            { "label": "拆兩首歌", "response": "對,主歌獨立成 ballad,副歌另寫一首 upbeat。但這樣兩首都半成品。" },
-            { "label": "硬接,變人格分裂歌", "response": "我目前就是這樣,聽起來很怪但有種真實感。" },
-            { "label": "直接砍副歌", "response": "...副歌是這首歌最值得寫的。砍了就沒了。" }
+            {
+              "label": "拆兩首歌",
+              "response": "對,主歌獨立成 ballad,副歌另寫一首 upbeat。但這樣兩首都半成品。"
+            },
+            {
+              "label": "硬接,變人格分裂歌",
+              "response": "我目前就是這樣,聽起來很怪但有種真實感。"
+            },
+            {
+              "label": "直接砍副歌",
+              "response": "...副歌是這首歌最值得寫的。砍了就沒了。"
+            }
           ],
           "badgeId": "",
           "badgeUnlockMsg": ""
@@ -391,15 +478,26 @@
           "################################################################################",
           "################################################################################"
         ],
-        "questionBlockContent": ["「在七-eleven 買關東煮的時候想到的句子」"],
+        "questionBlockContent": [
+          "「在七-eleven 買關東煮的時候想到的句子」"
+        ],
         "npc": {
           "name": "九份的 H",
           "yearTag": "2024 · 在九份租屋寫《小九份》",
           "prompt": "小九份的 bridge 改了 7 版自己都不滿意。\n總覺得缺一個句子。你會怎麼幫我寫?",
           "options": [
-            { "label": "「九份不在了,但我還在」", "response": "...這句的方向我喜歡。直接收回家放歌詞牆候選。" },
-            { "label": "「下山的路 比上山難走」", "response": "也是個 angle,有 layered meaning。" },
-            { "label": "「你曾經在這裡 但你不知道」", "response": "...有點 cliché 但對,小九份就是這個味道。" }
+            {
+              "label": "「九份不在了,但我還在」",
+              "response": "...這句的方向我喜歡。直接收回家放歌詞牆候選。"
+            },
+            {
+              "label": "「下山的路 比上山難走」",
+              "response": "也是個 angle,有 layered meaning。"
+            },
+            {
+              "label": "「你曾經在這裡 但你不知道」",
+              "response": "...有點 cliché 但對,小九份就是這個味道。"
+            }
           ],
           "badgeId": "",
           "badgeUnlockMsg": ""
@@ -413,727 +511,1695 @@
   },
   "eraItems": [
     {
-      "id": "nokia3310", "emoji": "📞", "year": 2002, "label": "Nokia 3310", "note": "貪食蛇玩到下課鐘響",
-      "intro": "你撿到 Nokia 3310!\n這隻在 2000 年代中期幾乎人手一支,號稱地表最堅硬的手機。",
+      "id": "nokia3310",
+      "emoji": "📞",
+      "year": 2002,
+      "label": "Nokia 3310",
+      "note": "貪食蛇玩到下課鐘響",
+      "intro": "📅 2002 · 耗耗 10 歲(國小)\n\n你撿到 Nokia 3310!\n這隻在 2000 年代中期幾乎人手一支,號稱地表最堅硬的手機。",
       "title": "考你三題,答對拿分。",
       "questions": [
         {
           "q": "3310 最有名的內建遊戲是?",
           "options": [
-            { "a": "貪食蛇 2 (Snake II)", "correct": true, "response": "對啦,我國中下課前最後 30 秒每天都在按。" },
-            { "a": "俄羅斯方塊", "correct": false, "response": "那是 Game Boy 的,3310 是貪食蛇 2。" },
-            { "a": "Pokemon Go", "correct": false, "response": "Pokemon Go 是 2016 才有的,3310 那時候連 GPS 都沒。" }
+            {
+              "a": "貪食蛇 2 (Snake II)",
+              "correct": true,
+              "response": "對啦,我國中下課前最後 30 秒每天都在按。"
+            },
+            {
+              "a": "俄羅斯方塊",
+              "correct": false,
+              "response": "那是 Game Boy 的,3310 是貪食蛇 2。"
+            },
+            {
+              "a": "Pokemon Go",
+              "correct": false,
+              "response": "Pokemon Go 是 2016 才有的,3310 那時候連 GPS 都沒。"
+            }
           ]
         },
         {
           "q": "3310 還有一款冷門遊戲是?",
           "options": [
-            { "a": "星際大戰 (Space Impact)", "correct": true, "response": "對! 沒幾個人記得,但 3310 真的有這個太空打飛機。" },
-            { "a": "Candy Crush", "correct": false, "response": "Candy Crush 是 2012 智慧型手機才有。" },
-            { "a": "Angry Birds", "correct": false, "response": "Angry Birds 是 2009,iPhone 才有。" }
+            {
+              "a": "星際大戰 (Space Impact)",
+              "correct": true,
+              "response": "對! 沒幾個人記得,但 3310 真的有這個太空打飛機。"
+            },
+            {
+              "a": "Candy Crush",
+              "correct": false,
+              "response": "Candy Crush 是 2012 智慧型手機才有。"
+            },
+            {
+              "a": "Angry Birds",
+              "correct": false,
+              "response": "Angry Birds 是 2009,iPhone 才有。"
+            }
           ]
         },
         {
           "q": "3310 最神奇的特色是?",
           "options": [
-            { "a": "可以換背殼 + 超耐摔", "correct": true, "response": "對! 一隻可以摔 100 次,然後換 5 種顏色背殼,都是文具店買得到的。" },
-            { "a": "可以拍照", "correct": false, "response": "3310 沒鏡頭,2003 之後的 Nokia 才有。" },
-            { "a": "可以上網", "correct": false, "response": "3310 是 2G 純通話 + 簡訊,WAP 都沒做好。" }
+            {
+              "a": "可以換背殼 + 超耐摔",
+              "correct": true,
+              "response": "對! 一隻可以摔 100 次,然後換 5 種顏色背殼,都是文具店買得到的。"
+            },
+            {
+              "a": "可以拍照",
+              "correct": false,
+              "response": "3310 沒鏡頭,2003 之後的 Nokia 才有。"
+            },
+            {
+              "a": "可以上網",
+              "correct": false,
+              "response": "3310 是 2G 純通話 + 簡訊,WAP 都沒做好。"
+            }
           ]
         }
       ]
     },
     {
-      "id": "tape", "emoji": "📼", "year": 1995, "label": "范曉萱錄音帶", "note": "我第一張買的專輯",
-      "intro": "你撿到范曉萱的錄音帶!\n這是我人生第一張買的專輯。",
+      "id": "tape",
+      "emoji": "📼",
+      "year": 1995,
+      "label": "范曉萱錄音帶",
+      "note": "我第一張買的專輯",
+      "intro": "📅 1995 · 耗耗 3 歲(學齡前)\n\n你撿到范曉萱的錄音帶!\n這是我人生第一張買的專輯。",
       "title": "考你三題范曉萱知識。",
       "questions": [
         {
           "q": "范曉萱第一張專輯封面是什麼顏色?",
           "options": [
-            { "a": "紅色", "correct": true, "response": "對! 一個小女孩穿紅色,封面整片紅。我跟我媽吵了三天才買到。" },
-            { "a": "藍色", "correct": false, "response": "藍色是後來《雪人》那張,1997 了。" },
-            { "a": "黃色", "correct": false, "response": "黃色是更後來《我要我們在一起》。" }
+            {
+              "a": "紅色",
+              "correct": true,
+              "response": "對! 一個小女孩穿紅色,封面整片紅。我跟我媽吵了三天才買到。"
+            },
+            {
+              "a": "藍色",
+              "correct": false,
+              "response": "藍色是後來《雪人》那張,1997 了。"
+            },
+            {
+              "a": "黃色",
+              "correct": false,
+              "response": "黃色是更後來《我要我們在一起》。"
+            }
           ]
         },
         {
           "q": "這張專輯第一首歌是?",
           "options": [
-            { "a": "健康歌", "correct": true, "response": "對! 早安 你好嗎 ~ 我陪我媽運動天天聽。" },
-            { "a": "稍息立正站好", "correct": false, "response": "那是後來,大概 96 年的歌。" },
-            { "a": "雪人", "correct": false, "response": "雪人是 97 年,專輯名也叫《雪人》。" }
+            {
+              "a": "健康歌",
+              "correct": true,
+              "response": "對! 早安 你好嗎 ~ 我陪我媽運動天天聽。"
+            },
+            {
+              "a": "稍息立正站好",
+              "correct": false,
+              "response": "那是後來,大概 96 年的歌。"
+            },
+            {
+              "a": "雪人",
+              "correct": false,
+              "response": "雪人是 97 年,專輯名也叫《雪人》。"
+            }
           ]
         },
         {
           "q": "下面哪一首卡通主題曲 *沒* 收錄在范曉萱的卡通專輯?",
           "options": [
-            { "a": "蠟筆小新", "correct": true, "response": "對! 蠟筆小新跟柯南、烏龍派出所都沒收。她收的是豆豆龍、魔女宅急便、櫻桃小丸子那批。" },
-            { "a": "豆豆龍", "correct": false, "response": "豆豆龍有收! 而且是經典版,不是後來重唱的。" },
-            { "a": "魔女宅急便", "correct": false, "response": "魔女宅急便有收 (你打字打成『模擬宅急便』被自動校正了哈哈)。" }
+            {
+              "a": "蠟筆小新",
+              "correct": true,
+              "response": "對! 蠟筆小新跟柯南、烏龍派出所都沒收。她收的是豆豆龍、魔女宅急便、櫻桃小丸子那批。"
+            },
+            {
+              "a": "豆豆龍",
+              "correct": false,
+              "response": "豆豆龍有收! 而且是經典版,不是後來重唱的。"
+            },
+            {
+              "a": "魔女宅急便",
+              "correct": false,
+              "response": "魔女宅急便有收 (你打字打成『模擬宅急便』被自動校正了哈哈)。"
+            }
           ]
         }
       ]
     },
     {
-      "id": "tamagotchi", "emoji": "🥚", "year": 1996, "label": "電子雞", "note": "我養死過三隻",
-      "intro": "你撿到電子雞!\n1996 萬代出的,那年人手一隻掛書包。",
+      "id": "tamagotchi",
+      "emoji": "🥚",
+      "year": 1996,
+      "label": "電子雞",
+      "note": "我養死過三隻",
+      "intro": "📅 1996 · 耗耗 4 歲(學齡前)\n\n你撿到電子雞!\n1996 萬代出的,那年人手一隻掛書包。",
       "title": "考你三題養雞知識。",
       "questions": [
         {
           "q": "電子雞最常死的原因?",
           "options": [
-            { "a": "不清大便累積到牠生病", "correct": true, "response": "對! 牠拉一坨你沒按掃把,牠就病給你看。我國小數學課偷按被沒收三次。" },
-            { "a": "電池沒電", "correct": false, "response": "電池可以撐 1-2 個月,死掉通常是疏於照顧。" },
-            { "a": "被別人按掉", "correct": false, "response": "被別人 reset 是 reset,不是死,還是有得重養。" }
+            {
+              "a": "不清大便累積到牠生病",
+              "correct": true,
+              "response": "對! 牠拉一坨你沒按掃把,牠就病給你看。我國小數學課偷按被沒收三次。"
+            },
+            {
+              "a": "電池沒電",
+              "correct": false,
+              "response": "電池可以撐 1-2 個月,死掉通常是疏於照顧。"
+            },
+            {
+              "a": "被別人按掉",
+              "correct": false,
+              "response": "被別人 reset 是 reset,不是死,還是有得重養。"
+            }
           ]
         },
         {
           "q": "怎麼讓電子雞長得快又健康?",
           "options": [
-            { "a": "餵食 + 訓練 + 清便 三件事輪流", "correct": true, "response": "對,缺一個就生病。我把這個玩成上班族行程表。" },
-            { "a": "一直按開關燈", "correct": false, "response": "燈只是讓牠睡覺,不會讓牠長大。" },
-            { "a": "搖一搖", "correct": false, "response": "搖一搖會讓牠暈,會生病。" }
+            {
+              "a": "餵食 + 訓練 + 清便 三件事輪流",
+              "correct": true,
+              "response": "對,缺一個就生病。我把這個玩成上班族行程表。"
+            },
+            {
+              "a": "一直按開關燈",
+              "correct": false,
+              "response": "燈只是讓牠睡覺,不會讓牠長大。"
+            },
+            {
+              "a": "搖一搖",
+              "correct": false,
+              "response": "搖一搖會讓牠暈,會生病。"
+            }
           ]
         },
         {
           "q": "電子雞死了之後 *出現的畫面* 是?",
           "options": [
-            { "a": "天使飛走了", "correct": true, "response": "對 ⋯ 一隻小天使飄上去然後 GAME OVER。我看到三次都哭了。" },
-            { "a": "蛋裂開", "correct": false, "response": "蛋裂開是出生啊。" },
-            { "a": "拉屎大爆炸", "correct": false, "response": "(這個畫面我倒是希望真的有)" }
+            {
+              "a": "天使飛走了",
+              "correct": true,
+              "response": "對 ⋯ 一隻小天使飄上去然後 GAME OVER。我看到三次都哭了。"
+            },
+            {
+              "a": "蛋裂開",
+              "correct": false,
+              "response": "蛋裂開是出生啊。"
+            },
+            {
+              "a": "拉屎大爆炸",
+              "correct": false,
+              "response": "(這個畫面我倒是希望真的有)"
+            }
           ]
         }
       ]
     },
     {
-      "id": "gameboy", "emoji": "🎮", "year": 1989, "label": "Game Boy", "note": "我國小同學家有,我去他家蹭",
-      "intro": "你撿到任天堂 Game Boy!\n1989 年出的,我國小那年同學家有,我每天去他家蹭。",
+      "id": "gameboy",
+      "emoji": "🎮",
+      "year": 1989,
+      "label": "Game Boy",
+      "note": "我國小同學家有,我去他家蹭",
+      "intro": "📅 1989 · 耗耗還沒出生(還早 3 年)\n\n你撿到任天堂 Game Boy!\n1989 年出的,我國小那年同學家有,我每天去他家蹭。",
       "title": "考你三題 Game Boy 知識。",
       "questions": [
         {
           "q": "Game Boy 最神奇的「跨機通訊」靠什麼?",
           "options": [
-            { "a": "紅外線(對著對面那台機器)", "correct": true, "response": "對! 兩台對著紅外線,可以交換寶可夢跟對戰。我跟同學在桌上對著對著差點翻倒。" },
-            { "a": "WiFi", "correct": false, "response": "Game Boy 1989 哪有 WiFi,WiFi 是 1997 之後的。" },
-            { "a": "藍牙", "correct": false, "response": "藍牙 1999 才有,Game Boy 早 10 年。" }
+            {
+              "a": "紅外線(對著對面那台機器)",
+              "correct": true,
+              "response": "對! 兩台對著紅外線,可以交換寶可夢跟對戰。我跟同學在桌上對著對著差點翻倒。"
+            },
+            {
+              "a": "WiFi",
+              "correct": false,
+              "response": "Game Boy 1989 哪有 WiFi,WiFi 是 1997 之後的。"
+            },
+            {
+              "a": "藍牙",
+              "correct": false,
+              "response": "藍牙 1999 才有,Game Boy 早 10 年。"
+            }
           ]
         },
         {
           "q": "Game Boy 螢幕的特色是?",
           "options": [
-            { "a": "黃綠色 + 黑灰像素", "correct": true, "response": "對! 那種獨特的綠灰色 dot matrix,沒背光,要在燈下才看得到。" },
-            { "a": "全彩 OLED", "correct": false, "response": "全彩要等到 Game Boy Color (1998) 之後。原版是 4 階灰。" },
-            { "a": "觸控螢幕", "correct": false, "response": "觸控要 NDS (2004)。原版只有十字鍵 + AB。" }
+            {
+              "a": "黃綠色 + 黑灰像素",
+              "correct": true,
+              "response": "對! 那種獨特的綠灰色 dot matrix,沒背光,要在燈下才看得到。"
+            },
+            {
+              "a": "全彩 OLED",
+              "correct": false,
+              "response": "全彩要等到 Game Boy Color (1998) 之後。原版是 4 階灰。"
+            },
+            {
+              "a": "觸控螢幕",
+              "correct": false,
+              "response": "觸控要 NDS (2004)。原版只有十字鍵 + AB。"
+            }
           ]
         },
         {
           "q": "Game Boy 最暢銷的遊戲是?",
           "options": [
-            { "a": "俄羅斯方塊 (Tetris)", "correct": true, "response": "對! 隨機附贈那個 Tetris 賣到爆炸,讓 Game Boy 直接統治掌上機市場。" },
-            { "a": "馬力歐", "correct": false, "response": "馬力歐也很賣,但 Tetris 才是 Game Boy 的代表作。" },
-            { "a": "寶可夢", "correct": false, "response": "寶可夢 1996 才出,那時 Game Boy 都快被 Color 取代了。" }
+            {
+              "a": "俄羅斯方塊 (Tetris)",
+              "correct": true,
+              "response": "對! 隨機附贈那個 Tetris 賣到爆炸,讓 Game Boy 直接統治掌上機市場。"
+            },
+            {
+              "a": "馬力歐",
+              "correct": false,
+              "response": "馬力歐也很賣,但 Tetris 才是 Game Boy 的代表作。"
+            },
+            {
+              "a": "寶可夢",
+              "correct": false,
+              "response": "寶可夢 1996 才出,那時 Game Boy 都快被 Color 取代了。"
+            }
           ]
         }
       ]
     },
     {
-      "id": "discman", "emoji": "💿", "year": 1998, "label": "CD 隨身聽", "note": "周杰倫 10 張我都用這個聽",
-      "intro": "你撿到 CD 隨身聽!\n2000 年代之前,要把音樂帶出門,就靠這個。",
+      "id": "discman",
+      "emoji": "💿",
+      "year": 1998,
+      "label": "CD 隨身聽",
+      "note": "周杰倫 10 張我都用這個聽",
+      "intro": "📅 1998 · 耗耗 6 歲(國小)\n\n你撿到 CD 隨身聽!\n2000 年代之前,要把音樂帶出門,就靠這個。",
       "questions": [
         {
           "q": "CD 隨身聽走路會幹嘛?",
           "options": [
-            { "a": "跳針 / 跳歌", "correct": true, "response": "對! 走路 / 跑步 / 搖晃 → 雷射讀不到 → 卡 0.5 秒。後來才有防跳針 (ESP) 但要貴 200 塊。" },
-            { "a": "電池爆炸", "correct": false, "response": "AA 電池不會爆,只是會用很快。" },
-            { "a": "重灌系統", "correct": false, "response": "(那是電腦)" }
+            {
+              "a": "跳針 / 跳歌",
+              "correct": true,
+              "response": "對! 走路 / 跑步 / 搖晃 → 雷射讀不到 → 卡 0.5 秒。後來才有防跳針 (ESP) 但要貴 200 塊。"
+            },
+            {
+              "a": "電池爆炸",
+              "correct": false,
+              "response": "AA 電池不會爆,只是會用很快。"
+            },
+            {
+              "a": "重灌系統",
+              "correct": false,
+              "response": "(那是電腦)"
+            }
           ]
         },
         {
           "q": "周杰倫第一張專輯叫?",
           "options": [
-            { "a": "同名《Jay》", "correct": true, "response": "對! 2000 年 11 月,封面是他坐著抱頭。第一首歌就是〈可愛女人〉。" },
-            { "a": "《范特西》", "correct": false, "response": "范特西是第二張 (2001),裡面有〈雙截棍〉跟〈愛在西元前〉。" },
-            { "a": "《八度空間》", "correct": false, "response": "八度空間是第三張 (2002),裡面有〈半獸人〉。" }
+            {
+              "a": "同名《Jay》",
+              "correct": true,
+              "response": "對! 2000 年 11 月,封面是他坐著抱頭。第一首歌就是〈可愛女人〉。"
+            },
+            {
+              "a": "《范特西》",
+              "correct": false,
+              "response": "范特西是第二張 (2001),裡面有〈雙截棍〉跟〈愛在西元前〉。"
+            },
+            {
+              "a": "《八度空間》",
+              "correct": false,
+              "response": "八度空間是第三張 (2002),裡面有〈半獸人〉。"
+            }
           ]
         },
         {
           "q": "CD 隨身聽聽久了會耗的不是電池,是?",
           "options": [
-            { "a": "耳機線(會接觸不良)", "correct": true, "response": "對! 那年代的耳機線不耐操,捲一捲塞口袋,線材內部斷了 = 一邊沒聲音。" },
-            { "a": "CD 本身會磨損", "correct": false, "response": "CD 不太會耗,有耗也是刮花,跟聽多少無關。" },
-            { "a": "螢幕會爛", "correct": false, "response": "CD 隨身聽螢幕只顯示曲號,很少壞。" }
+            {
+              "a": "耳機線(會接觸不良)",
+              "correct": true,
+              "response": "對! 那年代的耳機線不耐操,捲一捲塞口袋,線材內部斷了 = 一邊沒聲音。"
+            },
+            {
+              "a": "CD 本身會磨損",
+              "correct": false,
+              "response": "CD 不太會耗,有耗也是刮花,跟聽多少無關。"
+            },
+            {
+              "a": "螢幕會爛",
+              "correct": false,
+              "response": "CD 隨身聽螢幕只顯示曲號,很少壞。"
+            }
           ]
         }
       ]
     },
     {
-      "id": "yahoochat", "emoji": "💬", "year": 2003, "label": "奇摩聊天室", "note": "暱稱『冷淡的少年』,沒人理我",
-      "intro": "你撿到奇摩聊天室!\n2000 年代沒交友軟體,大家在這認識陌生人。",
+      "id": "yahoochat",
+      "emoji": "💬",
+      "year": 2003,
+      "label": "奇摩聊天室",
+      "note": "暱稱『冷淡的少年』,沒人理我",
+      "intro": "📅 2003 · 耗耗 11 歲(國小)\n\n你撿到奇摩聊天室!\n2000 年代沒交友軟體,大家在這認識陌生人。",
       "questions": [
         {
           "q": "進聊天室最常用的暱稱結構?",
           "options": [
-            { "a": "形容詞 + 名詞(像「冷淡的少年」)", "correct": true, "response": "對! 我那時候就是『冷淡的少年』。沒人理我。" },
-            { "a": "真實全名", "correct": false, "response": "誰會用真名 ⋯ 用真名的會被當怪人。" },
-            { "a": "Email 帳號", "correct": false, "response": "Email 太露骨, 而且容易被搜走。" }
+            {
+              "a": "形容詞 + 名詞(像「冷淡的少年」)",
+              "correct": true,
+              "response": "對! 我那時候就是『冷淡的少年』。沒人理我。"
+            },
+            {
+              "a": "真實全名",
+              "correct": false,
+              "response": "誰會用真名 ⋯ 用真名的會被當怪人。"
+            },
+            {
+              "a": "Email 帳號",
+              "correct": false,
+              "response": "Email 太露骨, 而且容易被搜走。"
+            }
           ]
         },
         {
           "q": "聊天室分房間,最常見的分類是?",
           "options": [
-            { "a": "地區 + 年齡 (台北 25-30)", "correct": true, "response": "對! 點進去看人多人少,人少就跳房,人多但都不講話也跳房。" },
-            { "a": "興趣分類", "correct": false, "response": "那是 BBS 的玩法。聊天室主要按地區。" },
-            { "a": "音樂類型", "correct": false, "response": "(這個我會喜歡,但奇摩沒做)" }
+            {
+              "a": "地區 + 年齡 (台北 25-30)",
+              "correct": true,
+              "response": "對! 點進去看人多人少,人少就跳房,人多但都不講話也跳房。"
+            },
+            {
+              "a": "興趣分類",
+              "correct": false,
+              "response": "那是 BBS 的玩法。聊天室主要按地區。"
+            },
+            {
+              "a": "音樂類型",
+              "correct": false,
+              "response": "(這個我會喜歡,但奇摩沒做)"
+            }
           ]
         },
         {
           "q": "奇摩聊天室哪一年正式關掉?",
           "options": [
-            { "a": "2013", "correct": true, "response": "對。Yahoo 一連串關了 Messenger / 聊天室 / 部落格 / 無名小站,大概都是 2013 前後。" },
-            { "a": "2003", "correct": false, "response": "2003 它正紅。" },
-            { "a": "2020", "correct": false, "response": "早就沒了。" }
+            {
+              "a": "2013",
+              "correct": true,
+              "response": "對。Yahoo 一連串關了 Messenger / 聊天室 / 部落格 / 無名小站,大概都是 2013 前後。"
+            },
+            {
+              "a": "2003",
+              "correct": false,
+              "response": "2003 它正紅。"
+            },
+            {
+              "a": "2020",
+              "correct": false,
+              "response": "早就沒了。"
+            }
           ]
         }
       ]
     },
     {
-      "id": "msn", "emoji": "📨", "year": 2004, "label": "MSN / 即時通", "note": "半夜跟暗戀的人說晚安",
-      "intro": "你撿到 MSN!\n2000 年代每個年輕人最常掛的軟體。",
+      "id": "msn",
+      "emoji": "📨",
+      "year": 2004,
+      "label": "MSN / 即時通",
+      "note": "半夜跟暗戀的人說晚安",
+      "intro": "📅 2004 · 耗耗 12 歲(國小)\n\n你撿到 MSN!\n2000 年代每個年輕人最常掛的軟體。",
       "questions": [
         {
           "q": "MSN 最有名的「催對方」功能?",
           "options": [
-            { "a": "振動 / 戳一下 (Nudge)", "correct": true, "response": "對! 對方視窗會抖三下,有聲音。被狂戳很煩,但戳暗戀的人是儀式感。" },
-            { "a": "已讀回條", "correct": false, "response": "那是 LINE 才有的(2011),MSN 沒有已讀。" },
-            { "a": "簡訊轉寄", "correct": false, "response": "(這個我希望它有,但 MSN 沒做)" }
+            {
+              "a": "振動 / 戳一下 (Nudge)",
+              "correct": true,
+              "response": "對! 對方視窗會抖三下,有聲音。被狂戳很煩,但戳暗戀的人是儀式感。"
+            },
+            {
+              "a": "已讀回條",
+              "correct": false,
+              "response": "那是 LINE 才有的(2011),MSN 沒有已讀。"
+            },
+            {
+              "a": "簡訊轉寄",
+              "correct": false,
+              "response": "(這個我希望它有,但 MSN 沒做)"
+            }
           ]
         },
         {
           "q": "MSN 暱稱最常拿來幹嘛?",
           "options": [
-            { "a": "藏想對某個人說的話", "correct": true, "response": "對! 「我以為你在乎」這種,暗中發給特定一個人看。心機之最。" },
-            { "a": "貼時鐘倒數", "correct": false, "response": "也有人這樣做(去日本還剩 X 天),但主流是發小心思。" },
-            { "a": "貼歌詞", "correct": false, "response": "也很常見,但目的還是「想說某句話又不直說」。" }
+            {
+              "a": "藏想對某個人說的話",
+              "correct": true,
+              "response": "對! 「我以為你在乎」這種,暗中發給特定一個人看。心機之最。"
+            },
+            {
+              "a": "貼時鐘倒數",
+              "correct": false,
+              "response": "也有人這樣做(去日本還剩 X 天),但主流是發小心思。"
+            },
+            {
+              "a": "貼歌詞",
+              "correct": false,
+              "response": "也很常見,但目的還是「想說某句話又不直說」。"
+            }
           ]
         },
         {
           "q": "MSN 跟即時通(Yahoo Messenger)最大差別?",
           "options": [
-            { "a": "MSN 是微軟,即時通是 Yahoo;台灣兩邊都有人用", "correct": true, "response": "對! 大家會兩個都裝。我朋友圈大多 MSN,長輩跟同事比較多即時通。" },
-            { "a": "MSN 收費,即時通免費", "correct": false, "response": "兩個都免費,Microsoft 沒收 MSN 錢。" },
-            { "a": "MSN 沒視訊,即時通有", "correct": false, "response": "兩個都有視訊,但畫質都很差。" }
+            {
+              "a": "MSN 是微軟,即時通是 Yahoo;台灣兩邊都有人用",
+              "correct": true,
+              "response": "對! 大家會兩個都裝。我朋友圈大多 MSN,長輩跟同事比較多即時通。"
+            },
+            {
+              "a": "MSN 收費,即時通免費",
+              "correct": false,
+              "response": "兩個都免費,Microsoft 沒收 MSN 錢。"
+            },
+            {
+              "a": "MSN 沒視訊,即時通有",
+              "correct": false,
+              "response": "兩個都有視訊,但畫質都很差。"
+            }
           ]
         }
       ]
     },
     {
-      "id": "wretch", "emoji": "📔", "year": 2005, "label": "無名小站", "note": "日記都是『今天好煩』",
-      "intro": "你撿到無名小站!\n2005-2013 台灣最大的部落格。每個高中生都有一個,今天考你 5 題。",
+      "id": "wretch",
+      "emoji": "📔",
+      "year": 2005,
+      "label": "無名小站",
+      "note": "日記都是『今天好煩』",
+      "intro": "📅 2005 · 耗耗 13 歲(國中)\n\n你撿到無名小站!\n2005-2013 台灣最大的部落格。每個高中生都有一個,今天考你 5 題。",
       "questions": [
         {
           "q": "無名最有名的功能(以為很 cool 其實很煩)?",
           "options": [
-            { "a": "進站自動播 BGM", "correct": true, "response": "對! 點進別人的網誌,音樂自動轟你。我最常被嚇到的是進去突然播〈晴天〉。" },
-            { "a": "發文按讚", "correct": false, "response": "無名沒按讚機制,只有留言。" },
-            { "a": "私訊", "correct": false, "response": "有但很少人用,主要靠留言版。" }
+            {
+              "a": "進站自動播 BGM",
+              "correct": true,
+              "response": "對! 點進別人的網誌,音樂自動轟你。我最常被嚇到的是進去突然播〈晴天〉。"
+            },
+            {
+              "a": "發文按讚",
+              "correct": false,
+              "response": "無名沒按讚機制,只有留言。"
+            },
+            {
+              "a": "私訊",
+              "correct": false,
+              "response": "有但很少人用,主要靠留言版。"
+            }
           ]
         },
         {
           "q": "無名相簿最大特色?",
           "options": [
-            { "a": "免費版有空間限制 / 有浮水印", "correct": true, "response": "對! 100MB 滿了就要升級 VIP。免費上傳的照片會打小小無名 logo。" },
-            { "a": "可以無限上傳 4K 照片", "correct": false, "response": "(2005 年連 4K 是什麼都沒人知道)" },
-            { "a": "自動上雲端備份", "correct": false, "response": "雲端是 2010 之後的詞。" }
+            {
+              "a": "免費版有空間限制 / 有浮水印",
+              "correct": true,
+              "response": "對! 100MB 滿了就要升級 VIP。免費上傳的照片會打小小無名 logo。"
+            },
+            {
+              "a": "可以無限上傳 4K 照片",
+              "correct": false,
+              "response": "(2005 年連 4K 是什麼都沒人知道)"
+            },
+            {
+              "a": "自動上雲端備份",
+              "correct": false,
+              "response": "雲端是 2010 之後的詞。"
+            }
           ]
         },
         {
           "q": "無名側邊欄最常被偷看 (還會研究是誰) 的功能?",
           "options": [
-            { "a": "「誰來我家」九宮格 — 顯示最近 9 個訪客", "correct": true, "response": "對! 九宮格會放最近訪客頭像,看到暗戀的人來過會心臟漏跳。也會看暗戀的人有沒有別人偷看。整個社交監視。" },
-            { "a": "聊天視窗", "correct": false, "response": "(無名沒內建聊天)" },
-            { "a": "新聞推播", "correct": false, "response": "(那不是部落格的事)" }
+            {
+              "a": "「誰來我家」九宮格 — 顯示最近 9 個訪客",
+              "correct": true,
+              "response": "對! 九宮格會放最近訪客頭像,看到暗戀的人來過會心臟漏跳。也會看暗戀的人有沒有別人偷看。整個社交監視。"
+            },
+            {
+              "a": "聊天視窗",
+              "correct": false,
+              "response": "(無名沒內建聊天)"
+            },
+            {
+              "a": "新聞推播",
+              "correct": false,
+              "response": "(那不是部落格的事)"
+            }
           ]
         },
         {
           "q": "無名「鎖文」的密碼,90% 的人會設成什麼?",
           "options": [
-            { "a": "生日 / 暱稱 / 我跟你都知道的某個梗 — 朋友猜得到那種", "correct": true, "response": "對! 密碼設超弱,因為「鎖文」其實是給特定一群朋友看,你會把密碼私下發 MSN 講。所以朋友通常都猜得到。" },
-            { "a": "16 位英數混合 + 大小寫", "correct": false, "response": "(那年代沒人在意安全,密碼就是要朋友猜得到)" },
-            { "a": "完全亂打", "correct": false, "response": "(亂打朋友看不到,違背鎖文目的)" }
+            {
+              "a": "生日 / 暱稱 / 我跟你都知道的某個梗 — 朋友猜得到那種",
+              "correct": true,
+              "response": "對! 密碼設超弱,因為「鎖文」其實是給特定一群朋友看,你會把密碼私下發 MSN 講。所以朋友通常都猜得到。"
+            },
+            {
+              "a": "16 位英數混合 + 大小寫",
+              "correct": false,
+              "response": "(那年代沒人在意安全,密碼就是要朋友猜得到)"
+            },
+            {
+              "a": "完全亂打",
+              "correct": false,
+              "response": "(亂打朋友看不到,違背鎖文目的)"
+            }
           ]
         },
         {
           "q": "哪個素人是從無名小站紅起來?",
           "options": [
-            { "a": "彎彎(部落格四格漫畫《可不可以不要上班》)", "correct": true, "response": "對! 彎彎 2005 開始畫 OL 心聲,2006 出書直接賣翻。她是無名素人爆紅最有名的案例。" },
-            { "a": "周杰倫", "correct": false, "response": "(周杰倫 2000 就紅了,跟無名無關)" },
-            { "a": "蔡依林", "correct": false, "response": "(蔡依林是樂壇,不是部落格出來的)" }
+            {
+              "a": "彎彎(部落格四格漫畫《可不可以不要上班》)",
+              "correct": true,
+              "response": "對! 彎彎 2005 開始畫 OL 心聲,2006 出書直接賣翻。她是無名素人爆紅最有名的案例。"
+            },
+            {
+              "a": "周杰倫",
+              "correct": false,
+              "response": "(周杰倫 2000 就紅了,跟無名無關)"
+            },
+            {
+              "a": "蔡依林",
+              "correct": false,
+              "response": "(蔡依林是樂壇,不是部落格出來的)"
+            }
           ]
         },
         {
           "q": "無名小站什麼時候停掉?",
           "options": [
-            { "a": "2013 年底", "correct": true, "response": "對。Yahoo 收掉,大家瘋狂備份照片。我那年也存了一堆,結果硬碟壞了全沒了。" },
-            { "a": "2008", "correct": false, "response": "2008 它還很紅。" },
-            { "a": "從來沒停", "correct": false, "response": "(很可惜,但真的停了)" }
+            {
+              "a": "2013 年底",
+              "correct": true,
+              "response": "對。Yahoo 收掉,大家瘋狂備份照片。我那年也存了一堆,結果硬碟壞了全沒了。"
+            },
+            {
+              "a": "2008",
+              "correct": false,
+              "response": "2008 它還很紅。"
+            },
+            {
+              "a": "從來沒停",
+              "correct": false,
+              "response": "(很可惜,但真的停了)"
+            }
           ]
         }
       ]
     },
     {
-      "id": "foxy", "emoji": "🦊", "year": 2008, "label": "Foxy", "note": "大學每天從這偷音樂",
-      "intro": "你撿到 Foxy!\n大學那年每天偷音樂的軟體。版權法存在,但你沒在管。",
+      "id": "foxy",
+      "emoji": "🦊",
+      "year": 2008,
+      "label": "Foxy",
+      "note": "大學每天從這偷音樂",
+      "intro": "📅 2008 · 耗耗 16 歲(高中)\n\n你撿到 Foxy!\n大學那年每天偷音樂的軟體。版權法存在,但你沒在管。",
       "questions": [
         {
           "q": "Foxy 是哪種軟體?",
           "options": [
-            { "a": "P2P 檔案分享(像 BT)", "correct": true, "response": "對! 我下載的同時也在分享,等於互相偷。下載速度看有多少人有那個檔。" },
-            { "a": "中央伺服器下載", "correct": false, "response": "那是 Napster 早期的玩法,後來都被告。" },
-            { "a": "雲端串流", "correct": false, "response": "(沒人在 2008 講雲端,雲端是 2012 之後)" }
+            {
+              "a": "P2P 檔案分享(像 BT)",
+              "correct": true,
+              "response": "對! 我下載的同時也在分享,等於互相偷。下載速度看有多少人有那個檔。"
+            },
+            {
+              "a": "中央伺服器下載",
+              "correct": false,
+              "response": "那是 Napster 早期的玩法,後來都被告。"
+            },
+            {
+              "a": "雲端串流",
+              "correct": false,
+              "response": "(沒人在 2008 講雲端,雲端是 2012 之後)"
+            }
           ]
         },
         {
           "q": "Foxy 最危險的是?",
           "options": [
-            { "a": "下載到病毒 / 木馬 / 個資外流", "correct": true, "response": "對! 整個資料夾被分享出去過,我同學的私人照片就這樣流出去過。慘案。" },
-            { "a": "速度太快爆網卡", "correct": false, "response": "(網卡沒這麼脆)" },
-            { "a": "電費爆增", "correct": false, "response": "(掛機是有差,但不會爆)" }
+            {
+              "a": "下載到病毒 / 木馬 / 個資外流",
+              "correct": true,
+              "response": "對! 整個資料夾被分享出去過,我同學的私人照片就這樣流出去過。慘案。"
+            },
+            {
+              "a": "速度太快爆網卡",
+              "correct": false,
+              "response": "(網卡沒這麼脆)"
+            },
+            {
+              "a": "電費爆增",
+              "correct": false,
+              "response": "(掛機是有差,但不會爆)"
+            }
           ]
         },
         {
           "q": "Foxy 後來為什麼消失?",
           "options": [
-            { "a": "版權糾紛 + 政府介入 + Spotify 出來", "correct": true, "response": "對。三件事一起,Foxy 就被淘汰了。後來大家慢慢付月費聽 Spotify,免費聽歌的時代結束了。" },
-            { "a": "病毒太多自己倒", "correct": false, "response": "病毒一直都在,但不是它倒的主因。" },
-            { "a": "公司被收購", "correct": false, "response": "Foxy 是台灣團隊做的,沒被收購。" }
+            {
+              "a": "版權糾紛 + 政府介入 + Spotify 出來",
+              "correct": true,
+              "response": "對。三件事一起,Foxy 就被淘汰了。後來大家慢慢付月費聽 Spotify,免費聽歌的時代結束了。"
+            },
+            {
+              "a": "病毒太多自己倒",
+              "correct": false,
+              "response": "病毒一直都在,但不是它倒的主因。"
+            },
+            {
+              "a": "公司被收購",
+              "correct": false,
+              "response": "Foxy 是台灣團隊做的,沒被收購。"
+            }
           ]
         }
       ]
     },
     {
-      "id": "oldtv3", "emoji": "📺", "year": 1971, "label": "老三台", "note": "彩色電視一家三台輪流看",
-      "intro": "你撿到老三台時代!\n沒第四台,全台只有 3 個無線頻道,8 點檔大家一起看,因為沒得選。",
+      "id": "oldtv3",
+      "emoji": "📺",
+      "year": 1971,
+      "label": "老三台",
+      "note": "彩色電視一家三台輪流看",
+      "intro": "📅 1971 · 耗耗還沒出生(還早 21 年)\n\n你撿到老三台時代!\n沒第四台,全台只有 3 個無線頻道,8 點檔大家一起看,因為沒得選。",
       "questions": [
         {
           "q": "「老三台」是哪三台?",
           "options": [
-            { "a": "台視 + 中視 + 華視", "correct": true, "response": "對! 台視 1962 / 中視 1969 / 華視 1971。三家壟斷 26 年到 1997 民視才出來。" },
-            { "a": "中視 + 華視 + 民視", "correct": false, "response": "民視是 1997 的後來者,不算「老」。" },
-            { "a": "TVBS + 三立 + 民視", "correct": false, "response": "這幾個都是有線電視台,90 年代後才出現。老三台是無線台。" }
+            {
+              "a": "台視 + 中視 + 華視",
+              "correct": true,
+              "response": "對! 台視 1962 / 中視 1969 / 華視 1971。三家壟斷 26 年到 1997 民視才出來。"
+            },
+            {
+              "a": "中視 + 華視 + 民視",
+              "correct": false,
+              "response": "民視是 1997 的後來者,不算「老」。"
+            },
+            {
+              "a": "TVBS + 三立 + 民視",
+              "correct": false,
+              "response": "這幾個都是有線電視台,90 年代後才出現。老三台是無線台。"
+            }
           ]
         },
         {
           "q": "民視大概什麼時候開台?",
           "options": [
-            { "a": "1997 年", "correct": true, "response": "對! 老三台壟斷 26 年,民視出來連續劇市場才開始多元。" },
-            { "a": "1980 年", "correct": false, "response": "1980 太早, 那時老三台正紅。" },
-            { "a": "2005 年", "correct": false, "response": "太晚,2005 民視都很穩了。" }
+            {
+              "a": "1997 年",
+              "correct": true,
+              "response": "對! 老三台壟斷 26 年,民視出來連續劇市場才開始多元。"
+            },
+            {
+              "a": "1980 年",
+              "correct": false,
+              "response": "1980 太早, 那時老三台正紅。"
+            },
+            {
+              "a": "2005 年",
+              "correct": false,
+              "response": "太晚,2005 民視都很穩了。"
+            }
           ]
         },
         {
           "q": "老三台 8 點檔黃金時段都播啥?",
           "options": [
-            { "a": "連續劇 + 港劇配音版", "correct": true, "response": "對! 全家圍電視沒得選,但也其實好看。〈含羞草〉〈包青天〉〈倚天屠龍記〉那種。" },
-            { "a": "新聞 24 小時跑馬燈", "correct": false, "response": "(那是後來有線電視才有的)" },
-            { "a": "Netflix 上的", "correct": false, "response": "(Netflix 2010 之後才出現)" }
+            {
+              "a": "連續劇 + 港劇配音版",
+              "correct": true,
+              "response": "對! 全家圍電視沒得選,但也其實好看。〈含羞草〉〈包青天〉〈倚天屠龍記〉那種。"
+            },
+            {
+              "a": "新聞 24 小時跑馬燈",
+              "correct": false,
+              "response": "(那是後來有線電視才有的)"
+            },
+            {
+              "a": "Netflix 上的",
+              "correct": false,
+              "response": "(Netflix 2010 之後才出現)"
+            }
           ]
         }
       ]
     },
     {
-      "id": "taiwanghost", "emoji": "👻", "year": 1996, "label": "台灣靈異事件", "note": "晚上不敢去廁所",
-      "intro": "你撿到《台灣靈異事件》錄影帶!\n90 年代華視週日晚上播,我們一群國小生半 cover 著眼睛看完還假裝沒事。",
+      "id": "taiwanghost",
+      "emoji": "👻",
+      "year": 1996,
+      "label": "台灣靈異事件",
+      "note": "晚上不敢去廁所",
+      "intro": "📅 1996 · 耗耗 4 歲(學齡前)\n\n你撿到《台灣靈異事件》錄影帶!\n90 年代華視週日晚上播,我們一群國小生半 cover 著眼睛看完還假裝沒事。",
       "questions": [
         {
           "q": "《台灣靈異事件》主持人是?",
           "options": [
-            { "a": "澎恰恰 + 許效舜", "correct": true, "response": "對啦,「鐵獅玉玲瓏」那兩位。穿西裝講鬼故事,白天看搞笑晚上想到會抖。" },
-            { "a": "豬哥亮", "correct": false, "response": "豬哥亮是綜藝歌廳秀,不是這個。" },
-            { "a": "張小燕", "correct": false, "response": "張小燕做《超級星期天》那種,跟靈異無關。" }
+            {
+              "a": "澎恰恰 + 許效舜",
+              "correct": true,
+              "response": "對啦,「鐵獅玉玲瓏」那兩位。穿西裝講鬼故事,白天看搞笑晚上想到會抖。"
+            },
+            {
+              "a": "豬哥亮",
+              "correct": false,
+              "response": "豬哥亮是綜藝歌廳秀,不是這個。"
+            },
+            {
+              "a": "張小燕",
+              "correct": false,
+              "response": "張小燕做《超級星期天》那種,跟靈異無關。"
+            }
           ]
         },
         {
           "q": "《台灣靈異事件》史上最白癡又最 viral 的鬼演員 bug 是?",
           "options": [
-            { "a": "鬼爬樓梯腳轉 180 度,觀眾笑到當迷因傳", "correct": true, "response": "對! 「你的腳怎麼扭成這樣?」變成網路經典。後來看那段都是笑著重播。" },
-            { "a": "鬼撞門撞太大力把門撞掉", "correct": false, "response": "(沒,鬼很怕撞門,通常飄過去)" },
-            { "a": "鬼忘記台詞站著發呆", "correct": false, "response": "(忘台詞鬼很多,但 viral 的是腳那段)" }
+            {
+              "a": "鬼爬樓梯腳轉 180 度,觀眾笑到當迷因傳",
+              "correct": true,
+              "response": "對! 「你的腳怎麼扭成這樣?」變成網路經典。後來看那段都是笑著重播。"
+            },
+            {
+              "a": "鬼撞門撞太大力把門撞掉",
+              "correct": false,
+              "response": "(沒,鬼很怕撞門,通常飄過去)"
+            },
+            {
+              "a": "鬼忘記台詞站著發呆",
+              "correct": false,
+              "response": "(忘台詞鬼很多,但 viral 的是腳那段)"
+            }
           ]
         },
         {
           "q": "看完《台灣靈異事件》最常做的事?",
           "options": [
-            { "a": "晚上不敢去廁所 / 不敢自己睡", "correct": true, "response": "對啦! 我國小看完那晚,衝刺從房間到廁所,睜一隻眼睡覺。" },
-            { "a": "找朋友驗證鬼故事", "correct": false, "response": "(也有人會,但主要還是嚇到不敢動)" },
-            { "a": "立刻笑出來", "correct": false, "response": "(白天回想會笑,晚上笑不出來)" }
+            {
+              "a": "晚上不敢去廁所 / 不敢自己睡",
+              "correct": true,
+              "response": "對啦! 我國小看完那晚,衝刺從房間到廁所,睜一隻眼睡覺。"
+            },
+            {
+              "a": "找朋友驗證鬼故事",
+              "correct": false,
+              "response": "(也有人會,但主要還是嚇到不敢動)"
+            },
+            {
+              "a": "立刻笑出來",
+              "correct": false,
+              "response": "(白天回想會笑,晚上笑不出來)"
+            }
           ]
         }
       ]
     },
     {
-      "id": "spicyteacher", "emoji": "🌶️", "year": 1999, "label": "麻辣鮮師", "note": "週末晚上的高中校園劇",
-      "intro": "你撿到《麻辣鮮師》錄影帶!\n台視 1999 開播,演到 2003。我們那代高中生看 G 怪老師跟一票學生鬧。",
+      "id": "spicyteacher",
+      "emoji": "🌶️",
+      "year": 1999,
+      "label": "麻辣鮮師",
+      "note": "週末晚上的高中校園劇",
+      "intro": "📅 1999 · 耗耗 7 歲(國小)\n\n你撿到《麻辣鮮師》錄影帶!\n台視 1999 開播,演到 2003。我們那代高中生看 G 怪老師跟一票學生鬧。",
       "questions": [
         {
           "q": "《麻辣鮮師》最有名的班導是?",
           "options": [
-            { "a": "徐磊老師", "correct": true, "response": "對! 徐磊那角色 — 髮型怪、講話怪,但學生都很愛。「徐磊」這個名字後來在台灣綜藝圈也變固定梗。" },
-            { "a": "嚴格老頭班導", "correct": false, "response": "(不是,徐磊才對)" },
-            { "a": "美女年輕老師", "correct": false, "response": "(主角是徐磊老師,不是美女)" }
+            {
+              "a": "徐磊老師",
+              "correct": true,
+              "response": "對! 徐磊那角色 — 髮型怪、講話怪,但學生都很愛。「徐磊」這個名字後來在台灣綜藝圈也變固定梗。"
+            },
+            {
+              "a": "嚴格老頭班導",
+              "correct": false,
+              "response": "(不是,徐磊才對)"
+            },
+            {
+              "a": "美女年輕老師",
+              "correct": false,
+              "response": "(主角是徐磊老師,不是美女)"
+            }
           ]
         },
         {
           "q": "《麻辣鮮師》捧紅哪一票後來大紅的藝人?",
           "options": [
-            { "a": "言承旭 + 5566 + 那一群偶像團體成員", "correct": true, "response": "對! F4 / 5566 那批人都從這裡走出來。當時看他們演高中生很跳 tone。" },
-            { "a": "周杰倫", "correct": false, "response": "(周杰倫沒演,他是同期樂壇崛起的另一條線)" },
-            { "a": "蔡依林", "correct": false, "response": "(蔡依林是樂壇,沒演劇)" }
+            {
+              "a": "言承旭 + 5566 + 那一群偶像團體成員",
+              "correct": true,
+              "response": "對! F4 / 5566 那批人都從這裡走出來。當時看他們演高中生很跳 tone。"
+            },
+            {
+              "a": "周杰倫",
+              "correct": false,
+              "response": "(周杰倫沒演,他是同期樂壇崛起的另一條線)"
+            },
+            {
+              "a": "蔡依林",
+              "correct": false,
+              "response": "(蔡依林是樂壇,沒演劇)"
+            }
           ]
         },
         {
           "q": "《麻辣鮮師》在什麼時段播?",
           "options": [
-            { "a": "週末晚上(青少年黃金時段)", "correct": true, "response": "對! 週六或週日晚上,我們一邊吃飯一邊看,偶爾被罵「先吃飯再看」。" },
-            { "a": "平日中午", "correct": false, "response": "(平日中午是綜藝重播)" },
-            { "a": "凌晨深夜", "correct": false, "response": "(那年代深夜不是放高中生劇)" }
+            {
+              "a": "週末晚上(青少年黃金時段)",
+              "correct": true,
+              "response": "對! 週六或週日晚上,我們一邊吃飯一邊看,偶爾被罵「先吃飯再看」。"
+            },
+            {
+              "a": "平日中午",
+              "correct": false,
+              "response": "(平日中午是綜藝重播)"
+            },
+            {
+              "a": "凌晨深夜",
+              "correct": false,
+              "response": "(那年代深夜不是放高中生劇)"
+            }
           ]
         }
       ]
     },
     {
-      "id": "cabletv", "emoji": "📡", "year": 1995, "label": "第四台選台器", "note": "卡通 22-25,電影 61-64",
-      "intro": "你撿到第四台選台器!\n90 年代家裡裝第四台 = 突然有 100 台,但實際上只看那 5 台。",
+      "id": "cabletv",
+      "emoji": "📡",
+      "year": 1995,
+      "label": "第四台選台器",
+      "note": "卡通 22-25,電影 61-64",
+      "intro": "📅 1995 · 耗耗 3 歲(學齡前)\n\n你撿到第四台選台器!\n90 年代家裡裝第四台 = 突然有 100 台,但實際上只看那 5 台。",
       "questions": [
         {
           "q": "卡通台都集中在第幾號?",
           "options": [
-            { "a": "22~25 號(Cartoon Network / 卡通台 / Disney / MOMO)", "correct": true, "response": "對! 22 Cartoon Network、23 卡通台、24 Disney、25 MOMO 親子台。順序差不多固定,我電視壞前都這樣按。" },
-            { "a": "1~5", "correct": false, "response": "(1~5 是無線台跟新聞,卡通不在那)" },
-            { "a": "100 以上", "correct": false, "response": "(100 以上是高級或購物台)" }
+            {
+              "a": "22~25 號(Cartoon Network / 卡通台 / Disney / MOMO)",
+              "correct": true,
+              "response": "對! 22 Cartoon Network、23 卡通台、24 Disney、25 MOMO 親子台。順序差不多固定,我電視壞前都這樣按。"
+            },
+            {
+              "a": "1~5",
+              "correct": false,
+              "response": "(1~5 是無線台跟新聞,卡通不在那)"
+            },
+            {
+              "a": "100 以上",
+              "correct": false,
+              "response": "(100 以上是高級或購物台)"
+            }
           ]
         },
         {
           "q": "電影台都在第幾號?",
           "options": [
-            { "a": "61~64 號(HBO / Cinemax / 衛視電影 / 緯來電影)", "correct": true, "response": "對! 61 HBO、62 Cinemax、63 衛視電影、64 緯來電影。週末晚上一直轉就是了。" },
-            { "a": "30 多號", "correct": false, "response": "(30 多是新聞 / 戲劇台)" },
-            { "a": "200 號之後", "correct": false, "response": "(200 之後是付費 / 成人台)" }
+            {
+              "a": "61~64 號(HBO / Cinemax / 衛視電影 / 緯來電影)",
+              "correct": true,
+              "response": "對! 61 HBO、62 Cinemax、63 衛視電影、64 緯來電影。週末晚上一直轉就是了。"
+            },
+            {
+              "a": "30 多號",
+              "correct": false,
+              "response": "(30 多是新聞 / 戲劇台)"
+            },
+            {
+              "a": "200 號之後",
+              "correct": false,
+              "response": "(200 之後是付費 / 成人台)"
+            }
           ]
         },
         {
           "q": "第四台選台器最常壞的按鈕?",
           "options": [
-            { "a": "電源鍵 / +/- 換頻道", "correct": true, "response": "對! 換頻道按到斷掉,我家換過 5 個。後來都用拍的(拍一拍會好)。" },
-            { "a": "靜音按鈕", "correct": false, "response": "(其實沒人用靜音,要安靜就關電視)" },
-            { "a": "色彩調整", "correct": false, "response": "(那種高級設定鈕一輩子都不會碰)" }
+            {
+              "a": "電源鍵 / +/- 換頻道",
+              "correct": true,
+              "response": "對! 換頻道按到斷掉,我家換過 5 個。後來都用拍的(拍一拍會好)。"
+            },
+            {
+              "a": "靜音按鈕",
+              "correct": false,
+              "response": "(其實沒人用靜音,要安靜就關電視)"
+            },
+            {
+              "a": "色彩調整",
+              "correct": false,
+              "response": "(那種高級設定鈕一輩子都不會碰)"
+            }
           ]
         }
       ]
     },
     {
-      "id": "lyricbook", "emoji": "📒", "year": 2002, "label": "歌詞本 + 大頭貼", "note": "高中抄歌詞抄到手酸",
-      "intro": "你撿到一本國高中歌詞本!\n那年代沒手機 K 歌,你聽 CD 一句一句倒帶抄。本子裡夾大頭貼,愛的人在第一頁。",
+      "id": "lyricbook",
+      "emoji": "📒",
+      "year": 2002,
+      "label": "歌詞本 + 大頭貼",
+      "note": "高中抄歌詞抄到手酸",
+      "intro": "📅 2002 · 耗耗 10 歲(國小)\n\n你撿到一本國高中歌詞本!\n那年代沒手機 K 歌,你聽 CD 一句一句倒帶抄。本子裡夾大頭貼,愛的人在第一頁。",
       "questions": [
         {
           "q": "歌詞本除了抄歌詞還會放什麼?",
           "options": [
-            { "a": "大頭貼 + 朋友留言 + 偶像照片剪報", "correct": true, "response": "對! 翻開第一頁就是「我跟我朋友拍的大頭貼一起閃」。後面還會給朋友寫留言,跟簽名簿差不多。" },
-            { "a": "考試重點", "correct": false, "response": "(那是另一本筆記本,跟歌詞本嚴格分開)" },
-            { "a": "數學公式", "correct": false, "response": "(誰把數學跟周杰倫放一起)" }
+            {
+              "a": "大頭貼 + 朋友留言 + 偶像照片剪報",
+              "correct": true,
+              "response": "對! 翻開第一頁就是「我跟我朋友拍的大頭貼一起閃」。後面還會給朋友寫留言,跟簽名簿差不多。"
+            },
+            {
+              "a": "考試重點",
+              "correct": false,
+              "response": "(那是另一本筆記本,跟歌詞本嚴格分開)"
+            },
+            {
+              "a": "數學公式",
+              "correct": false,
+              "response": "(誰把數學跟周杰倫放一起)"
+            }
           ]
         },
         {
           "q": "歌詞本最常抄哪幾個歌手?",
           "options": [
-            { "a": "周杰倫 / 五月天 / 蔡依林 / 孫燕姿", "correct": true, "response": "對! 那年代華語天王天后,每個女生男生歌詞本都有〈晴天〉〈黑色毛衣〉〈倔強〉〈遇見〉。" },
-            { "a": "古典樂譜", "correct": false, "response": "(古典樂沒詞要抄,而且也不潮)" },
-            { "a": "兒歌", "correct": false, "response": "(高中抄兒歌會被霸凌)" }
+            {
+              "a": "周杰倫 / 五月天 / 蔡依林 / 孫燕姿",
+              "correct": true,
+              "response": "對! 那年代華語天王天后,每個女生男生歌詞本都有〈晴天〉〈黑色毛衣〉〈倔強〉〈遇見〉。"
+            },
+            {
+              "a": "古典樂譜",
+              "correct": false,
+              "response": "(古典樂沒詞要抄,而且也不潮)"
+            },
+            {
+              "a": "兒歌",
+              "correct": false,
+              "response": "(高中抄兒歌會被霸凌)"
+            }
           ]
         },
         {
           "q": "大頭貼那時候去哪裡拍?",
           "options": [
-            { "a": "西門町 / 第一廣場 / 公館 學生街的大頭貼機", "correct": true, "response": "對! 一張 100-200 塊,六格小張,可以加文字 / 邊框 / 心心。我跟好朋友拍過 50 多張。" },
-            { "a": "全家便利商店", "correct": false, "response": "(那是後來電子化才有的服務)" },
-            { "a": "百貨公司樓上", "correct": false, "response": "(百貨有但很少,主要還是學生街)" }
+            {
+              "a": "西門町 / 第一廣場 / 公館 學生街的大頭貼機",
+              "correct": true,
+              "response": "對! 一張 100-200 塊,六格小張,可以加文字 / 邊框 / 心心。我跟好朋友拍過 50 多張。"
+            },
+            {
+              "a": "全家便利商店",
+              "correct": false,
+              "response": "(那是後來電子化才有的服務)"
+            },
+            {
+              "a": "百貨公司樓上",
+              "correct": false,
+              "response": "(百貨有但很少,主要還是學生街)"
+            }
           ]
         }
       ]
     },
     {
-      "id": "taichungplaza", "emoji": "🏬", "year": 1998, "label": "台中第一廣場", "note": "台中國高中生朝聖地",
-      "intro": "你撿到第一廣場記憶卡!\n台中人國高中下課必去,飾品 / 漫畫 / 大頭貼 / 偶像周邊全在那。後來變另一種文化地景。",
+      "id": "taichungplaza",
+      "emoji": "🏬",
+      "year": 1998,
+      "label": "台中第一廣場",
+      "note": "台中國高中生朝聖地",
+      "intro": "📅 1998 · 耗耗 6 歲(國小)\n\n你撿到第一廣場記憶卡!\n台中人國高中下課必去,飾品 / 漫畫 / 大頭貼 / 偶像周邊全在那。後來變另一種文化地景。",
       "questions": [
         {
           "q": "第一廣場 90 年代對台中年輕人的意義?",
           "options": [
-            { "a": "週末朝聖地 — 飾品 / 大頭貼 / 漫畫 / 偶像周邊", "correct": true, "response": "對! 我那年週六一定去,口袋 500 元就花光。一樓飾品店,二樓漫畫店,五樓 KTV。" },
-            { "a": "高級百貨公司", "correct": false, "response": "(高級百貨在後火車站區,第一廣場是學生消費)" },
-            { "a": "政府機關大樓", "correct": false, "response": "(政府機關在另一頭)" }
+            {
+              "a": "週末朝聖地 — 飾品 / 大頭貼 / 漫畫 / 偶像周邊",
+              "correct": true,
+              "response": "對! 我那年週六一定去,口袋 500 元就花光。一樓飾品店,二樓漫畫店,五樓 KTV。"
+            },
+            {
+              "a": "高級百貨公司",
+              "correct": false,
+              "response": "(高級百貨在後火車站區,第一廣場是學生消費)"
+            },
+            {
+              "a": "政府機關大樓",
+              "correct": false,
+              "response": "(政府機關在另一頭)"
+            }
           ]
         },
         {
           "q": "第一廣場 2010 之後變成?",
           "options": [
-            { "a": "東南亞移工的聚集地 + 外籍商家", "correct": true, "response": "對。現在叫「東協廣場」,有越南/泰國/印尼餐廳跟雜貨店,週末超熱鬧。" },
-            { "a": "蘋果旗艦店", "correct": false, "response": "(蘋果旗艦店在台北 101 / 信義區)" },
-            { "a": "台中市政府", "correct": false, "response": "(市政府在七期重劃區)" }
+            {
+              "a": "東南亞移工的聚集地 + 外籍商家",
+              "correct": true,
+              "response": "對。現在叫「東協廣場」,有越南/泰國/印尼餐廳跟雜貨店,週末超熱鬧。"
+            },
+            {
+              "a": "蘋果旗艦店",
+              "correct": false,
+              "response": "(蘋果旗艦店在台北 101 / 信義區)"
+            },
+            {
+              "a": "台中市政府",
+              "correct": false,
+              "response": "(市政府在七期重劃區)"
+            }
           ]
         },
         {
           "q": "第一廣場最有名的「危險都市傳說」是?",
           "options": [
-            { "a": "電梯死過人 / 鬧鬼 / 半夜不要去", "correct": true, "response": "對! 90 年代有真的電梯意外加上後來的傳聞,變成台中年輕人的鬼故事素材。半夜不敢去頂樓。" },
-            { "a": "免費 wifi 涵蓋全棟", "correct": false, "response": "(那年代沒 wifi)" },
-            { "a": "可以洗 SPA", "correct": false, "response": "(沒有,主要是飾品+大頭貼)" }
+            {
+              "a": "電梯死過人 / 鬧鬼 / 半夜不要去",
+              "correct": true,
+              "response": "對! 90 年代有真的電梯意外加上後來的傳聞,變成台中年輕人的鬼故事素材。半夜不敢去頂樓。"
+            },
+            {
+              "a": "免費 wifi 涵蓋全棟",
+              "correct": false,
+              "response": "(那年代沒 wifi)"
+            },
+            {
+              "a": "可以洗 SPA",
+              "correct": false,
+              "response": "(沒有,主要是飾品+大頭貼)"
+            }
           ]
         }
       ]
     },
     {
-      "id": "boyhair", "emoji": "💇", "year": 2003, "label": "男生熱塑燙", "note": "不燙頭髮不出門",
-      "intro": "你撿到一張 2003 年男生髮型 DM!\n那年代男生不燙頭髮根本不出門,設計師會問你「要韓系還日系」?",
+      "id": "boyhair",
+      "emoji": "💇",
+      "year": 2003,
+      "label": "男生熱塑燙",
+      "note": "不燙頭髮不出門",
+      "intro": "📅 2003 · 耗耗 11 歲(國小)\n\n你撿到一張 2003 年男生髮型 DM!\n那年代男生不燙頭髮根本不出門,設計師會問你「要韓系還日系」?",
       "questions": [
         {
           "q": "2000 年代台灣男生最潮髮型是?",
           "options": [
-            { "a": "熱塑燙(蓬鬆有空氣感的捲度)", "correct": true, "response": "對! 設計師會說「韓系熱塑」,做完頭頂超蓬,前髮往下撥到眼睛。F4 出來之後人手一顆。" },
-            { "a": "平頭", "correct": false, "response": "(平頭是當兵才剪的,沒人主動)" },
-            { "a": "完全光頭", "correct": false, "response": "(光頭是宗教或大病後)" }
+            {
+              "a": "熱塑燙(蓬鬆有空氣感的捲度)",
+              "correct": true,
+              "response": "對! 設計師會說「韓系熱塑」,做完頭頂超蓬,前髮往下撥到眼睛。F4 出來之後人手一顆。"
+            },
+            {
+              "a": "平頭",
+              "correct": false,
+              "response": "(平頭是當兵才剪的,沒人主動)"
+            },
+            {
+              "a": "完全光頭",
+              "correct": false,
+              "response": "(光頭是宗教或大病後)"
+            }
           ]
         },
         {
           "q": "「玉米鬚」是什麼?",
           "options": [
-            { "a": "用特殊夾子在髮根夾出小波浪 → 髮根整個蓬起", "correct": true, "response": "對! 玉米鬚夾下去,髮根會有 zigzag 紋路,整個頭膨起來。我同學夾完像戴一頂蓬鬆帽。" },
-            { "a": "把頭髮染成玉米黃色", "correct": false, "response": "(那是另一個東西)" },
-            { "a": "在頭上抹玉米油", "correct": false, "response": "(廚房用品,不要這樣對你的頭)" }
+            {
+              "a": "用特殊夾子在髮根夾出小波浪 → 髮根整個蓬起",
+              "correct": true,
+              "response": "對! 玉米鬚夾下去,髮根會有 zigzag 紋路,整個頭膨起來。我同學夾完像戴一頂蓬鬆帽。"
+            },
+            {
+              "a": "把頭髮染成玉米黃色",
+              "correct": false,
+              "response": "(那是另一個東西)"
+            },
+            {
+              "a": "在頭上抹玉米油",
+              "correct": false,
+              "response": "(廚房用品,不要這樣對你的頭)"
+            }
           ]
         },
         {
           "q": "燙完髮最常做的第一件事?",
           "options": [
-            { "a": "去拍大頭貼 + 上無名小站發文炫耀", "correct": true, "response": "對! 「今天弄了新髮型 yo」配 6 張大頭貼。回應數比平常多 5 倍。" },
-            { "a": "立刻剪掉", "correct": false, "response": "(燙完剪掉是浪費 1500)" },
-            { "a": "給爸媽看", "correct": false, "response": "(給爸媽看會被罵『花這麼多錢』)" }
+            {
+              "a": "去拍大頭貼 + 上無名小站發文炫耀",
+              "correct": true,
+              "response": "對! 「今天弄了新髮型 yo」配 6 張大頭貼。回應數比平常多 5 倍。"
+            },
+            {
+              "a": "立刻剪掉",
+              "correct": false,
+              "response": "(燙完剪掉是浪費 1500)"
+            },
+            {
+              "a": "給爸媽看",
+              "correct": false,
+              "response": "(給爸媽看會被罵『花這麼多錢』)"
+            }
           ]
         }
       ]
     },
     {
-      "id": "girlhair", "emoji": "💁", "year": 2005, "label": "女生高瀏海 (不規則高層次)", "note": "剪到眉毛上方,蓬蓬高高",
-      "intro": "你撿到 2005 女生髮型雜誌!\n那年代女生瀏海一定要剪到眉毛上、剪不規則、然後想辦法讓它「蓬」起來,沒高度不出門。",
+      "id": "girlhair",
+      "emoji": "💁",
+      "year": 2005,
+      "label": "女生高瀏海 (不規則高層次)",
+      "note": "剪到眉毛上方,蓬蓬高高",
+      "intro": "📅 2005 · 耗耗 13 歲(國中)\n\n你撿到 2005 女生髮型雜誌!\n那年代女生瀏海一定要剪到眉毛上、剪不規則、然後想辦法讓它「蓬」起來,沒高度不出門。",
       "questions": [
         {
           "q": "2005 前後女生最潮的瀏海樣子是?",
           "options": [
-            { "a": "高瀏海 — 剪到眉毛上方,不規則,層次堆疊讓它蓬蓬的", "correct": true, "response": "對! 那種短而蓬的高瀏海,層次剪法 + 髮根燙讓額頭上頂一坨膨起來。日韓風混台灣街頭的代表造型。" },
-            { "a": "全部往後梳露額頭", "correct": false, "response": "(那是 2010 之後,模特兒高定風)" },
-            { "a": "完全光頭", "correct": false, "response": "(你選這個是想開玩笑吧)" }
+            {
+              "a": "高瀏海 — 剪到眉毛上方,不規則,層次堆疊讓它蓬蓬的",
+              "correct": true,
+              "response": "對! 那種短而蓬的高瀏海,層次剪法 + 髮根燙讓額頭上頂一坨膨起來。日韓風混台灣街頭的代表造型。"
+            },
+            {
+              "a": "全部往後梳露額頭",
+              "correct": false,
+              "response": "(那是 2010 之後,模特兒高定風)"
+            },
+            {
+              "a": "完全光頭",
+              "correct": false,
+              "response": "(你選這個是想開玩笑吧)"
+            }
           ]
         },
         {
           "q": "怎麼讓高瀏海保持那種「蓬」?",
           "options": [
-            { "a": "髮根燙 + 早上吹蓬 + 髮膠 / 定型液撐住", "correct": true, "response": "對! 髮根燙是基底,早上 20 分鐘倒著吹讓根部蓬,出門前噴定型液。下雨那天毀了乾脆別出門。" },
-            { "a": "睡一覺自然就蓬", "correct": false, "response": "(睡一覺只會被壓扁)" },
-            { "a": "抹橄欖油", "correct": false, "response": "(會油塌,完全反方向)" }
+            {
+              "a": "髮根燙 + 早上吹蓬 + 髮膠 / 定型液撐住",
+              "correct": true,
+              "response": "對! 髮根燙是基底,早上 20 分鐘倒著吹讓根部蓬,出門前噴定型液。下雨那天毀了乾脆別出門。"
+            },
+            {
+              "a": "睡一覺自然就蓬",
+              "correct": false,
+              "response": "(睡一覺只會被壓扁)"
+            },
+            {
+              "a": "抹橄欖油",
+              "correct": false,
+              "response": "(會油塌,完全反方向)"
+            }
           ]
         },
         {
           "q": "2005 高瀏海跟現在的「空氣瀏海」差別?",
           "options": [
-            { "a": "高瀏海更短更蓬 + 不規則層次,現在是長且輕薄", "correct": true, "response": "對! 高瀏海是「立體堆」在額頭上,空氣瀏海是「輕飄」過眉。10 年前的照片現在看會有種『時代感』。" },
-            { "a": "其實一樣", "correct": false, "response": "(差很多,看那年代照片就知道)" },
-            { "a": "顏色不一樣", "correct": false, "response": "(顏色不影響造型結構)" }
+            {
+              "a": "高瀏海更短更蓬 + 不規則層次,現在是長且輕薄",
+              "correct": true,
+              "response": "對! 高瀏海是「立體堆」在額頭上,空氣瀏海是「輕飄」過眉。10 年前的照片現在看會有種『時代感』。"
+            },
+            {
+              "a": "其實一樣",
+              "correct": false,
+              "response": "(差很多,看那年代照片就知道)"
+            },
+            {
+              "a": "顏色不一樣",
+              "correct": false,
+              "response": "(顏色不影響造型結構)"
+            }
           ]
         }
       ]
     },
     {
-      "id": "cassetterecorder", "emoji": "🎙️", "year": 1985, "label": "雙卡錄音機", "note": "錄音鈕為什麼壓不下去?",
-      "intro": "你撿到一台雙卡錄音機!\n那年代家家戶戶都有一台,聽錄音帶 + 翻錄朋友的卡帶。但你按過「錄音」鈕嗎?",
+      "id": "cassetterecorder",
+      "emoji": "🎙️",
+      "year": 1985,
+      "label": "雙卡錄音機",
+      "note": "錄音鈕為什麼壓不下去?",
+      "intro": "📅 1985 · 耗耗還沒出生(還早 7 年)\n\n你撿到一台雙卡錄音機!\n那年代家家戶戶都有一台,聽錄音帶 + 翻錄朋友的卡帶。但你按過「錄音」鈕嗎?",
       "questions": [
         {
           "q": "一般錄音帶放進錄音機,「錄音」鈕為什麼壓不下去?",
           "options": [
-            { "a": "帶子背面有 2 個塑膠防呆片擋住按鈕", "correct": true, "response": "對! 90% 的人不知道。錄音帶背面那兩個小方孔被塑膠片填滿 = 防錄。把那塑膠片摳掉就可以重錄了。" },
-            { "a": "錄音功能要解鎖", "correct": false, "response": "(沒有解鎖,純粹物理擋住)" },
-            { "a": "機器壞了", "correct": false, "response": "(不是壞,是設計如此)" }
+            {
+              "a": "帶子背面有 2 個塑膠防呆片擋住按鈕",
+              "correct": true,
+              "response": "對! 90% 的人不知道。錄音帶背面那兩個小方孔被塑膠片填滿 = 防錄。把那塑膠片摳掉就可以重錄了。"
+            },
+            {
+              "a": "錄音功能要解鎖",
+              "correct": false,
+              "response": "(沒有解鎖,純粹物理擋住)"
+            },
+            {
+              "a": "機器壞了",
+              "correct": false,
+              "response": "(不是壞,是設計如此)"
+            }
           ]
         },
         {
           "q": "要真的錄音的話要買什麼?",
           "options": [
-            { "a": "「空白錄音帶」(沒有防呆塑膠片,專門錄音用)", "correct": true, "response": "對! 文具店買得到,封面寫「空白錄音帶 90 分鐘」那種。我國中錄了好多自製混音帶。" },
-            { "a": "任何錄音帶都可以", "correct": false, "response": "(一般有節目的錄音帶都被防呆,不能錄)" },
-            { "a": "USB 隨身碟", "correct": false, "response": "(USB 是 90 年代末之後的事)" }
+            {
+              "a": "「空白錄音帶」(沒有防呆塑膠片,專門錄音用)",
+              "correct": true,
+              "response": "對! 文具店買得到,封面寫「空白錄音帶 90 分鐘」那種。我國中錄了好多自製混音帶。"
+            },
+            {
+              "a": "任何錄音帶都可以",
+              "correct": false,
+              "response": "(一般有節目的錄音帶都被防呆,不能錄)"
+            },
+            {
+              "a": "USB 隨身碟",
+              "correct": false,
+              "response": "(USB 是 90 年代末之後的事)"
+            }
           ]
         },
         {
           "q": "錄音機要錄你的聲音,還缺什麼?",
           "options": [
-            { "a": "外接麥克風(機器本身不含,要另買幾百塊,品質超爛)", "correct": true, "response": "對! 那個外接麥克風長得像一根棒,3.5mm 線,品質糟到自己錄完不忍聽。但那年代就只能用這個。" },
-            { "a": "錄音機本身就有內建麥克風", "correct": false, "response": "(很少很少很少有內建,主流款都沒)" },
-            { "a": "要連手機", "correct": false, "response": "(那年代沒手機可以連)" }
+            {
+              "a": "外接麥克風(機器本身不含,要另買幾百塊,品質超爛)",
+              "correct": true,
+              "response": "對! 那個外接麥克風長得像一根棒,3.5mm 線,品質糟到自己錄完不忍聽。但那年代就只能用這個。"
+            },
+            {
+              "a": "錄音機本身就有內建麥克風",
+              "correct": false,
+              "response": "(很少很少很少有內建,主流款都沒)"
+            },
+            {
+              "a": "要連手機",
+              "correct": false,
+              "response": "(那年代沒手機可以連)"
+            }
           ]
         }
       ]
     },
     {
-      "id": "chiaolianzhi", "emoji": "🐯", "year": 1985, "label": "巧連智", "note": "以前不叫巧虎島",
-      "intro": "你撿到一本巧連智!\n以前不叫「可愛巧虎島」 — 就是「巧連智」雜誌 + 錄音帶 + 手作教材。答對你應該年紀不小。",
+      "id": "chiaolianzhi",
+      "emoji": "🐯",
+      "year": 1985,
+      "label": "巧連智",
+      "note": "以前不叫巧虎島",
+      "intro": "📅 1985 · 耗耗還沒出生(還早 7 年)\n\n你撿到一本巧連智!\n以前不叫「可愛巧虎島」 — 就是「巧連智」雜誌 + 錄音帶 + 手作教材。答對你應該年紀不小。",
       "questions": [
         {
           "q": "巧連智在 90 年代台灣到底是什麼?",
           "options": [
-            { "a": "一本分齡雜誌(1-3 / 3-5 / 5-7 歲),每月附錄音帶 + 手作教材", "correct": true, "response": "對! 我媽幫我訂過。每個月寄一本厚雜誌,加錄音帶聽故事,加一袋勞作材料。後來才有電視動畫。" },
-            { "a": "電視卡通頻道", "correct": false, "response": "(後來才變動畫,90 年代主要是雜誌)" },
-            { "a": "漫畫週刊", "correct": false, "response": "(漫畫週刊是另一種,巧連智是教育)" }
+            {
+              "a": "一本分齡雜誌(1-3 / 3-5 / 5-7 歲),每月附錄音帶 + 手作教材",
+              "correct": true,
+              "response": "對! 我媽幫我訂過。每個月寄一本厚雜誌,加錄音帶聽故事,加一袋勞作材料。後來才有電視動畫。"
+            },
+            {
+              "a": "電視卡通頻道",
+              "correct": false,
+              "response": "(後來才變動畫,90 年代主要是雜誌)"
+            },
+            {
+              "a": "漫畫週刊",
+              "correct": false,
+              "response": "(漫畫週刊是另一種,巧連智是教育)"
+            }
           ]
         },
         {
           "q": "巧連智裡那隻虎,以前叫什麼名字?",
           "options": [
-            { "a": "小虎(後來才改叫「巧虎」)", "correct": true, "response": "對! 我那年代讀的時候他就叫「小虎」。後來商品化才統一叫「巧虎」,連商品 logo 都改了。" },
-            { "a": "老虎王", "correct": false, "response": "(沒這個角色,你瞎猜的)" },
-            { "a": "大虎", "correct": false, "response": "(也沒)" }
+            {
+              "a": "小虎(後來才改叫「巧虎」)",
+              "correct": true,
+              "response": "對! 我那年代讀的時候他就叫「小虎」。後來商品化才統一叫「巧虎」,連商品 logo 都改了。"
+            },
+            {
+              "a": "老虎王",
+              "correct": false,
+              "response": "(沒這個角色,你瞎猜的)"
+            },
+            {
+              "a": "大虎",
+              "correct": false,
+              "response": "(也沒)"
+            }
           ]
         },
         {
           "q": "民國 70 幾年的巧連智,沒有哪個角色?",
           "options": [
-            { "a": "琪琪(琪琪是後來才加進來的)", "correct": true, "response": "對! 那年代只有小虎跟陶樂比。琪琪是 90 年代後期商業化擴展才加的角色。" },
-            { "a": "陶樂比(從以前就有)", "correct": false, "response": "(陶樂比一直都在,從第一天就在)" },
-            { "a": "妙妙", "correct": false, "response": "(妙妙是 2000 之後才有的角色,但更晚於琪琪)" }
+            {
+              "a": "琪琪(琪琪是後來才加進來的)",
+              "correct": true,
+              "response": "對! 那年代只有小虎跟陶樂比。琪琪是 90 年代後期商業化擴展才加的角色。"
+            },
+            {
+              "a": "陶樂比(從以前就有)",
+              "correct": false,
+              "response": "(陶樂比一直都在,從第一天就在)"
+            },
+            {
+              "a": "妙妙",
+              "correct": false,
+              "response": "(妙妙是 2000 之後才有的角色,但更晚於琪琪)"
+            }
           ]
         }
       ]
     },
     {
-      "id": "floppygames", "emoji": "💾", "year": 2000, "label": "3.5 磁片小遊戲", "note": "1.44 MB 的童年",
-      "intro": "你撿到一片 3.5 軟碟!\n國小電腦課午休大家都帶這個。問題是 1.44 MB 真的塞不下幾個遊戲。",
+      "id": "floppygames",
+      "emoji": "💾",
+      "year": 2000,
+      "label": "3.5 磁片小遊戲",
+      "note": "1.44 MB 的童年",
+      "intro": "📅 2000 · 耗耗 8 歲(國小)\n\n你撿到一片 3.5 軟碟!\n國小電腦課午休大家都帶這個。問題是 1.44 MB 真的塞不下幾個遊戲。",
       "questions": [
         {
           "q": "3.5 軟碟(高密度雙面 HD)容量是多少?",
           "options": [
-            { "a": "1.44 MB", "correct": true, "response": "對! 一片就 1.44 MB,寫不下太多東西。我電腦課都帶 5 片才安心。" },
-            { "a": "1 GB", "correct": false, "response": "(那是 USB 隨身碟,2003 後才平價)" },
-            { "a": "100 KB", "correct": false, "response": "(太小,連一張圖都塞不下)" }
+            {
+              "a": "1.44 MB",
+              "correct": true,
+              "response": "對! 一片就 1.44 MB,寫不下太多東西。我電腦課都帶 5 片才安心。"
+            },
+            {
+              "a": "1 GB",
+              "correct": false,
+              "response": "(那是 USB 隨身碟,2003 後才平價)"
+            },
+            {
+              "a": "100 KB",
+              "correct": false,
+              "response": "(太小,連一張圖都塞不下)"
+            }
           ]
         },
         {
           "q": "「阿榮打壞人」這個經典小遊戲,檔案多大?",
           "options": [
-            { "a": "差不多 1 MB,自己就吃掉一片磁片大半", "correct": true, "response": "對! 阿榮一塞進去,就剩 400 KB。其他遊戲幾乎都塞不下了。但你還是會塞,因為阿榮太爽。" },
-            { "a": "50 KB", "correct": false, "response": "(沒那麼小,有完整音效跟動畫)" },
-            { "a": "100 GB", "correct": false, "response": "(那年代沒這麼大的檔,硬碟都還沒這麼大)" }
+            {
+              "a": "差不多 1 MB,自己就吃掉一片磁片大半",
+              "correct": true,
+              "response": "對! 阿榮一塞進去,就剩 400 KB。其他遊戲幾乎都塞不下了。但你還是會塞,因為阿榮太爽。"
+            },
+            {
+              "a": "50 KB",
+              "correct": false,
+              "response": "(沒那麼小,有完整音效跟動畫)"
+            },
+            {
+              "a": "100 GB",
+              "correct": false,
+              "response": "(那年代沒這麼大的檔,硬碟都還沒這麼大)"
+            }
           ]
         },
         {
           "q": "同一片磁片要塞「小朋友下樓梯 / 夢遊先生 / 螢幕破壞 / 阿榮打壞人」,要刪掉哪一個才能塞下其他三個?",
           "options": [
-            { "a": "阿榮打壞人(自己就吃掉一片磁片大半)", "correct": true, "response": "對! 阿榮 ~1 MB 一進去,其他三個小遊戲加起來 ~600 KB 才塞得進。沒阿榮就能多元玩。但沒阿榮也少了打人的爽感。" },
-            { "a": "小朋友下樓梯", "correct": false, "response": "(下樓梯才 ~100 KB,刪它救不了阿榮)" },
-            { "a": "夢遊先生", "correct": false, "response": "(夢遊先生 ~200 KB,刪它也不夠)" }
+            {
+              "a": "阿榮打壞人(自己就吃掉一片磁片大半)",
+              "correct": true,
+              "response": "對! 阿榮 ~1 MB 一進去,其他三個小遊戲加起來 ~600 KB 才塞得進。沒阿榮就能多元玩。但沒阿榮也少了打人的爽感。"
+            },
+            {
+              "a": "小朋友下樓梯",
+              "correct": false,
+              "response": "(下樓梯才 ~100 KB,刪它救不了阿榮)"
+            },
+            {
+              "a": "夢遊先生",
+              "correct": false,
+              "response": "(夢遊先生 ~200 KB,刪它也不夠)"
+            }
           ]
         }
       ]
     },
     {
-      "id": "gsmbeep", "emoji": "🔊", "year": 2002, "label": "電腦喇叭嗶嗶預警", "note": "手機要響的神秘訊號",
-      "intro": "你撿到 2G 手機 + 電腦喇叭!\n那年代神秘現象 — 電腦喇叭突然「嗶嗶嗶」,然後 5 秒後手機真的響了。怎回事?",
+      "id": "gsmbeep",
+      "emoji": "🔊",
+      "year": 2002,
+      "label": "電腦喇叭嗶嗶預警",
+      "note": "手機要響的神秘訊號",
+      "intro": "📅 2002 · 耗耗 10 歲(國小)\n\n你撿到 2G 手機 + 電腦喇叭!\n那年代神秘現象 — 電腦喇叭突然「嗶嗶嗶」,然後 5 秒後手機真的響了。怎回事?",
       "questions": [
         {
           "q": "為什麼電腦喇叭會在手機要響前發出嗶嗶嗶?",
           "options": [
-            { "a": "2G 手機 GSM 信號干擾喇叭音訊線路", "correct": true, "response": "對! 手機要接通基地台會發出強信號,喇叭線材沒屏蔽會收到 → 變成嗶嗶嗶。是物理現象不是巧合。" },
-            { "a": "純粹巧合", "correct": false, "response": "(發生太頻繁不可能巧合)" },
-            { "a": "病毒", "correct": false, "response": "(這跟病毒無關,是硬體電磁感應)" }
+            {
+              "a": "2G 手機 GSM 信號干擾喇叭音訊線路",
+              "correct": true,
+              "response": "對! 手機要接通基地台會發出強信號,喇叭線材沒屏蔽會收到 → 變成嗶嗶嗶。是物理現象不是巧合。"
+            },
+            {
+              "a": "純粹巧合",
+              "correct": false,
+              "response": "(發生太頻繁不可能巧合)"
+            },
+            {
+              "a": "病毒",
+              "correct": false,
+              "response": "(這跟病毒無關,是硬體電磁感應)"
+            }
           ]
         },
         {
           "q": "「嗶嗶嗶」之後幾秒手機才會真的響?",
           "options": [
-            { "a": "大概 3-5 秒(剛好夠你準備接)", "correct": true, "response": "對! 信號傳完到手機鈴聲響中間有 buffer,你聽到嗶嗶就知道是誰會打來,提前掏手機。我練到聽嗶聲 = 媽要打來了。" },
-            { "a": "30 秒", "correct": false, "response": "(沒那麼久,反應時間就那 5 秒)" },
-            { "a": "完全同時", "correct": false, "response": "(其實有時間差,所以才有「預警」效果)" }
+            {
+              "a": "大概 3-5 秒(剛好夠你準備接)",
+              "correct": true,
+              "response": "對! 信號傳完到手機鈴聲響中間有 buffer,你聽到嗶嗶就知道是誰會打來,提前掏手機。我練到聽嗶聲 = 媽要打來了。"
+            },
+            {
+              "a": "30 秒",
+              "correct": false,
+              "response": "(沒那麼久,反應時間就那 5 秒)"
+            },
+            {
+              "a": "完全同時",
+              "correct": false,
+              "response": "(其實有時間差,所以才有「預警」效果)"
+            }
           ]
         },
         {
           "q": "這個神秘現象什麼時候消失?",
           "options": [
-            { "a": "3G / 4G 普及之後(~2010)", "correct": true, "response": "對! 3G/4G 信號編碼跟 2G 不同,加上喇叭線材改進,嗶嗶聲就消失了。現在的小孩完全沒聽過。" },
-            { "a": "從來沒消失", "correct": false, "response": "(早就沒了,你現在用 5G 手機放電腦旁邊不會嗶嗶)" },
-            { "a": "1995 年就消失了", "correct": false, "response": "(1995 還在 2G,正在嗶得很歡樂)" }
+            {
+              "a": "3G / 4G 普及之後(~2010)",
+              "correct": true,
+              "response": "對! 3G/4G 信號編碼跟 2G 不同,加上喇叭線材改進,嗶嗶聲就消失了。現在的小孩完全沒聽過。"
+            },
+            {
+              "a": "從來沒消失",
+              "correct": false,
+              "response": "(早就沒了,你現在用 5G 手機放電腦旁邊不會嗶嗶)"
+            },
+            {
+              "a": "1995 年就消失了",
+              "correct": false,
+              "response": "(1995 還在 2G,正在嗶得很歡樂)"
+            }
           ]
         }
       ]
     },
     {
-      "id": "haohaosongs", "emoji": "🎵", "year": 2010, "label": "號號的歌(自爆)", "note": "硬核粉絲限定",
-      "intro": "你撿到號號自己的歌單!\n這是硬核粉絲題 — 號號自己寫的、自己發的歌。連他粉絲都不一定全知道。",
+      "id": "haohaosongs",
+      "emoji": "🎵",
+      "year": 2010,
+      "label": "耗耗的歌(自爆)",
+      "note": "硬核粉絲限定",
+      "intro": "📅 2010 · 耗耗 18 歲(高中)\n\n你撿到耗耗自己的歌單!\n這是硬核粉絲題 — 耗耗自己寫的、自己發的歌。連他粉絲都不一定全知道。",
       "questions": [
         {
-          "q": "號號第一首正式發行的歌叫什麼?",
+          "q": "耗耗第一首正式發行的歌叫什麼?",
           "options": [
-            { "a": "《淡妝》", "correct": true, "response": "對! 第一首正式上架的歌。每次有人能答對我都嚇到。" },
-            { "a": "《晴天》", "correct": false, "response": "(那是周杰倫的)" },
-            { "a": "《不夠好》", "correct": false, "response": "(《不夠好》是 14 歲在浴室寫的第一首歌, 但沒發行, 只有 1-3 NPC 在講)" }
+            {
+              "a": "《淡妝》",
+              "correct": true,
+              "response": "對! 第一首正式上架的歌。每次有人能答對我都嚇到。"
+            },
+            {
+              "a": "《晴天》",
+              "correct": false,
+              "response": "(那是周杰倫的)"
+            },
+            {
+              "a": "《不夠好》",
+              "correct": false,
+              "response": "(《不夠好》是 14 歲在浴室寫的第一首歌, 但沒發行, 只有 1-3 NPC 在講)"
+            }
           ]
         },
         {
-          "q": "號號第一首饒舌歌叫什麼? (那年代的「大無邪」歌)",
+          "q": "耗耗第一首饒舌歌叫什麼? (那年代的「大無邪」歌)",
           "options": [
-            { "a": "《壯強旗》", "correct": true, "response": "對! 大學時期大無邪做的饒舌歌。連粉絲都很少人聽過。" },
-            { "a": "《以前的事》", "correct": false, "response": "(這是後來的歌, 不是饒舌)" },
-            { "a": "《Threads murmur》", "correct": false, "response": "(這個只是耗耗 Threads 風格名稱, 不是歌名)" }
+            {
+              "a": "《撞牆期》",
+              "correct": true,
+              "response": "對! 大學時期大無邪做的饒舌歌。連粉絲都很少人聽過。"
+            },
+            {
+              "a": "《以前的事》",
+              "correct": false,
+              "response": "(這是後來的歌, 不是饒舌)"
+            },
+            {
+              "a": "《Threads murmur》",
+              "correct": false,
+              "response": "(這個只是耗耗 Threads 風格名稱, 不是歌名)"
+            }
           ]
         },
         {
-          "q": "號號第一首用「編曲軟體」(Logic / DAW) 做出來的歌叫什麼?",
+          "q": "耗耗第一首用「編曲軟體」(Logic / DAW) 做出來的歌叫什麼?",
           "options": [
-            { "a": "《你們眼中的女孩》", "correct": true, "response": "對! 這首號號自己說連粉絲都沒聽過。是技術跨越的關鍵作品 — 從寫詞到自己編曲的轉捩點。" },
-            { "a": "《不夠好》", "correct": false, "response": "(浴室寫的, 沒編曲)" },
-            { "a": "《晴天》", "correct": false, "response": "(周杰倫)" }
+            {
+              "a": "《你們眼中的女孩》",
+              "correct": true,
+              "response": "對! 這首耗耗自己說連粉絲都沒聽過。是技術跨越的關鍵作品 — 從寫詞到自己編曲的轉捩點。"
+            },
+            {
+              "a": "《不夠好》",
+              "correct": false,
+              "response": "(浴室寫的, 沒編曲)"
+            },
+            {
+              "a": "《晴天》",
+              "correct": false,
+              "response": "(周杰倫)"
+            }
           ]
         },
         {
-          "q": "號號大學時期立的 IP 計畫是?",
+          "q": "耗耗大學時期立的 IP 計畫是?",
           "options": [
-            { "a": "收集 100 個故事 → 寫成 100 首歌", "correct": true, "response": "對! 這是號號從大學開始的長期 IP — 從別人故事提取、轉化成歌。haohao.unzip 整個遊戲就是這個 IP 的延伸。" },
-            { "a": "拍 100 部 MV", "correct": false, "response": "(沒, 主軸是「故事 → 歌」, 不是 MV)" },
-            { "a": "寫 100 本書", "correct": false, "response": "(他偶爾寫文,但不是 100 本的計畫)" }
+            {
+              "a": "收集 100 個故事 → 寫成 100 首歌",
+              "correct": true,
+              "response": "對! 這是耗耗從大學開始的長期 IP — 從別人故事提取、轉化成歌。haohao.unzip 整個遊戲就是這個 IP 的延伸。"
+            },
+            {
+              "a": "拍 100 部 MV",
+              "correct": false,
+              "response": "(沒, 主軸是「故事 → 歌」, 不是 MV)"
+            },
+            {
+              "a": "寫 100 本書",
+              "correct": false,
+              "response": "(他偶爾寫文,但不是 100 本的計畫)"
+            }
           ]
         }
       ]
     },
     {
-      "id": "magicpencilcase", "emoji": "🧰", "year": 1996, "label": "百用鉛筆盒", "note": "國小書包重的元兇",
-      "intro": "你撿到百用鉛筆盒!\n90 年代台灣國小生人手一個。塑膠多色,印卡通,按鈕一堆,重死人。",
+      "id": "magicpencilcase",
+      "emoji": "🧰",
+      "year": 1996,
+      "label": "百用鉛筆盒",
+      "note": "國小書包重的元兇",
+      "intro": "📅 1996 · 耗耗 4 歲(學齡前)\n\n你撿到百用鉛筆盒!\n90 年代台灣國小生人手一個。塑膠多色,印卡通,按鈕一堆,重死人。",
       "questions": [
         {
           "q": "百用鉛筆盒最神奇的功能是?",
           "options": [
-            { "a": "按鈕一按彈出抽屜 + 卷筆器 + 磁鐵 + 小尺", "correct": true, "response": "對! 高級款還有溫度計、放大鏡、指南針,99% 用不到但全班都要有。" },
-            { "a": "可以充電", "correct": false, "response": "(那是 2010 之後的詞)" },
-            { "a": "可以連網", "correct": false, "response": "(連網鉛筆盒到現在都沒人做)" }
+            {
+              "a": "按鈕一按彈出抽屜 + 卷筆器 + 磁鐵 + 小尺",
+              "correct": true,
+              "response": "對! 高級款還有溫度計、放大鏡、指南針,99% 用不到但全班都要有。"
+            },
+            {
+              "a": "可以充電",
+              "correct": false,
+              "response": "(那是 2010 之後的詞)"
+            },
+            {
+              "a": "可以連網",
+              "correct": false,
+              "response": "(連網鉛筆盒到現在都沒人做)"
+            }
           ]
         },
         {
           "q": "百用鉛筆盒在學校最常被用來?",
           "options": [
-            { "a": "上課偷按彈彈彈被老師罵", "correct": true, "response": "對啦,我同學的彈簧按到斷掉,全班看戲。後來他偷偷接強力膠,黏歪了。" },
-            { "a": "拿來打架", "correct": false, "response": "(也有人這樣,但會被沒收)" },
-            { "a": "藏錢", "correct": false, "response": "(裡面塞太多文具,沒空間)" }
+            {
+              "a": "上課偷按彈彈彈被老師罵",
+              "correct": true,
+              "response": "對啦,我同學的彈簧按到斷掉,全班看戲。後來他偷偷接強力膠,黏歪了。"
+            },
+            {
+              "a": "拿來打架",
+              "correct": false,
+              "response": "(也有人這樣,但會被沒收)"
+            },
+            {
+              "a": "藏錢",
+              "correct": false,
+              "response": "(裡面塞太多文具,沒空間)"
+            }
           ]
         },
         {
           "q": "百用鉛筆盒上面通常印什麼?",
           "options": [
-            { "a": "豆豆龍 / 多啦 A 夢 / 七龍珠 / 美少女戰士", "correct": true, "response": "對! 看你的鉛筆盒印什麼,大概就知道你幾歲。我那一台是七龍珠,蓋子被同學偷拆開過一次。" },
-            { "a": "蘋果 logo", "correct": false, "response": "(蘋果 90 年代是邊緣公司,文具上根本不會印)" },
-            { "a": "公司 LOGO 很大", "correct": false, "response": "(那是大人才喜歡的東西)" }
+            {
+              "a": "豆豆龍 / 多啦 A 夢 / 七龍珠 / 美少女戰士",
+              "correct": true,
+              "response": "對! 看你的鉛筆盒印什麼,大概就知道你幾歲。我那一台是七龍珠,蓋子被同學偷拆開過一次。"
+            },
+            {
+              "a": "蘋果 logo",
+              "correct": false,
+              "response": "(蘋果 90 年代是邊緣公司,文具上根本不會印)"
+            },
+            {
+              "a": "公司 LOGO 很大",
+              "correct": false,
+              "response": "(那是大人才喜歡的東西)"
+            }
           ]
         }
       ]
