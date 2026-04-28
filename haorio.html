@@ -14,11 +14,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build-version" content="haorio-1.22">
+<meta name="build-version" content="haorio-1.23">
 <script>
   // iOS Safari aggressive cache buster — force hard-reload if local cache holds older build
   (function() {
-    const CURRENT = 'haorio-1.22';
+    const CURRENT = 'haorio-1.23';
     const LAST = localStorage.getItem('haorio-build');
     if (LAST && LAST !== CURRENT && !location.search.includes('_nocache=')) {
       const sep = location.search ? '&' : '?';
@@ -2442,9 +2442,12 @@ function triggerStageEnd() {
 // Three-layer button binding for iOS Safari/Chrome: touchstart fires earliest
 // and is most reliable, pointerdown covers Chrome desktop and most modern
 // browsers, click is the fallback. 300ms debounce so they don't triple-fire.
+// disabled check: HTML disabled attr blocks click but NOT pointerdown/touchstart
+// on iOS — so era quiz buttons could be re-clicked after answering. Manual check.
 function bindModalButton(btn, fn) {
   let lastFireTs = 0;
   const fire = (e) => {
+    if (btn.disabled) return;
     const now = Date.now();
     if (now - lastFireTs < 300) return;
     lastFireTs = now;
