@@ -528,7 +528,7 @@
               "response": "那是 Game Boy 的,3310 是貪食蛇 2。"
             },
             {
-              "a": "貪食蛇 2 (Snake II)",
+              "a": "貪食蛇 2 ",
               "correct": true,
               "response": "對啦,我國中下課前最後 30 秒每天都在按。"
             },
@@ -553,7 +553,7 @@
               "response": "Candy Crush 是 2012 智慧型手機才有。"
             },
             {
-              "a": "星際大戰 (Space Impact)",
+              "a": "星際大戰",
               "correct": true,
               "response": "對! 沒幾個人記得,但 3310 真的有這個太空打飛機。"
             }
@@ -573,7 +573,7 @@
               "response": "3310 是 2G 純通話 + 簡訊,WAP 都沒做好。"
             },
             {
-              "a": "可以換背殼 + 超耐摔",
+              "a": "超耐摔",
               "correct": true,
               "response": "對! 一隻可以摔 100 次,然後換 5 種顏色背殼,都是文具店買得到的。"
             }
@@ -695,7 +695,7 @@
               "response": "搖一搖會讓牠暈,會生病。"
             },
             {
-              "a": "餵食 + 訓練 + 清便 三件事輪流",
+              "a": "餵食 + 訓練 + 清便",
               "correct": true,
               "response": "對,缺一個就生病。我把這個玩成上班族行程表。"
             }
@@ -711,13 +711,13 @@
             },
             {
               "a": "拉屎大爆炸",
-              "correct": false,
-              "response": "這個畫面我倒是希望真的有"
+              "correct": true,
+              "response": "我記得是j個"
             },
             {
               "a": "天使飛走了",
-              "correct": true,
-              "response": "對 ⋯ 一隻小天使飄上去然後 GAME OVER。我看到三次都哭了。"
+              "correct": false,
+              "response": "還是其實是這個？"
             }
           ]
         }
@@ -741,7 +741,7 @@
               "response": "Game Boy 1989 哪有 WiFi,WiFi 是 1997 之後的。"
             },
             {
-              "a": "紅外線(對著對面那台機器)",
+              "a": "紅外線",
               "correct": true,
               "response": "對! 兩台對著紅外線,可以交換寶可夢跟對戰。我跟同學在桌上對著對著差點翻倒。"
             },
