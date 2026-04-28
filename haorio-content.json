@@ -719,8 +719,11 @@
   ],
   "endgame": {
     "title": "🎮 GAME CLEAR",
-    "body": "你陪我走完了 EP1。\n\n這是 demo 版,村莊裡有完整的歌詞牆 / 投票 / 製作日誌 / 留 email 名單。\n\n如果你集滿 5 個徽章 — 你 OK 的,你比你想的更同代。",
-    "ctaLabel": "▶ 進村莊(haohao.unzip 經典版)",
-    "ctaUrl": "https://okiijuuhyygt.github.io/artist-rpg-mvp/#ep1"
+    "body": "你陪我走完了 8 關。\n\n如果你想留 email + 留下你在這個遊戲拿到的稱號,點下面那顆。\n你的成績會自動帶進表單,我這邊會看到誰是『老派的浪漫』、誰是『你很懂』。",
+    "ctaLabel": "▶ 留 email + 帶上稱號",
+    "ctaUrl": "https://tally.so/r/J9V8N4",
+    "tallyEnabled": true,
+    "fallbackCtaLabel": "▶ 進舊版村莊",
+    "fallbackCtaUrl": "https://okiijuuhyygt.github.io/artist-rpg-mvp/#ep1"
   }
 }

@@ -14,11 +14,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build-version" content="haorio-1.12">
+<meta name="build-version" content="haorio-1.13">
 <script>
   // iOS Safari aggressive cache buster — force hard-reload if local cache holds older build
   (function() {
-    const CURRENT = 'haorio-1.12';
+    const CURRENT = 'haorio-1.13';
     const LAST = localStorage.getItem('haorio-build');
     if (LAST && LAST !== CURRENT && !location.search.includes('_nocache=')) {
       const sep = location.search ? '&' : '?';
@@ -1822,19 +1822,10 @@ function closeEraQuiz() {
   $('era-modal').classList.remove('open');
 }
 
-// Background click closes (skip)
-$('era-modal').addEventListener('click', e => {
-  if (e.target.id === 'era-modal') {
-    if (activeQuiz) {
-      // skip = collect without bonus
-      if (!progress.collected.includes(activeQuiz.item.id)) {
-        progress.collected.push(activeQuiz.item.id);
-        saveProgress();
-      }
-      closeEraQuiz();
-    }
-  }
-});
+// Background click NO LONGER closes — was a bug source. iOS touch on
+// 「下一題」button could bubble + trigger background close = whole modal
+// vanished mid-quiz. Now only the explicit 收進圖鑑 / outside (after
+// finishing) closes the modal.
 
 function killEnemy(e) {
   e.dead = true;
@@ -2534,16 +2525,10 @@ function showStageClearModal() {
     bindModalButton(next, () => { closeModal(); startStage(stageIdx + 1); });
     row.appendChild(next);
   } else {
+    // Last stage: always go through showEndgame (it has Tally prefill + body stats)
     const end = document.createElement('button');
-    end.textContent = stage.endModalCta || (content.endgame && content.endgame.ctaLabel) || '▶ 結算';
-    bindModalButton(end, () => {
-      // last stage CTA: jump straight to endgame URL if has voteKey, else show endgame modal
-      if (stage.voteKey && content.endgame && content.endgame.ctaUrl) {
-        window.location.href = content.endgame.ctaUrl;
-      } else {
-        closeModal(); showEndgame();
-      }
-    });
+    end.textContent = (content.endgame && content.endgame.ctaLabel) || '▶ 結算';
+    bindModalButton(end, () => { closeModal(); showEndgame(); });
     row.appendChild(end);
   }
   const back = document.createElement('button');
@@ -2554,17 +2539,55 @@ function showStageClearModal() {
   openModal();
 }
 
+function buildTallyUrl(baseUrl) {
+  // Prefill Tally form with player stats — uses URL query params (Tally
+  // reads ?field_name=value into matching form fields).
+  const totalItems = (content.eraItems || []).length;
+  const collected = (progress.collected || []).length;
+  const answered = progress.quizAnswered || 0;
+  const correct = progress.quizCorrect || 0;
+  const ratio = answered > 0 ? Math.round(correct / answered * 100) : 0;
+  const title = generateTitle().replace(/^[^\s]+\s*/, '');  // strip leading icon
+  const params = new URLSearchParams({
+    'haorio_title': title || '新世代',
+    'haorio_collected': collected + '/' + totalItems,
+    'haorio_quiz': correct + '/' + answered,
+    'haorio_score': hud.coins,
+    'haorio_ratio': ratio + '%'
+  });
+  return baseUrl + (baseUrl.includes('?') ? '&' : '?') + params.toString();
+}
+
 function showEndgame() {
   const eg = content.endgame || {};
   $('modal-title').textContent = eg.title || '🎮 GAME CLEAR';
-  $('modal-body').textContent = eg.body || 'Thank you for playing!';
+  // body + stats summary
+  const bodyEl = $('modal-body');
+  bodyEl.innerHTML = '';
+  const t = document.createElement('div');
+  t.style.whiteSpace = 'pre-wrap';
+  t.textContent = eg.body || '';
+  bodyEl.appendChild(t);
+  const stats = document.createElement('div');
+  stats.innerHTML = buildStageStatsHTML(stages[stageIdx]);
+  bodyEl.appendChild(stats);
+
   const row = $('modal-row');
   row.innerHTML = '';
   if (eg.ctaUrl) {
     const cta = document.createElement('button');
     cta.textContent = eg.ctaLabel || '▶ 繼續';
-    bindModalButton(cta, () => { window.location.href = eg.ctaUrl; });
+    const targetUrl = eg.tallyEnabled ? buildTallyUrl(eg.ctaUrl) : eg.ctaUrl;
+    bindModalButton(cta, () => { window.location.href = targetUrl; });
     row.appendChild(cta);
+  }
+  // Optional fallback CTA (e.g. "進舊版村莊")
+  if (eg.fallbackCtaUrl) {
+    const fb = document.createElement('button');
+    fb.className = 'secondary';
+    fb.textContent = eg.fallbackCtaLabel || '▶ 別處';
+    bindModalButton(fb, () => { window.location.href = eg.fallbackCtaUrl; });
+    row.appendChild(fb);
   }
   const back = document.createElement('button');
   back.className = 'secondary';
