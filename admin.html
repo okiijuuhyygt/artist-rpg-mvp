@@ -659,6 +659,7 @@
       <a href="#global-area" style="flex:1;text-align:center;padding:8px;background:var(--paper-light);border:2px solid var(--gb-darkest);text-decoration:none;color:var(--ink);font-family:'Press Start 2P',monospace;font-size:9px;letter-spacing:1px;">🌍 全站</a>
       <a href="#ep1-area" style="flex:1;text-align:center;padding:8px;background:var(--paper-light);border:2px solid var(--gb-darkest);text-decoration:none;color:var(--ink);font-family:'Press Start 2P',monospace;font-size:9px;letter-spacing:1px;">📀 EP1</a>
       <a href="#ep2-area" style="flex:1;text-align:center;padding:8px;background:var(--paper-light);border:2px solid var(--gb-darkest);text-decoration:none;color:var(--ink);font-family:'Press Start 2P',monospace;font-size:9px;letter-spacing:1px;">🆕 EP2</a>
+      <button id="btnLogoutTop" type="button" style="padding:8px 12px;background:#fff5f5;border:2px solid #c44;color:#a33;cursor:pointer;font-family:'Press Start 2P',monospace;font-size:9px;letter-spacing:1px;">🚪 登出</button>
     </nav>
     <span id="global-area"></span>
 
@@ -1974,6 +1975,9 @@ $('btnSave').addEventListener('click', async () => {
     $('btnSave').disabled = false;
   }
 });
+
+// Top sticky logout button — same handler as bottom one
+$('btnLogoutTop').addEventListener('click', () => $('btnLogout').click());
 
 $('btnLogout').addEventListener('click', () => {
   if (!confirm('登出會清掉這個瀏覽器存的 Token(GitHub 上的 Token 不受影響)。確定?')) return;
