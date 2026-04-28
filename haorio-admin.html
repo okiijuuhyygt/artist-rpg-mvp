@@ -949,6 +949,7 @@ function renderQuizEditor(item, container) {
     q.options.forEach((opt, oIdx) => {
       const oDiv = document.createElement('div');
       oDiv.style.padding = '4px 0';
+      oDiv.style.borderTop = '1px dashed #ddd';
       oDiv.innerHTML = `
         <div class="field-row">
           <div class="field" style="flex:1;">
@@ -959,12 +960,12 @@ function renderQuizEditor(item, container) {
             <label>正解?</label>
             <input type="checkbox" class="o-corr" ${opt.correct ? 'checked' : ''} style="width:auto;">
           </div>
+          <button class="btn-mini o-del-opt" type="button" style="align-self:end;">刪選項</button>
         </div>
         <div class="field"><label>回應 (耗耗講)</label><textarea class="o-resp" rows="2">${escapeHtml(opt.response || '')}</textarea></div>
       `;
       oDiv.querySelector('.o-a').addEventListener('input', e => { opt.a = e.target.value; markDirty(); });
       oDiv.querySelector('.o-corr').addEventListener('change', e => {
-        // Only one correct: if user checks this one, uncheck others
         if (e.target.checked) {
           q.options.forEach(o => o.correct = false);
           opt.correct = true;
@@ -975,8 +976,25 @@ function renderQuizEditor(item, container) {
         markDirty();
       });
       oDiv.querySelector('.o-resp').addEventListener('input', e => { opt.response = e.target.value; markDirty(); });
+      oDiv.querySelector('.o-del-opt').addEventListener('click', () => {
+        q.options.splice(oIdx, 1);
+        renderQuizEditor(item, container);
+        markDirty();
+      });
       optsBox.appendChild(oDiv);
     });
+    // Add option button per question
+    const addOpt = document.createElement('button');
+    addOpt.className = 'btn-add';
+    addOpt.style.marginTop = '6px';
+    addOpt.style.fontSize = '9px';
+    addOpt.textContent = '+ 加選項';
+    addOpt.addEventListener('click', () => {
+      q.options.push({ a: '', correct: false, response: '' });
+      renderQuizEditor(item, container);
+      markDirty();
+    });
+    optsBox.appendChild(addOpt);
   });
 }
 
