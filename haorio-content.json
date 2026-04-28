@@ -2212,6 +2212,58 @@
           ]
         }
       ]
+    },
+    {
+      "id": "lovehaohao",
+      "emoji": "🐻‍❄",
+      "label": "耗耗題1",
+      "year": 2024,
+      "note": "耗耗の聽眾知道",
+      "questions": [
+        {
+          "q": "選不對的",
+          "options": [
+            {
+              "a": "越是想戒掉想念 越是戒不掉他",
+              "correct": false,
+              "response": "悅氏礦泉水"
+            },
+            {
+              "a": "這首歌是將愛共踹的續集",
+              "correct": false,
+              "response": "嚴格來說是第3集"
+            },
+            {
+              "a": "白熊是Haohao對自身的形象化",
+              "correct": true,
+              "response": "毋丟哦~~~"
+            }
+          ],
+          "spotifyEmbed": "https://open.spotify.com/track/0bh5WdCeCH4zi47Mx1SEhE?si=qRNdebwYSk6wvZBiN-6k7w"
+        },
+        {
+          "q": "土豆麵筋題",
+          "options": [
+            {
+              "a": "Haohao月初犒賞自己的禮物",
+              "correct": false,
+              "response": "月底比較沒有錢💰👋"
+            },
+            {
+              "a": "阿公說今日仔欲吃素",
+              "correct": false,
+              "response": "不可能錯在這裡欸😂"
+            },
+            {
+              "a": "因為泡麵漲價所以改吃麵筋",
+              "correct": true,
+              "response": "去超商買一碗泡麵來泡涮 key gay 所以想到還有一罐阿嬤給我的土豆麵筋"
+            }
+          ],
+          "spotifyEmbed": "https://open.spotify.com/track/1HnhLGNu9VXIluYZwfJf65?si=6veKoqxvRNi6a5WOchKuPQ"
+        }
+      ],
+      "intro": "身為 Haohao聽眾 /•᷅‎‎•᷄\\୭"
     }
   ],
   "endgame": {
