@@ -14,11 +14,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build-version" content="haorio-1.49">
+<meta name="build-version" content="haorio-1.50">
 <script>
   // iOS Safari aggressive cache buster — force hard-reload if local cache holds older build
   (function() {
-    const CURRENT = 'haorio-1.49';
+    const CURRENT = 'haorio-1.50';
     const LAST = localStorage.getItem('haorio-build');
     if (LAST && LAST !== CURRENT && !location.search.includes('_nocache=')) {
       const sep = location.search ? '&' : '?';
@@ -1965,13 +1965,25 @@ function bumpEraBrick(stage, tx, ty) {
   addScore(50);
   const items = (content.eraItems || []);
   if (!items.length) return;
-  // Avoid repeats *within this play session* — sessionDrawnEra is in-memory,
-  // resets on page reload / startStage. Different from progress.collected
-  // (which is persistent LS). Means even if 收過 the item before in another
-  // session, this session's first time still feels fresh.
   const sessionUsed = sessionDrawnEra || [];
-  const fresh = items.filter(it => !sessionUsed.includes(it.id));
-  const pool = fresh.length ? fresh : items;  // fallback when all 23 drawn this session
+  const stageId = stage.id || '';
+  // Priority pool selection:
+  // 1. items with targetStage matching current stage (fresh first)
+  // 2. untargeted items (no targetStage set) common pool, fresh first
+  // 3. fallback to anything when session ran out
+  const stageTargeted = items.filter(it => it.targetStage === stageId && !sessionUsed.includes(it.id));
+  if (stageTargeted.length) {
+    const item = stageTargeted[Math.floor(Math.random() * stageTargeted.length)];
+    if (!sessionDrawnEra) sessionDrawnEra = [];
+    sessionDrawnEra.push(item.id);
+    startEraQuiz(item, tx * TILE + TILE/2, ty * TILE - 6);
+    return;
+  }
+  // Untargeted (no targetStage) common pool
+  const untargeted = items.filter(it => !it.targetStage);
+  const freshUntargeted = untargeted.filter(it => !sessionUsed.includes(it.id));
+  const pool = freshUntargeted.length ? freshUntargeted
+             : (untargeted.length ? untargeted : items);
   const item = pool[Math.floor(Math.random() * pool.length)];
   if (!sessionDrawnEra) sessionDrawnEra = [];
   sessionDrawnEra.push(item.id);
@@ -1995,6 +2007,7 @@ function startEraQuiz(item, partX, partY) {
   }
   activeQuiz = { item, qIdx: 0, score: 0, answers: [] };
   modalOpen = true;
+  stopBGM();  // pause BGM during quiz so audio question (Spotify embed) doesn't fight it
   $('era-mascot').textContent = item.emoji;
   $('era-label').textContent = item.label + ' · ' + item.year;
   $('era-intro').textContent = item.intro || '';
@@ -2150,6 +2163,7 @@ function closeEraQuiz() {
   const spBox = $('era-spotify');
   if (spBox) { spBox.innerHTML = ''; spBox.classList.add('hidden'); }
   $('era-modal').classList.remove('open');
+  startBGM();  // resume BGM after quiz close
 }
 
 // Background click NO LONGER closes — was a bug source. iOS touch on

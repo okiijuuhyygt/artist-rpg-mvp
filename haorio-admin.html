@@ -7,11 +7,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build-version" content="haorio-admin-0.8">
+<meta name="build-version" content="haorio-admin-0.9">
 <script>
   // Admin cache buster — force hard-reload if local cache holds older build
   (function() {
-    const CURRENT = 'haorio-admin-0.8';
+    const CURRENT = 'haorio-admin-0.9';
     const LAST = localStorage.getItem('haorio-admin-build');
     if (LAST && LAST !== CURRENT && !location.search.includes('_nocache=')) {
       const sep = location.search ? '&' : '?';
@@ -962,6 +962,13 @@ function renderEraItems() {
     const row = document.createElement('div');
     row.className = 'stage-block';
     row.style.padding = '10px';
+    const stageIds = [
+      ...((contentData.world1 || {}).stages || []).map(s => s.id),
+      ...((contentData.world2 || {}).stages || []).map(s => s.id)
+    ].filter(Boolean);
+    const tsOpts = ['<option value="">(任意 / 全遊戲共用 pool)</option>']
+      .concat(stageIds.map(sid => `<option value="${escapeHtml(sid)}"${it.targetStage === sid ? ' selected' : ''}>${escapeHtml(sid)}</option>`))
+      .join('');
     row.innerHTML = `
       <div class="field-row">
         <div class="field" style="flex:0 0 80px;"><label>Emoji</label><input type="text" class="ei-em" value="${escapeHtml(it.emoji || '')}" maxlength="4"></div>
@@ -972,6 +979,7 @@ function renderEraItems() {
       </div>
       <div class="field"><label>說明</label><input type="text" class="ei-note" value="${escapeHtml(it.note || '')}"></div>
       <div class="field"><label>intro (撞磚跳出來的開場白)</label><textarea class="ei-intro" rows="3">${escapeHtml(it.intro || '')}</textarea></div>
+      <div class="field"><label>📍 指定在哪一關出現 (空 = 任意 stage 都可抽到)</label><select class="ei-stage" style="padding:6px;font-family:'VT323',monospace;font-size:13px;">${tsOpts}</select></div>
       <h3 style="font-size:11px;margin:12px 0 6px;color:var(--gb-dark);">📝 Quiz 題目 (3 題,每題 3 選項,正解 1)</h3>
       <div class="ei-quiz-wrap"></div>
       <button class="btn-add ei-add-q" type="button">+ 加題目</button>
@@ -982,6 +990,7 @@ function renderEraItems() {
     row.querySelector('.ei-id').addEventListener('input', e => { it.id = e.target.value; markDirty(); });
     row.querySelector('.ei-note').addEventListener('input', e => { it.note = e.target.value; markDirty(); });
     row.querySelector('.ei-intro').addEventListener('input', e => { it.intro = e.target.value; markDirty(); });
+    row.querySelector('.ei-stage').addEventListener('change', e => { it.targetStage = e.target.value; markDirty(); });
     row.querySelector('.ei-del').addEventListener('click', () => { contentData.eraItems.splice(idx, 1); renderEraItems(); markDirty(); });
     renderQuizEditor(it, row.querySelector('.ei-quiz-wrap'));
     row.querySelector('.ei-add-q').addEventListener('click', () => {
