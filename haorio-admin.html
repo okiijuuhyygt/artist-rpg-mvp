@@ -7,11 +7,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build-version" content="haorio-admin-0.5">
+<meta name="build-version" content="haorio-admin-0.6">
 <script>
   // Admin cache buster — force hard-reload if local cache holds older build
   (function() {
-    const CURRENT = 'haorio-admin-0.5';
+    const CURRENT = 'haorio-admin-0.6';
     const LAST = localStorage.getItem('haorio-admin-build');
     if (LAST && LAST !== CURRENT && !location.search.includes('_nocache=')) {
       const sep = location.search ? '&' : '?';
@@ -557,6 +557,10 @@
           <label>SUBTITLE(副標)</label>
           <input type="text" data-path="meta.subtitle">
         </div>
+        <div class="field">
+          <label>🎧 Spotify URL (標題畫面 CTA — 空 = 不顯示)</label>
+          <input type="url" data-path="meta.spotifyUrl" placeholder="https://open.spotify.com/playlist/...">
+        </div>
       </div>
 
       <div class="section tab-section" id="tab-character">
@@ -939,6 +943,12 @@ function renderWorld2() {
       // sync back: if user edits npcLike.npc, also write to s.npcs[0] when applicable
       if (s.npcs) s.npcs[0] = npcLike.npc;
     }
+    // Per-stage BGM dropdown (async populate)
+    const bgmField = document.createElement('div');
+    bgmField.className = 'field';
+    bgmField.innerHTML = '<label>🎵 關卡 BGM (空 = 用全域預設)</label>';
+    buildBgmSelect(s.bgm || '', e => { s.bgm = e.target.value; markDirty(); }).then(sel => bgmField.appendChild(sel));
+    block.appendChild(bgmField);
     box.appendChild(block);
   });
 }
@@ -1201,6 +1211,12 @@ function renderStages() {
     block.querySelector('.s-modal-cta').addEventListener('input', e => { s.endModalCta = e.target.value; markDirty(); });
     block.querySelector('.s-end-text').addEventListener('input', e => { s.endText = e.target.value; markDirty(); });
     renderNpcEditor(s, block.querySelector('.npc-editor-wrap'));
+    // Per-stage BGM dropdown (async populate)
+    const bgmField = document.createElement('div');
+    bgmField.className = 'field';
+    bgmField.innerHTML = '<label>🎵 關卡 BGM (空 = 用全域預設)</label>';
+    buildBgmSelect(s.bgm || '', e => { s.bgm = e.target.value; markDirty(); }).then(sel => bgmField.appendChild(sel));
+    block.appendChild(bgmField);
     box.appendChild(block);
   });
 }
@@ -1359,19 +1375,41 @@ $('btnAddMarquee').addEventListener('click', () => {
 // =======================================================
 // AUDIO SLOTS — browse audio/ folder, pick existing file
 // =======================================================
+let _audioFilesCache = null;
+async function fetchAudioFiles() {
+  if (_audioFilesCache) return _audioFilesCache;
+  const tok = localStorage.getItem(LS_TOKEN);
+  if (!tok) return [];
+  try {
+    const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/audio`, {
+      headers: { 'Authorization': `Bearer ${tok}`, 'Accept': 'application/vnd.github+json' }
+    });
+    if (res.ok) {
+      _audioFilesCache = (await res.json()).filter(f => f.type === 'file').map(f => f.path);
+      return _audioFilesCache;
+    }
+  } catch {}
+  return [];
+}
+async function buildBgmSelect(currentValue, onChange) {
+  const sel = document.createElement('select');
+  sel.style.cssText = 'padding:6px;font-family:VT323,monospace;font-size:13px;width:100%;';
+  sel.innerHTML = '<option value="">(用全域預設 BGM)</option>';
+  const files = await fetchAudioFiles();
+  files.forEach(f => {
+    const opt = document.createElement('option');
+    opt.value = f;
+    opt.textContent = f;
+    if (f === currentValue) opt.selected = true;
+    sel.appendChild(opt);
+  });
+  sel.addEventListener('change', onChange);
+  return sel;
+}
 async function renderAudioSlots() {
   const box = $('audioSlots');
   box.innerHTML = '';
-  const tok = localStorage.getItem(LS_TOKEN);
-  let files = [];
-  if (tok) {
-    try {
-      const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/audio`, {
-        headers: { 'Authorization': `Bearer ${tok}`, 'Accept': 'application/vnd.github+json' }
-      });
-      if (res.ok) files = (await res.json()).filter(f => f.type === 'file').map(f => f.path);
-    } catch {}
-  }
+  const files = await fetchAudioFiles();
 
   // BGM slot
   const slot = document.createElement('div');

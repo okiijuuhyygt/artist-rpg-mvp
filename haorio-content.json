@@ -2,7 +2,8 @@
   "meta": {
     "worldName": "haohao.unzip · HAORIO",
     "version": "v0.2",
-    "subtitle": "8-bit 橫向捲軸 · 34 歲音樂人時代遊戲"
+    "subtitle": "8-bit 橫向捲軸 · 34 歲音樂人時代遊戲",
+    "spotifyUrl": "https://open.spotify.com/playlist/65xMw1SZEmZb7sVco0L7KD?si=349adc98610540d2"
   },
   "physics": {
     "gravity": 0.55,

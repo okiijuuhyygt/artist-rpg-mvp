@@ -14,11 +14,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build-version" content="haorio-1.41">
+<meta name="build-version" content="haorio-1.42">
 <script>
   // iOS Safari aggressive cache buster — force hard-reload if local cache holds older build
   (function() {
-    const CURRENT = 'haorio-1.41';
+    const CURRENT = 'haorio-1.42';
     const LAST = localStorage.getItem('haorio-build');
     if (LAST && LAST !== CURRENT && !location.search.includes('_nocache=')) {
       const sep = location.search ? '&' : '?';
@@ -367,6 +367,28 @@
     font-family: 'VT323', monospace;
   }
   #title-scene .meta a { color: var(--nes-yellow); text-decoration: underline; }
+  #title-scene .title-spotify {
+    display: inline-block;
+    margin-top: 14px;
+    padding: 10px 20px;
+    background: #1db954;
+    color: #000;
+    border: 3px solid #000;
+    box-shadow: 4px 4px 0 #1a1a1a;
+    font-family: 'Press Start 2P', 'Cubic 11', monospace;
+    font-size: 11px;
+    text-decoration: none;
+    letter-spacing: 1px;
+    transition: transform 0.1s, box-shadow 0.1s;
+  }
+  #title-scene .title-spotify:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 5px 5px 0 #1a1a1a;
+  }
+  #title-scene .title-spotify:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 #1a1a1a;
+  }
 
   /* ========== badges row ========== */
   .badges-row {
@@ -1021,6 +1043,7 @@
   <div class="badges-row" id="badges-row"></div>
   <div class="stages" id="stage-grid"></div>
   <button class="start-btn" id="btn-continue">▶ 繼續</button>
+  <a id="btn-spotify" class="title-spotify hidden" href="#" target="_blank" rel="noopener">★ 在 Spotify 聽我的歌</a>
   <div class="meta">
     ← → 移動 · ↑/空白 跳 · B/X 發射 · ESC 回標題<br>
     手機:左下搖桿 · 右下 A 跳 / B 射 · <a href="index.html">回經典版</a>
@@ -1333,11 +1356,15 @@ function initMarquee() {
 // =====================================================
 // BGM
 // =====================================================
-function initBGM() {
-  if (!content.audio || !content.audio.bgm) return;
-  bgmAudio = new Audio(content.audio.bgm);
+let _bgmCurrentSrc = null;
+function initBGM(srcOverride) {
+  const src = srcOverride || (content.audio && content.audio.bgm);
+  if (!src) return;
+  if (bgmAudio) bgmAudio.pause();
+  bgmAudio = new Audio(src);
   bgmAudio.loop = true;
-  bgmAudio.volume = content.audio.bgmVolume || 0.4;
+  bgmAudio.volume = (content.audio && content.audio.bgmVolume) || 0.4;
+  _bgmCurrentSrc = src;
 }
 function startBGM() {
   if (!bgmAudio) return;
@@ -1346,6 +1373,17 @@ function startBGM() {
 function stopBGM() {
   if (!bgmAudio) return;
   bgmAudio.pause();
+}
+function switchBGM(src) {
+  // Per-stage BGM: switch only when src actually differs from current
+  const target = src || (content.audio && content.audio.bgm);
+  if (!target) return;
+  if (_bgmCurrentSrc === target) {
+    if (bgmAudio && bgmAudio.paused) bgmAudio.play().catch(() => {});
+    return;
+  }
+  initBGM(target);
+  startBGM();
 }
 
 // =====================================================
@@ -1549,6 +1587,17 @@ function showTitle() {
   const btn = $('btn-continue');
   btn.textContent = (progress.cleared.length > 0 ? '▶ 繼續 ' : '▶ 開始 ') + (stages[selectedStageIdx]?.id || '1-1');
   btn.onclick = () => startStage(selectedStageIdx);
+  // Spotify CTA — show only when admin set meta.spotifyUrl
+  const spBtn = $('btn-spotify');
+  if (spBtn) {
+    const spUrl = (content.meta && content.meta.spotifyUrl) || '';
+    if (spUrl) {
+      spBtn.href = spUrl;
+      spBtn.classList.remove('hidden');
+    } else {
+      spBtn.classList.add('hidden');
+    }
+  }
   stopBGM();
 
   // Wire title-screen joystick + A button (override game behavior on title)
@@ -1607,6 +1656,8 @@ function goTitle() {
 function startStage(idx) {
   if (idx < 0 || idx >= stages.length) return;
   stageIdx = idx;
+  // Per-stage BGM (fallback to global content.audio.bgm)
+  switchBGM(stages[idx].bgm);
   // reset stage tiles (re-parse so question blocks reset)
   stages[idx].tiles = parseLayout(stages[idx].layout);
   // FULL INPUT RESET — fixes "stuck moving across stage transitions"
