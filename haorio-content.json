@@ -26,7 +26,7 @@
     "touchButtonSize": 80
   },
   "audio": {
-    "bgm": "audio/haorio-bgm-1777405787030.mp3",
+    "bgm": "audio/bgm-map.mp3",
     "bgmVolume": 0.25
   },
   "marquee": {
