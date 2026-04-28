@@ -536,12 +536,186 @@
         }
       ]
     },
-    { "id": "discman",   "emoji": "💿", "year": 1998, "label": "CD 隨身聽",    "note": "周杰倫 10 張我都用這個聽" },
-    { "id": "yahoochat", "emoji": "💬", "year": 2003, "label": "奇摩聊天室",   "note": "暱稱『冷淡的少年』,沒人理我" },
-    { "id": "msn",       "emoji": "📨", "year": 2004, "label": "MSN / 即時通", "note": "半夜跟暗戀的人說晚安" },
-    { "id": "wretch",    "emoji": "📔", "year": 2005, "label": "無名小站",     "note": "日記都是『今天好煩』" },
-    { "id": "foxy",      "emoji": "🦊", "year": 2008, "label": "Foxy",         "note": "大學每天從這偷音樂" },
-    { "id": "sunoprompt","emoji": "🎼", "year": 2024, "label": "Suno",         "note": "現在我用這個做 demo,真的快" }
+    {
+      "id": "discman", "emoji": "💿", "year": 1998, "label": "CD 隨身聽", "note": "周杰倫 10 張我都用這個聽",
+      "intro": "你撿到 CD 隨身聽!\n2000 年代之前,要把音樂帶出門,就靠這個。",
+      "questions": [
+        {
+          "q": "CD 隨身聽走路會幹嘛?",
+          "options": [
+            { "a": "跳針 / 跳歌", "correct": true, "response": "對! 走路 / 跑步 / 搖晃 → 雷射讀不到 → 卡 0.5 秒。後來才有防跳針 (ESP) 但要貴 200 塊。" },
+            { "a": "電池爆炸", "correct": false, "response": "AA 電池不會爆,只是會用很快。" },
+            { "a": "重灌系統", "correct": false, "response": "(那是電腦)" }
+          ]
+        },
+        {
+          "q": "周杰倫第一張專輯叫?",
+          "options": [
+            { "a": "同名《Jay》", "correct": true, "response": "對! 2000 年 11 月,封面是他坐著抱頭。第一首歌就是〈可愛女人〉。" },
+            { "a": "《范特西》", "correct": false, "response": "范特西是第二張 (2001),裡面有〈雙截棍〉跟〈愛在西元前〉。" },
+            { "a": "《八度空間》", "correct": false, "response": "八度空間是第三張 (2002),裡面有〈半獸人〉。" }
+          ]
+        },
+        {
+          "q": "CD 隨身聽聽久了會耗的不是電池,是?",
+          "options": [
+            { "a": "耳機線(會接觸不良)", "correct": true, "response": "對! 那年代的耳機線不耐操,捲一捲塞口袋,線材內部斷了 = 一邊沒聲音。" },
+            { "a": "CD 本身會磨損", "correct": false, "response": "CD 不太會耗,有耗也是刮花,跟聽多少無關。" },
+            { "a": "螢幕會爛", "correct": false, "response": "CD 隨身聽螢幕只顯示曲號,很少壞。" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "yahoochat", "emoji": "💬", "year": 2003, "label": "奇摩聊天室", "note": "暱稱『冷淡的少年』,沒人理我",
+      "intro": "你撿到奇摩聊天室!\n2000 年代沒交友軟體,大家在這認識陌生人。",
+      "questions": [
+        {
+          "q": "進聊天室最常用的暱稱結構?",
+          "options": [
+            { "a": "形容詞 + 名詞(像「冷淡的少年」)", "correct": true, "response": "對! 我那時候就是『冷淡的少年』。沒人理我。" },
+            { "a": "真實全名", "correct": false, "response": "誰會用真名 ⋯ 用真名的會被當怪人。" },
+            { "a": "Email 帳號", "correct": false, "response": "Email 太露骨, 而且容易被搜走。" }
+          ]
+        },
+        {
+          "q": "聊天室分房間,最常見的分類是?",
+          "options": [
+            { "a": "地區 + 年齡 (台北 25-30)", "correct": true, "response": "對! 點進去看人多人少,人少就跳房,人多但都不講話也跳房。" },
+            { "a": "興趣分類", "correct": false, "response": "那是 BBS 的玩法。聊天室主要按地區。" },
+            { "a": "音樂類型", "correct": false, "response": "(這個我會喜歡,但奇摩沒做)" }
+          ]
+        },
+        {
+          "q": "奇摩聊天室哪一年正式關掉?",
+          "options": [
+            { "a": "2013", "correct": true, "response": "對。Yahoo 一連串關了 Messenger / 聊天室 / 部落格 / 無名小站,大概都是 2013 前後。" },
+            { "a": "2003", "correct": false, "response": "2003 它正紅。" },
+            { "a": "2020", "correct": false, "response": "早就沒了。" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "msn", "emoji": "📨", "year": 2004, "label": "MSN / 即時通", "note": "半夜跟暗戀的人說晚安",
+      "intro": "你撿到 MSN!\n2000 年代每個年輕人最常掛的軟體。",
+      "questions": [
+        {
+          "q": "MSN 最有名的「催對方」功能?",
+          "options": [
+            { "a": "振動 / 戳一下 (Nudge)", "correct": true, "response": "對! 對方視窗會抖三下,有聲音。被狂戳很煩,但戳暗戀的人是儀式感。" },
+            { "a": "已讀回條", "correct": false, "response": "那是 LINE 才有的(2011),MSN 沒有已讀。" },
+            { "a": "簡訊轉寄", "correct": false, "response": "(這個我希望它有,但 MSN 沒做)" }
+          ]
+        },
+        {
+          "q": "MSN 暱稱最常拿來幹嘛?",
+          "options": [
+            { "a": "藏想對某個人說的話", "correct": true, "response": "對! 「我以為你在乎」這種,暗中發給特定一個人看。心機之最。" },
+            { "a": "貼時鐘倒數", "correct": false, "response": "也有人這樣做(去日本還剩 X 天),但主流是發小心思。" },
+            { "a": "貼歌詞", "correct": false, "response": "也很常見,但目的還是「想說某句話又不直說」。" }
+          ]
+        },
+        {
+          "q": "MSN 跟即時通(Yahoo Messenger)最大差別?",
+          "options": [
+            { "a": "MSN 是微軟,即時通是 Yahoo;台灣兩邊都有人用", "correct": true, "response": "對! 大家會兩個都裝。我朋友圈大多 MSN,長輩跟同事比較多即時通。" },
+            { "a": "MSN 收費,即時通免費", "correct": false, "response": "兩個都免費,Microsoft 沒收 MSN 錢。" },
+            { "a": "MSN 沒視訊,即時通有", "correct": false, "response": "兩個都有視訊,但畫質都很差。" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "wretch", "emoji": "📔", "year": 2005, "label": "無名小站", "note": "日記都是『今天好煩』",
+      "intro": "你撿到無名小站!\n2005-2013 台灣最大的部落格。每個高中生都有一個。",
+      "questions": [
+        {
+          "q": "無名最有名的功能(以為很 cool 其實很煩)?",
+          "options": [
+            { "a": "進站自動播 BGM", "correct": true, "response": "對! 點進別人的網誌,音樂自動轟你。我最常被嚇到的是進去突然播〈晴天〉。" },
+            { "a": "發文按讚", "correct": false, "response": "無名沒按讚機制,只有留言。" },
+            { "a": "私訊", "correct": false, "response": "有但很少人用,主要靠留言版。" }
+          ]
+        },
+        {
+          "q": "無名相簿最大特色?",
+          "options": [
+            { "a": "免費版有空間限制 / 有浮水印", "correct": true, "response": "對! 100MB 滿了就要升級 VIP。免費上傳的照片會打小小無名 logo。" },
+            { "a": "可以無限上傳 4K 照片", "correct": false, "response": "(2005 年連 4K 是什麼都沒人知道)" },
+            { "a": "自動上雲端備份", "correct": false, "response": "雲端是 2010 之後的詞。" }
+          ]
+        },
+        {
+          "q": "無名小站什麼時候停掉?",
+          "options": [
+            { "a": "2013 年底", "correct": true, "response": "對。Yahoo 收掉,大家瘋狂備份照片。我那年也存了一堆,結果硬碟壞了全沒了。" },
+            { "a": "2008", "correct": false, "response": "2008 它還很紅。" },
+            { "a": "從來沒停", "correct": false, "response": "(很可惜,但真的停了)" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "foxy", "emoji": "🦊", "year": 2008, "label": "Foxy", "note": "大學每天從這偷音樂",
+      "intro": "你撿到 Foxy!\n大學那年每天偷音樂的軟體。版權法存在,但你沒在管。",
+      "questions": [
+        {
+          "q": "Foxy 是哪種軟體?",
+          "options": [
+            { "a": "P2P 檔案分享(像 BT)", "correct": true, "response": "對! 我下載的同時也在分享,等於互相偷。下載速度看有多少人有那個檔。" },
+            { "a": "中央伺服器下載", "correct": false, "response": "那是 Napster 早期的玩法,後來都被告。" },
+            { "a": "雲端串流", "correct": false, "response": "(沒人在 2008 講雲端,雲端是 2012 之後)" }
+          ]
+        },
+        {
+          "q": "Foxy 最危險的是?",
+          "options": [
+            { "a": "下載到病毒 / 木馬 / 個資外流", "correct": true, "response": "對! 整個資料夾被分享出去過,我同學的私人照片就這樣流出去過。慘案。" },
+            { "a": "速度太快爆網卡", "correct": false, "response": "(網卡沒這麼脆)" },
+            { "a": "電費爆增", "correct": false, "response": "(掛機是有差,但不會爆)" }
+          ]
+        },
+        {
+          "q": "Foxy 後來為什麼消失?",
+          "options": [
+            { "a": "版權糾紛 + 政府介入 + Spotify 出來", "correct": true, "response": "對。三件事一起,Foxy 就被淘汰了。後來大家慢慢付月費聽 Spotify,免費聽歌的時代結束了。" },
+            { "a": "病毒太多自己倒", "correct": false, "response": "病毒一直都在,但不是它倒的主因。" },
+            { "a": "公司被收購", "correct": false, "response": "Foxy 是台灣團隊做的,沒被收購。" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sunoprompt", "emoji": "🎼", "year": 2024, "label": "Suno", "note": "現在我用這個做 demo,真的快",
+      "intro": "你撿到 Suno!\n2024 年最火的 AI 音樂生成工具。我現在用它做 demo,真的比手刻快。",
+      "questions": [
+        {
+          "q": "Suno 最大優勢?",
+          "options": [
+            { "a": "30 秒內生出一首有人聲的歌", "correct": true, "response": "對! 我寫詞 + 寫風格 prompt,Suno 30 秒給我兩個 demo,我選一個再 reroll 細節。" },
+            { "a": "比 Logic 還準", "correct": false, "response": "(差遠了,Logic 是專業 DAW,Suno 是創意起點)" },
+            { "a": "可以幫你寫詞", "correct": false, "response": "(可以,但寫出來的詞通常很制式,我都自己寫詞再餵)" }
+          ]
+        },
+        {
+          "q": "Suno 最常見的缺點?",
+          "options": [
+            { "a": "重複前奏 / 結構僵化 / 細節不可控", "correct": true, "response": "對! 你想要某段 bridge 突然轉調,只能 prompt 暗示,不能直接畫 MIDI。所以最後還是要回 DAW。" },
+            { "a": "中文發音差", "correct": false, "response": "中文發音其實有大進步,2024 v3.5 已經很 OK。" },
+            { "a": "沒有英文版", "correct": false, "response": "(英文反而是它強項)" }
+          ]
+        },
+        {
+          "q": "好的 Suno prompt 結構?",
+          "options": [
+            { "a": "風格 + 樂器 + 情緒 + 時代 + 參考歌手", "correct": true, "response": "對! 像「city pop, 80s synths, melancholy, late night drive, vibes of 山下達郎」這種疊加描述,比一句話勝太多。" },
+            { "a": "丟一段日記讓它自己理解", "correct": false, "response": "(它會理解,但結果通常很 random)" },
+            { "a": "中文寫滿一段", "correct": false, "response": "中文也行但不夠精準,英文 prompt 通常結果穩定多。" }
+          ]
+        }
+      ]
+    }
   ],
   "endgame": {
     "title": "🎮 GAME CLEAR",

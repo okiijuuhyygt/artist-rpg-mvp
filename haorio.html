@@ -14,11 +14,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build-version" content="haorio-1.11">
+<meta name="build-version" content="haorio-1.12">
 <script>
   // iOS Safari aggressive cache buster — force hard-reload if local cache holds older build
   (function() {
-    const CURRENT = 'haorio-1.11';
+    const CURRENT = 'haorio-1.12';
     const LAST = localStorage.getItem('haorio-build');
     if (LAST && LAST !== CURRENT && !location.search.includes('_nocache=')) {
       const sep = location.search ? '&' : '?';
@@ -598,8 +598,68 @@
   }
   .era-opt:hover { transform: translate(-1px,-1px); box-shadow: 4px 4px 0 var(--nes-red); }
   .era-opt:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 #1a1a1a; }
-  .era-opt.correct { background: var(--nes-yellow); border-color: var(--nes-red); }
+  .era-opt.correct { background: var(--nes-yellow); border-color: var(--nes-red); animation: opt-pulse 0.5s ease-out; }
   .era-opt.wrong { background: #ffd0d0; opacity: 0.6; }
+  @keyframes opt-pulse {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.06); box-shadow: 5px 5px 0 var(--nes-red), 0 0 30px var(--nes-yellow); }
+    100% { transform: scale(1); }
+  }
+  .era-modal.flash {
+    animation: era-flash 0.5s ease-out;
+  }
+  @keyframes era-flash {
+    0% { box-shadow: 10px 10px 0 var(--nes-yellow), 14px 14px 0 var(--nes-red), 0 0 80px var(--nes-yellow); }
+    100% { box-shadow: 10px 10px 0 var(--nes-yellow), 14px 14px 0 var(--nes-red); }
+  }
+  .confetti {
+    position: absolute;
+    top: 30%;
+    font-size: 28px;
+    pointer-events: none;
+    animation: confetti-fall 1.4s ease-out forwards;
+    z-index: 260;
+  }
+  @keyframes confetti-fall {
+    0% { transform: translate(0, 0) rotate(0); opacity: 1; }
+    100% { transform: translate(var(--cx, 0), 200px) rotate(540deg); opacity: 0; }
+  }
+  .xp-pop {
+    position: absolute;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 28px;
+    color: var(--nes-yellow);
+    text-shadow: 3px 3px 0 #1a1a1a;
+    pointer-events: none;
+    z-index: 261;
+    animation: xp-pop 1.2s ease-out forwards;
+  }
+  @keyframes xp-pop {
+    0% { transform: translateY(0) scale(0.5); opacity: 0; }
+    20% { transform: translateY(-10px) scale(1.3); opacity: 1; }
+    100% { transform: translateY(-80px) scale(1); opacity: 0; }
+  }
+  /* Stage clear stats block */
+  .stage-stats {
+    background: #1a1a1a;
+    color: var(--nes-yellow);
+    padding: 12px 14px;
+    margin: 12px 0;
+    font-family: 'VT323', monospace;
+    font-size: 18px;
+    border-left: 4px solid var(--nes-red);
+    line-height: 1.6;
+  }
+  .stage-stats .title-tag {
+    display: inline-block;
+    background: var(--nes-yellow);
+    color: #1a1a1a;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 11px;
+    padding: 4px 10px;
+    margin-top: 8px;
+    box-shadow: 3px 3px 0 var(--nes-red);
+  }
   .era-feedback {
     background: #1a1a1a;
     color: var(--nes-yellow);
@@ -1037,6 +1097,8 @@ async function boot() {
     if (saved.badges)  progress.badges = saved.badges;
     if (saved.milestones) progress.milestones = saved.milestones;
     if (saved.collected) progress.collected = saved.collected;
+    if (saved.quizAnswered) progress.quizAnswered = saved.quizAnswered;
+    if (saved.quizCorrect) progress.quizCorrect = saved.quizCorrect;
     if (saved.coins) hud.coins = saved.coins;
     if (typeof saved.lastStage === 'number') progress.lastStage = saved.lastStage;
   } catch {}
@@ -1067,6 +1129,8 @@ function saveProgress() {
       badges: progress.badges,
       milestones: progress.milestones,
       collected: progress.collected,
+      quizAnswered: progress.quizAnswered,
+      quizCorrect: progress.quizCorrect,
       coins: hud.coins,
       lastStage: stageIdx
     }));
@@ -1666,13 +1730,19 @@ function renderEraQuestion() {
 }
 
 function eraAnswer(opt, btn) {
-  // disable other buttons
   document.querySelectorAll('#era-opts .era-opt').forEach(b => b.disabled = true);
   btn.classList.add(opt.correct ? 'correct' : 'wrong');
   if (opt.correct) {
     activeQuiz.score++;
     addScore(100);
+    // Visual dopamine: confetti + flash + xp pop
+    spawnEraConfetti(8);
+    flashEraModal();
+    spawnEraXPPop('+100');
+    // Track quiz stats
+    progress.quizCorrect = (progress.quizCorrect || 0) + 1;
   }
+  progress.quizAnswered = (progress.quizAnswered || 0) + 1;
   activeQuiz.answers.push({ qIdx: activeQuiz.qIdx, correct: !!opt.correct });
   $('era-feedback').textContent = (opt.correct ? '✓ 對! ' : '✗ ') + (opt.response || '');
   $('era-feedback').classList.remove('hidden');
@@ -1684,6 +1754,41 @@ function eraAnswer(opt, btn) {
   } else {
     $('era-next').classList.remove('hidden');
   }
+}
+
+function spawnEraConfetti(count) {
+  const container = document.querySelector('.era-modal');
+  if (!container) return;
+  const emojis = ['★', '✦', '♪', '🎉', '💛', '⭐', '🎵'];
+  for (let i = 0; i < count; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.style.left = (40 + Math.random() * 20) + '%';
+    c.style.setProperty('--cx', ((Math.random() - 0.5) * 300) + 'px');
+    c.style.animationDelay = (Math.random() * 0.2) + 's';
+    c.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    container.appendChild(c);
+    setTimeout(() => c.remove(), 1600);
+  }
+}
+function flashEraModal() {
+  const m = document.querySelector('.era-modal');
+  if (!m) return;
+  m.classList.remove('flash');
+  void m.offsetWidth;  // restart animation
+  m.classList.add('flash');
+}
+function spawnEraXPPop(text) {
+  const container = document.querySelector('.era-modal');
+  if (!container) return;
+  const x = document.createElement('div');
+  x.className = 'xp-pop';
+  x.textContent = text;
+  x.style.left = '50%';
+  x.style.top = '40%';
+  x.style.transform = 'translateX(-50%)';
+  container.appendChild(x);
+  setTimeout(() => x.remove(), 1300);
 }
 
 bindModalButton($('era-next'), () => {
@@ -2357,10 +2462,51 @@ function bindModalButton(btn, fn) {
   btn.addEventListener('click', fire);
 }
 
+function generateTitle() {
+  const totalItems = (content.eraItems || []).length;
+  const collected = (progress.collected || []).length;
+  const answered = progress.quizAnswered || 0;
+  const correct = progress.quizCorrect || 0;
+  const ratio = answered > 0 ? correct / answered : 0;
+  if (collected >= totalItems && totalItems > 0) return '★ 你完整理解 H 的時代';
+  if (answered >= 9 && ratio >= 0.85) return '✦ 你很懂';
+  if (answered >= 6 && ratio >= 0.6) return '✧ 老派的浪漫';
+  if (answered >= 3 && ratio >= 0.4) return '· 同代邊緣 (還在學)';
+  if (answered > 0) return '· 新世代(沒事,你來了就好)';
+  return '';
+}
+
+function buildStageStatsHTML(stage) {
+  const totalItems = (content.eraItems || []).length;
+  const collected = (progress.collected || []).length;
+  const answered = progress.quizAnswered || 0;
+  const correct = progress.quizCorrect || 0;
+  const ratio = answered > 0 ? Math.round(correct / answered * 100) : 0;
+  const title = generateTitle();
+  let html = '<div class="stage-stats">';
+  html += '★ 收集圖鑑: ' + collected + ' / ' + totalItems + '<br>';
+  if (answered > 0) {
+    html += '✓ 答對 ' + correct + ' / ' + answered + ' 題 (' + ratio + '%)<br>';
+  }
+  html += '★ 累積分數: ' + hud.coins;
+  if (title) html += '<br><span class="title-tag">' + title + '</span>';
+  html += '</div>';
+  return html;
+}
+
 function showStageClearModal() {
   const stage = stages[stageIdx];
   $('modal-title').textContent = stage.endModalTitle || stage.title || 'CLEAR';
-  $('modal-body').textContent = stage.endModalBody || '';
+  // Body + stats overlay
+  const bodyEl = $('modal-body');
+  bodyEl.innerHTML = '';
+  const txt = document.createElement('div');
+  txt.style.whiteSpace = 'pre-wrap';
+  txt.textContent = stage.endModalBody || '';
+  bodyEl.appendChild(txt);
+  const statsDiv = document.createElement('div');
+  statsDiv.innerHTML = buildStageStatsHTML(stage);
+  bodyEl.appendChild(statsDiv);
   const row = $('modal-row');
   row.innerHTML = '';
 
