@@ -7,11 +7,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build-version" content="haorio-admin-0.4">
+<meta name="build-version" content="haorio-admin-0.5">
 <script>
   // Admin cache buster — force hard-reload if local cache holds older build
   (function() {
-    const CURRENT = 'haorio-admin-0.4';
+    const CURRENT = 'haorio-admin-0.5';
     const LAST = localStorage.getItem('haorio-admin-build');
     if (LAST && LAST !== CURRENT && !location.search.includes('_nocache=')) {
       const sep = location.search ? '&' : '?';
@@ -624,7 +624,7 @@
       </div>
 
       <div class="section tab-section" id="tab-endgame">
-        <h2>🏁 GAME CLEAR(全部過完顯示)</h2>
+        <h2>🏁 GAME CLEAR(最後一關過完顯示)</h2>
         <div class="field">
           <label>標題</label>
           <input type="text" data-path="endgame.title">
@@ -635,13 +635,53 @@
         </div>
         <div class="field-row">
           <div class="field">
-            <label>CTA 按鈕文字</label>
+            <label>主 CTA 按鈕文字</label>
             <input type="text" data-path="endgame.ctaLabel">
           </div>
           <div class="field">
-            <label>CTA 連結</label>
+            <label>主 CTA 連結 (Tally)</label>
             <input type="url" data-path="endgame.ctaUrl">
           </div>
+        </div>
+        <div class="field-row">
+          <div class="field" style="flex:0 0 220px;">
+            <label>Tally 自動帶稱號?</label>
+            <select data-path="endgame.tallyEnabled">
+              <option value="true">開 (default)</option>
+              <option value="false">關</option>
+            </select>
+          </div>
+        </div>
+        <hr style="border:none;border-top:1px dashed var(--paper-edge);margin:18px 0;">
+        <h3 style="font-size:11px;margin:0 0 8px;color:var(--gb-dark);">🔧 第二顆 Button (進舊版村莊 / 額外 CTA)</h3>
+        <div class="field-row">
+          <div class="field" style="flex:0 0 220px;">
+            <label>顯示這顆 button?</label>
+            <select data-path="endgame.fallbackEnabled">
+              <option value="false">關 (default)</option>
+              <option value="true">開</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>第二 CTA 文字</label>
+            <input type="text" data-path="endgame.fallbackCtaLabel">
+          </div>
+          <div class="field">
+            <label>第二 CTA 連結</label>
+            <input type="url" data-path="endgame.fallbackCtaUrl">
+          </div>
+        </div>
+        <hr style="border:none;border-top:1px dashed var(--paper-edge);margin:18px 0;">
+        <h3 style="font-size:11px;margin:0 0 8px;color:var(--gb-dark);">★ 集滿 5 徽章隱藏結尾 (覆蓋上面標題+內文)</h3>
+        <div class="field">
+          <label>標題 (集滿時)</label>
+          <input type="text" data-path="endgame.allBadgesTitle">
+        </div>
+        <div class="field">
+          <label>內文 (集滿時)</label>
+          <textarea data-path="endgame.allBadgesBody" rows="3"></textarea>
         </div>
       </div>
 

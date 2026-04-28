@@ -14,11 +14,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build-version" content="haorio-1.38">
+<meta name="build-version" content="haorio-1.39">
 <script>
   // iOS Safari aggressive cache buster — force hard-reload if local cache holds older build
   (function() {
-    const CURRENT = 'haorio-1.38';
+    const CURRENT = 'haorio-1.39';
     const LAST = localStorage.getItem('haorio-build');
     if (LAST && LAST !== CURRENT && !location.search.includes('_nocache=')) {
       const sep = location.search ? '&' : '?';
@@ -2556,13 +2556,37 @@ function buildStageStatsHTML(stage) {
 
 function showStageClearModal() {
   const stage = stages[stageIdx];
-  $('modal-title').textContent = stage.endModalTitle || stage.title || 'CLEAR';
-  // Body + stats overlay
+  const isLast = stageIdx >= stages.length - 1;
+  const eg = content.endgame || {};
+  // Hidden ending: 集滿 5 徽章 (只在最後一關 trigger)
+  const allBadges = isLast && (content.badges || []).length > 0 &&
+    (progress.badges || []).length >= (content.badges || []).length;
+
+  // Title (allBadges > isLast endgame > stage)
+  let modalTitle;
+  if (allBadges) {
+    modalTitle = eg.allBadgesTitle || '★ 你跟耗耗走完了一段';
+  } else if (isLast) {
+    modalTitle = eg.title || stage.endModalTitle || stage.title || '🎮 GAME CLEAR';
+  } else {
+    modalTitle = stage.endModalTitle || stage.title || 'CLEAR';
+  }
+  $('modal-title').textContent = modalTitle;
+
+  // Body
   const bodyEl = $('modal-body');
   bodyEl.innerHTML = '';
   const txt = document.createElement('div');
   txt.style.whiteSpace = 'pre-wrap';
-  txt.textContent = stage.endModalBody || '';
+  let bodyText;
+  if (allBadges) {
+    bodyText = eg.allBadgesBody || '你集齊了 5 個徽章 — 你比你想的，更同代。\n\n這是 demo 版。下一張 EP 還在做 — 留 email 上線那天我寄信給你。';
+  } else if (isLast) {
+    bodyText = eg.body || stage.endModalBody || '';
+  } else {
+    bodyText = stage.endModalBody || '';
+  }
+  txt.textContent = bodyText;
   bodyEl.appendChild(txt);
   const statsDiv = document.createElement('div');
   statsDiv.innerHTML = buildStageStatsHTML(stage);
@@ -2587,18 +2611,28 @@ function showStageClearModal() {
     row.appendChild(vote);
   }
 
-  const isLast = stageIdx >= stages.length - 1;
   if (!isLast) {
     const next = document.createElement('button');
     next.textContent = stage.endModalCta || ('▶ 下一關 ' + stages[stageIdx + 1].id);
     bindModalButton(next, () => { closeModal(); startStage(stageIdx + 1); });
     row.appendChild(next);
   } else {
-    // Last stage: always go through showEndgame (it has Tally prefill + body stats)
-    const end = document.createElement('button');
-    end.textContent = (content.endgame && content.endgame.ctaLabel) || '▶ 結算';
-    bindModalButton(end, () => { closeModal(); showEndgame(); });
-    row.appendChild(end);
+    // Last stage: 主 CTA 直接連 Tally (合併 endgame，不再跳第二層 modal)
+    if (eg.ctaUrl) {
+      const cta = document.createElement('button');
+      cta.textContent = eg.ctaLabel || '▶ 留 email + 帶上稱號';
+      const targetUrl = eg.tallyEnabled ? buildTallyUrl(eg.ctaUrl) : eg.ctaUrl;
+      bindModalButton(cta, () => { window.location.href = targetUrl; });
+      row.appendChild(cta);
+    }
+    // Optional fallback button (admin toggle，default 關)
+    if (eg.fallbackEnabled && eg.fallbackCtaUrl) {
+      const fb = document.createElement('button');
+      fb.className = 'secondary';
+      fb.textContent = eg.fallbackCtaLabel || '▶ 別處';
+      bindModalButton(fb, () => { window.location.href = eg.fallbackCtaUrl; });
+      row.appendChild(fb);
+    }
   }
   const back = document.createElement('button');
   back.className = 'secondary';
