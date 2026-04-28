@@ -776,17 +776,17 @@
           "q": "Game Boy 最暢銷的遊戲是?",
           "options": [
             {
-              "a": "寶可夢",
+              "a": "神奇寶貝",
               "correct": false,
-              "response": "寶可夢 1996 才出,那時 Game Boy 都快被 Color 取代了。"
+              "response": "神奇寶貝 1996 才出,那時 Game Boy 都快被 Color 取代了。"
             },
             {
-              "a": "馬力歐",
+              "a": "瑪莉兄弟",
               "correct": false,
-              "response": "馬力歐也很賣,但 Tetris 才是 Game Boy 的代表作。"
+              "response": "也很賣,但 Tetris 才是 Game Boy 的代表作。"
             },
             {
-              "a": "俄羅斯方塊 (Tetris)",
+              "a": "俄羅斯方塊",
               "correct": true,
               "response": "對! 隨機附贈那個 Tetris 賣到爆炸,讓 Game Boy 直接統治掌上機市場。"
             }
