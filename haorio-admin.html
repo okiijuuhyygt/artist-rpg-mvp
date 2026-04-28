@@ -7,11 +7,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build-version" content="haorio-admin-0.6">
+<meta name="build-version" content="haorio-admin-0.7">
 <script>
   // Admin cache buster — force hard-reload if local cache holds older build
   (function() {
-    const CURRENT = 'haorio-admin-0.6';
+    const CURRENT = 'haorio-admin-0.7';
     const LAST = localStorage.getItem('haorio-admin-build');
     if (LAST && LAST !== CURRENT && !location.search.includes('_nocache=')) {
       const sep = location.search ? '&' : '?';
@@ -1015,9 +1015,18 @@ function renderQuizEditor(item, container) {
         </div>
         <button class="btn-mini q-del" type="button" style="margin-top:18px;">刪題</button>
       </div>
+      <div class="field">
+        <label>🎧 Spotify URL (留空 = 純文字題;填了 = 玩家會聽 30s preview)</label>
+        <input type="url" class="q-spotify" value="${escapeHtml(q.spotifyEmbed || '')}" placeholder="https://open.spotify.com/track/...">
+      </div>
       <div class="q-opts"></div>
     `;
     qDiv.querySelector('.q-text').addEventListener('input', e => { q.q = e.target.value; markDirty(); });
+    qDiv.querySelector('.q-spotify').addEventListener('input', e => {
+      const v = e.target.value.trim();
+      if (v) q.spotifyEmbed = v; else delete q.spotifyEmbed;
+      markDirty();
+    });
     qDiv.querySelector('.q-del').addEventListener('click', () => {
       item.questions.splice(qIdx, 1);
       renderQuizEditor(item, container);
