@@ -1611,6 +1611,9 @@
       <div id="socialsBlock" style="margin-bottom:14px;"></div>
       <p class="credits">BUILD 2.6 · haohao.unzip · L3 純 Tally + L4 任意投稿</p>
       <p><a href="admin.html" class="admin-link-footer">關主登入 →</a></p>
+      <p id="previewAsPlayerWrap" style="display:none;margin-top:6px;">
+        <a href="#" class="admin-link-footer" id="previewAsPlayer">👁 以玩家身份預覽(暫清 admin token)</a>
+      </p>
     </footer>
   </div>
 </section>
@@ -2052,6 +2055,22 @@ document.getElementById('btnSkip').addEventListener('click', () => {
   state.introSeen = true; saveState();
   navigate('#map');
 });
+// 「以玩家身份預覽」 — admin token present 時 footer 顯示這個 link,
+// 點下去清 token + reload → 立刻看到付費 CTA 等玩家視角內容。
+// Token 存在 GitHub PAT 那邊不受影響,要回關主身份再去 admin.html 重貼即可。
+(function setupPreviewAsPlayer() {
+  const wrap = document.getElementById('previewAsPlayerWrap');
+  const link = document.getElementById('previewAsPlayer');
+  if (!wrap || !link) return;
+  if (localStorage.getItem('hao-admin-token-v1')) wrap.style.display = '';
+  link.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (!confirm('清掉這個瀏覽器的 admin token,以玩家身份預覽 site?\n\n(token 在 GitHub 那邊不受影響,要回關主身份去 admin.html 重貼即可)')) return;
+    localStorage.removeItem('hao-admin-token-v1');
+    location.reload();
+  });
+})();
+
 document.getElementById('btnBackToIntro').addEventListener('click', () => {
   // Returning player wants to re-read the opener — go back without resetting introSeen.
   navigate('#intro');
