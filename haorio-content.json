@@ -775,11 +775,11 @@
       "intro": "你撿到《麻辣鮮師》錄影帶!\n台視 1999 開播,演到 2003。我們那代高中生看 G 怪老師跟一票學生鬧。",
       "questions": [
         {
-          "q": "《麻辣鮮師》最有名的怪叔叔老師是?",
+          "q": "《麻辣鮮師》最有名的班導是?",
           "options": [
-            { "a": "G 怪導師(王中皇飾)", "correct": true, "response": "對! 髮型超亂、講話超怪,但同學都被他感動。" },
-            { "a": "嚴格老頭班導", "correct": false, "response": "(那是別齣戲的設定)" },
-            { "a": "美女年輕老師", "correct": false, "response": "(主角是 G 怪叔叔級,不是美女)" }
+            { "a": "徐磊老師", "correct": true, "response": "對! 徐磊那角色 — 髮型怪、講話怪,但學生都很愛。「徐磊」這個名字後來在台灣綜藝圈也變固定梗。" },
+            { "a": "嚴格老頭班導", "correct": false, "response": "(不是,徐磊才對)" },
+            { "a": "美女年輕老師", "correct": false, "response": "(主角是徐磊老師,不是美女)" }
           ]
         },
         {
@@ -1066,6 +1066,44 @@
             { "a": "3G / 4G 普及之後(~2010)", "correct": true, "response": "對! 3G/4G 信號編碼跟 2G 不同,加上喇叭線材改進,嗶嗶聲就消失了。現在的小孩完全沒聽過。" },
             { "a": "從來沒消失", "correct": false, "response": "(早就沒了,你現在用 5G 手機放電腦旁邊不會嗶嗶)" },
             { "a": "1995 年就消失了", "correct": false, "response": "(1995 還在 2G,正在嗶得很歡樂)" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "haohaosongs", "emoji": "🎵", "year": 2010, "label": "號號的歌(自爆)", "note": "硬核粉絲限定",
+      "intro": "你撿到號號自己的歌單!\n這是硬核粉絲題 — 號號自己寫的、自己發的歌。連他粉絲都不一定全知道。",
+      "questions": [
+        {
+          "q": "號號第一首正式發行的歌叫什麼?",
+          "options": [
+            { "a": "《淡妝》", "correct": true, "response": "對! 第一首正式上架的歌。每次有人能答對我都嚇到。" },
+            { "a": "《晴天》", "correct": false, "response": "(那是周杰倫的)" },
+            { "a": "《不夠好》", "correct": false, "response": "(《不夠好》是 14 歲在浴室寫的第一首歌, 但沒發行, 只有 1-3 NPC 在講)" }
+          ]
+        },
+        {
+          "q": "號號第一首饒舌歌叫什麼? (那年代的「大無邪」歌)",
+          "options": [
+            { "a": "《壯強旗》", "correct": true, "response": "對! 大學時期大無邪做的饒舌歌。連粉絲都很少人聽過。" },
+            { "a": "《以前的事》", "correct": false, "response": "(這是後來的歌, 不是饒舌)" },
+            { "a": "《Threads murmur》", "correct": false, "response": "(這個只是耗耗 Threads 風格名稱, 不是歌名)" }
+          ]
+        },
+        {
+          "q": "號號第一首用「編曲軟體」(Logic / DAW) 做出來的歌叫什麼?",
+          "options": [
+            { "a": "《你們眼中的女孩》", "correct": true, "response": "對! 這首號號自己說連粉絲都沒聽過。是技術跨越的關鍵作品 — 從寫詞到自己編曲的轉捩點。" },
+            { "a": "《不夠好》", "correct": false, "response": "(浴室寫的, 沒編曲)" },
+            { "a": "《晴天》", "correct": false, "response": "(周杰倫)" }
+          ]
+        },
+        {
+          "q": "號號大學時期立的 IP 計畫是?",
+          "options": [
+            { "a": "收集 100 個故事 → 寫成 100 首歌", "correct": true, "response": "對! 這是號號從大學開始的長期 IP — 從別人故事提取、轉化成歌。haohao.unzip 整個遊戲就是這個 IP 的延伸。" },
+            { "a": "拍 100 部 MV", "correct": false, "response": "(沒, 主軸是「故事 → 歌」, 不是 MV)" },
+            { "a": "寫 100 本書", "correct": false, "response": "(他偶爾寫文,但不是 100 本的計畫)" }
           ]
         }
       ]
