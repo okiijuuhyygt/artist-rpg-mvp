@@ -861,6 +861,19 @@ function renderWorld2() {
     block.querySelector('.ws-bg').addEventListener('input', e => { s.bgColor = e.target.value; markDirty(); });
     block.querySelector('.ws-gd').addEventListener('input', e => { s.groundColor = e.target.value; markDirty(); });
     block.querySelector('.ws-br').addEventListener('input', e => { s.brickColor = e.target.value; markDirty(); });
+    // NPC editor (W2 uses npcs[] array; render single one for now via legacy renderNpcEditor)
+    if (s.npc || (s.npcs && s.npcs[0])) {
+      const npcWrap = document.createElement('div');
+      const npcTitle = document.createElement('h3');
+      npcTitle.textContent = '📢 NPC 對話';
+      block.appendChild(npcTitle);
+      block.appendChild(npcWrap);
+      // For W2, npcs[0] (single NPC per song stage, multi-NPC support added but not used here)
+      const npcLike = { npc: s.npcs ? s.npcs[0] : s.npc };
+      renderNpcEditor(npcLike, npcWrap);
+      // sync back: if user edits npcLike.npc, also write to s.npcs[0] when applicable
+      if (s.npcs) s.npcs[0] = npcLike.npc;
+    }
     box.appendChild(block);
   });
 }
@@ -883,14 +896,91 @@ function renderEraItems() {
         <button class="btn-mini ei-del" type="button" style="align-self:end;">刪</button>
       </div>
       <div class="field"><label>說明</label><input type="text" class="ei-note" value="${escapeHtml(it.note || '')}"></div>
+      <div class="field"><label>intro (撞磚跳出來的開場白)</label><textarea class="ei-intro" rows="3">${escapeHtml(it.intro || '')}</textarea></div>
+      <h3 style="font-size:11px;margin:12px 0 6px;color:var(--gb-dark);">📝 Quiz 題目 (3 題,每題 3 選項,正解 1)</h3>
+      <div class="ei-quiz-wrap"></div>
+      <button class="btn-add ei-add-q" type="button">+ 加題目</button>
     `;
     row.querySelector('.ei-em').addEventListener('input', e => { it.emoji = e.target.value; markDirty(); });
     row.querySelector('.ei-lab').addEventListener('input', e => { it.label = e.target.value; markDirty(); });
     row.querySelector('.ei-yr').addEventListener('input', e => { it.year = parseInt(e.target.value) || 0; markDirty(); });
     row.querySelector('.ei-id').addEventListener('input', e => { it.id = e.target.value; markDirty(); });
     row.querySelector('.ei-note').addEventListener('input', e => { it.note = e.target.value; markDirty(); });
+    row.querySelector('.ei-intro').addEventListener('input', e => { it.intro = e.target.value; markDirty(); });
     row.querySelector('.ei-del').addEventListener('click', () => { contentData.eraItems.splice(idx, 1); renderEraItems(); markDirty(); });
+    renderQuizEditor(it, row.querySelector('.ei-quiz-wrap'));
+    row.querySelector('.ei-add-q').addEventListener('click', () => {
+      if (!Array.isArray(it.questions)) it.questions = [];
+      it.questions.push({ q: '', options: [
+        { a: '', correct: true, response: '' },
+        { a: '', correct: false, response: '' },
+        { a: '', correct: false, response: '' }
+      ]});
+      renderQuizEditor(it, row.querySelector('.ei-quiz-wrap'));
+      markDirty();
+    });
     box.appendChild(row);
+  });
+}
+
+function renderQuizEditor(item, container) {
+  container.innerHTML = '';
+  if (!Array.isArray(item.questions)) item.questions = [];
+  item.questions.forEach((q, qIdx) => {
+    const qDiv = document.createElement('div');
+    qDiv.style.background = '#fff';
+    qDiv.style.border = '1px solid #ccc';
+    qDiv.style.padding = '8px';
+    qDiv.style.marginBottom = '8px';
+    qDiv.innerHTML = `
+      <div class="field-row">
+        <div class="field" style="flex:1;">
+          <label>題 ${qIdx + 1}</label>
+          <input type="text" class="q-text" value="${escapeHtml(q.q || '')}">
+        </div>
+        <button class="btn-mini q-del" type="button" style="margin-top:18px;">刪題</button>
+      </div>
+      <div class="q-opts"></div>
+    `;
+    qDiv.querySelector('.q-text').addEventListener('input', e => { q.q = e.target.value; markDirty(); });
+    qDiv.querySelector('.q-del').addEventListener('click', () => {
+      item.questions.splice(qIdx, 1);
+      renderQuizEditor(item, container);
+      markDirty();
+    });
+    const optsBox = qDiv.querySelector('.q-opts');
+    if (!Array.isArray(q.options)) q.options = [];
+    q.options.forEach((opt, oIdx) => {
+      const oDiv = document.createElement('div');
+      oDiv.style.padding = '4px 0';
+      oDiv.innerHTML = `
+        <div class="field-row">
+          <div class="field" style="flex:1;">
+            <label>選項 ${String.fromCharCode(65 + oIdx)} ${opt.correct ? '✓ 正解' : ''}</label>
+            <input type="text" class="o-a" value="${escapeHtml(opt.a || '')}">
+          </div>
+          <div class="field" style="flex:0 0 70px;">
+            <label>正解?</label>
+            <input type="checkbox" class="o-corr" ${opt.correct ? 'checked' : ''} style="width:auto;">
+          </div>
+        </div>
+        <div class="field"><label>回應 (耗耗講)</label><textarea class="o-resp" rows="2">${escapeHtml(opt.response || '')}</textarea></div>
+      `;
+      oDiv.querySelector('.o-a').addEventListener('input', e => { opt.a = e.target.value; markDirty(); });
+      oDiv.querySelector('.o-corr').addEventListener('change', e => {
+        // Only one correct: if user checks this one, uncheck others
+        if (e.target.checked) {
+          q.options.forEach(o => o.correct = false);
+          opt.correct = true;
+        } else {
+          opt.correct = false;
+        }
+        renderQuizEditor(item, container);
+        markDirty();
+      });
+      oDiv.querySelector('.o-resp').addEventListener('input', e => { opt.response = e.target.value; markDirty(); });
+      optsBox.appendChild(oDiv);
+    });
   });
 }
 
