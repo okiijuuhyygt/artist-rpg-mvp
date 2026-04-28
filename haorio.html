@@ -14,11 +14,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build-version" content="haorio-1.39">
+<meta name="build-version" content="haorio-1.40">
 <script>
   // iOS Safari aggressive cache buster — force hard-reload if local cache holds older build
   (function() {
-    const CURRENT = 'haorio-1.39';
+    const CURRENT = 'haorio-1.40';
     const LAST = localStorage.getItem('haorio-build');
     if (LAST && LAST !== CURRENT && !location.search.includes('_nocache=')) {
       const sep = location.search ? '&' : '?';
@@ -32,6 +32,11 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
 <style>
+  @font-face {
+    font-family: 'Cubic 11';
+    src: url('https://cdn.jsdelivr.net/gh/ACh-K/Cubic-11/fonts/web/Cubic_11.woff2') format('woff2');
+    font-display: swap;
+  }
   :root {
     --nes-black: #1a1a1a;
     --nes-white: #fcfcfc;
@@ -873,6 +878,127 @@
   @media (orientation: portrait) and (hover: none) and (pointer: coarse) {
     #rotate-warn { display: flex; }
   }
+
+  /* ============ GAME CLEAR SCREEN (full-screen dedicated) ============ */
+  #game-clear-screen {
+    position: fixed; inset: 0; z-index: 1500;
+    background: #000;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+    opacity: 0;
+    transition: opacity 1s ease-in;
+  }
+  #game-clear-screen.show { opacity: 1; }
+  #game-clear-screen.hidden { display: none; }
+
+  .gc-particles {
+    position: absolute; inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .gc-particle {
+    position: absolute;
+    width: 3px; height: 3px;
+    background: rgba(255, 224, 0, 0.55);
+    box-shadow: 0 0 4px rgba(255, 224, 0, 0.4);
+    bottom: -10px;
+    animation: gc-drift linear infinite;
+  }
+  @keyframes gc-drift {
+    0%   { transform: translateY(0);     opacity: 0; }
+    8%   { opacity: 0.7; }
+    92%  { opacity: 0.7; }
+    100% { transform: translateY(-110vh); opacity: 0; }
+  }
+
+  .gc-content {
+    position: relative; z-index: 2;
+    text-align: center;
+    padding: 24px 20px;
+    max-width: 720px;
+    width: 100%;
+  }
+  .gc-title {
+    font-family: 'Cubic 11', 'Press Start 2P', monospace;
+    font-size: clamp(36px, 8vw, 72px);
+    letter-spacing: 6px;
+    color: var(--nes-yellow);
+    text-shadow: 0 0 18px rgba(255, 224, 0, 0.55), 0 0 4px rgba(255, 224, 0, 0.9);
+    margin: 0;
+    opacity: 0;
+    transform: scale(0.85);
+    animation: gc-title-in 2s ease-out 0.8s forwards;
+  }
+  .gc-subtitle {
+    font-family: 'Cubic 11', 'Press Start 2P', monospace;
+    font-size: clamp(13px, 2.4vw, 18px);
+    color: rgba(255, 255, 255, 0.78);
+    letter-spacing: 2px;
+    margin-top: 28px;
+    opacity: 0;
+    animation: gc-fade-in 2s ease-out 2.6s forwards;
+  }
+  .gc-stats {
+    font-family: 'Cubic 11', 'Press Start 2P', monospace;
+    font-size: clamp(11px, 1.8vw, 14px);
+    color: rgba(255, 255, 255, 0.5);
+    line-height: 1.9;
+    margin-top: 36px;
+    opacity: 0;
+    animation: gc-fade-in 1.5s ease-out 4.4s forwards;
+  }
+  .gc-stats .stage-stats { display: block; }
+  .gc-stats .title-tag { color: var(--nes-yellow); display: inline-block; margin-top: 6px; }
+  .gc-buttons {
+    margin-top: 36px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+    opacity: 0;
+    animation: gc-fade-in 1.5s ease-out 5.8s forwards;
+  }
+  .gc-btn {
+    font-family: 'Cubic 11', 'Press Start 2P', monospace;
+    font-size: clamp(12px, 1.8vw, 14px);
+    padding: 12px 22px;
+    background: transparent;
+    color: var(--nes-yellow);
+    border: 2px solid var(--nes-yellow);
+    cursor: pointer;
+    min-width: 260px;
+    letter-spacing: 1px;
+    transition: background 0.15s, color 0.15s;
+  }
+  .gc-btn:hover { background: var(--nes-yellow); color: #000; }
+  .gc-btn.secondary {
+    color: rgba(255, 255, 255, 0.65);
+    border-color: rgba(255, 255, 255, 0.4);
+  }
+  .gc-btn.secondary:hover { background: rgba(255, 255, 255, 0.15); color: #fff; }
+
+  @keyframes gc-title-in {
+    0%   { opacity: 0; transform: scale(0.85); letter-spacing: 18px; }
+    60%  { opacity: 1; }
+    100% { opacity: 1; transform: scale(1); letter-spacing: 6px; }
+  }
+  @keyframes gc-fade-in {
+    to { opacity: 1; }
+  }
+
+  @supports (padding: env(safe-area-inset-top)) {
+    .gc-content {
+      padding-top: max(24px, env(safe-area-inset-top));
+      padding-bottom: max(24px, env(safe-area-inset-bottom));
+    }
+  }
+  @media (max-height: 500px) and (orientation: landscape) {
+    .gc-title { font-size: clamp(28px, 6vw, 48px); }
+    .gc-subtitle { margin-top: 14px; }
+    .gc-stats { margin-top: 16px; line-height: 1.5; }
+    .gc-buttons { margin-top: 16px; gap: 8px; }
+    .gc-btn { padding: 8px 16px; min-width: 220px; }
+  }
 </style>
 </head>
 <body>
@@ -970,6 +1096,17 @@
     <div class="response hidden" id="npc-response"></div>
     <div class="badge-pop hidden" id="npc-badgepop"></div>
     <button class="close-btn hidden" id="npc-close">▶ 繼續</button>
+  </div>
+</div>
+
+<!-- ====================== GAME CLEAR SCREEN (full-screen dedicated) ====================== -->
+<div id="game-clear-screen" class="hidden">
+  <div class="gc-particles"></div>
+  <div class="gc-content">
+    <div class="gc-title">★ FIN ★</div>
+    <div class="gc-subtitle">- EP 在另一張未發行的專輯裡 -</div>
+    <div class="gc-stats"></div>
+    <div class="gc-buttons"></div>
   </div>
 </div>
 
@@ -2557,36 +2694,13 @@ function buildStageStatsHTML(stage) {
 function showStageClearModal() {
   const stage = stages[stageIdx];
   const isLast = stageIdx >= stages.length - 1;
-  const eg = content.endgame || {};
-  // Hidden ending: 集滿 5 徽章 (只在最後一關 trigger)
-  const allBadges = isLast && (content.badges || []).length > 0 &&
-    (progress.badges || []).length >= (content.badges || []).length;
-
-  // Title (allBadges > isLast endgame > stage)
-  let modalTitle;
-  if (allBadges) {
-    modalTitle = eg.allBadgesTitle || '★ 你跟耗耗走完了一段';
-  } else if (isLast) {
-    modalTitle = eg.title || stage.endModalTitle || stage.title || '🎮 GAME CLEAR';
-  } else {
-    modalTitle = stage.endModalTitle || stage.title || 'CLEAR';
-  }
-  $('modal-title').textContent = modalTitle;
-
-  // Body
+  $('modal-title').textContent = stage.endModalTitle || stage.title || 'CLEAR';
+  // Body + stats overlay
   const bodyEl = $('modal-body');
   bodyEl.innerHTML = '';
   const txt = document.createElement('div');
   txt.style.whiteSpace = 'pre-wrap';
-  let bodyText;
-  if (allBadges) {
-    bodyText = eg.allBadgesBody || '你集齊了 5 個徽章 — 你比你想的，更同代。\n\n這是 demo 版。下一張 EP 還在做 — 留 email 上線那天我寄信給你。';
-  } else if (isLast) {
-    bodyText = eg.body || stage.endModalBody || '';
-  } else {
-    bodyText = stage.endModalBody || '';
-  }
-  txt.textContent = bodyText;
+  txt.textContent = stage.endModalBody || '';
   bodyEl.appendChild(txt);
   const statsDiv = document.createElement('div');
   statsDiv.innerHTML = buildStageStatsHTML(stage);
@@ -2617,22 +2731,11 @@ function showStageClearModal() {
     bindModalButton(next, () => { closeModal(); startStage(stageIdx + 1); });
     row.appendChild(next);
   } else {
-    // Last stage: 主 CTA 直接連 Tally (合併 endgame，不再跳第二層 modal)
-    if (eg.ctaUrl) {
-      const cta = document.createElement('button');
-      cta.textContent = eg.ctaLabel || '▶ 留 email + 帶上稱號';
-      const targetUrl = eg.tallyEnabled ? buildTallyUrl(eg.ctaUrl) : eg.ctaUrl;
-      bindModalButton(cta, () => { window.location.href = targetUrl; });
-      row.appendChild(cta);
-    }
-    // Optional fallback button (admin toggle，default 關)
-    if (eg.fallbackEnabled && eg.fallbackCtaUrl) {
-      const fb = document.createElement('button');
-      fb.className = 'secondary';
-      fb.textContent = eg.fallbackCtaLabel || '▶ 別處';
-      bindModalButton(fb, () => { window.location.href = eg.fallbackCtaUrl; });
-      row.appendChild(fb);
-    }
+    // Last stage: 「結算」 button → 全螢幕 game clear screen (avoid CTA dup)
+    const end = document.createElement('button');
+    end.textContent = '▶ 結算';
+    bindModalButton(end, () => { closeModal(); showGameClearScreen(); });
+    row.appendChild(end);
   }
   const back = document.createElement('button');
   back.className = 'secondary';
@@ -2659,6 +2762,76 @@ function buildTallyUrl(baseUrl) {
     'haorio_ratio': ratio + '%'
   });
   return baseUrl + (baseUrl.includes('?') ? '&' : '?') + params.toString();
+}
+
+// =====================================================
+// GAME CLEAR SCREEN (全螢幕 dedicated 破關畫面)
+// =====================================================
+function showGameClearScreen() {
+  const eg = content.endgame || {};
+  const allBadges = (content.badges || []).length > 0 &&
+    (progress.badges || []).length >= (content.badges || []).length;
+  const screen = document.getElementById('game-clear-screen');
+  if (!screen) return;
+
+  // Title (default ★ FIN ★, admin overridable via endgame.title or allBadgesTitle)
+  const title = (allBadges ? eg.allBadgesTitle : eg.title) || '★ FIN ★';
+  const subtitle = (allBadges ? eg.allBadgesBody : eg.body) || '- EP 在另一張未發行的專輯裡 -';
+  screen.querySelector('.gc-title').textContent = title;
+  screen.querySelector('.gc-subtitle').textContent = subtitle;
+
+  // Stats
+  const statsEl = screen.querySelector('.gc-stats');
+  statsEl.innerHTML = buildStageStatsHTML(stages[stageIdx]);
+
+  // Buttons (留 email / fallback / 回標題)
+  const btnsEl = screen.querySelector('.gc-buttons');
+  btnsEl.innerHTML = '';
+  if (eg.ctaUrl) {
+    const cta = document.createElement('button');
+    cta.className = 'gc-btn primary';
+    cta.textContent = eg.ctaLabel || '▶ 留 email + 帶上稱號';
+    const targetUrl = eg.tallyEnabled ? buildTallyUrl(eg.ctaUrl) : eg.ctaUrl;
+    bindModalButton(cta, () => { window.location.href = targetUrl; });
+    btnsEl.appendChild(cta);
+  }
+  if (eg.fallbackEnabled && eg.fallbackCtaUrl) {
+    const fb = document.createElement('button');
+    fb.className = 'gc-btn secondary';
+    fb.textContent = eg.fallbackCtaLabel || '▶ 別處';
+    bindModalButton(fb, () => { window.location.href = eg.fallbackCtaUrl; });
+    btnsEl.appendChild(fb);
+  }
+  const back = document.createElement('button');
+  back.className = 'gc-btn secondary';
+  back.textContent = '↑ 回標題';
+  bindModalButton(back, () => { hideGameClearScreen(); goTitle(); });
+  btnsEl.appendChild(back);
+
+  // Spawn drifting pixel particles (40 顆，random delay/duration 製造亂流)
+  const particlesEl = screen.querySelector('.gc-particles');
+  particlesEl.innerHTML = '';
+  for (let i = 0; i < 40; i++) {
+    const p = document.createElement('div');
+    p.className = 'gc-particle';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.animationDuration = (12 + Math.random() * 18) + 's';
+    p.style.animationDelay = (-Math.random() * 25) + 's';
+    p.style.opacity = (0.25 + Math.random() * 0.5);
+    particlesEl.appendChild(p);
+  }
+
+  // Show + trigger fade-in
+  screen.classList.remove('hidden');
+  void screen.offsetHeight;  // force reflow so transition runs
+  screen.classList.add('show');
+}
+
+function hideGameClearScreen() {
+  const screen = document.getElementById('game-clear-screen');
+  if (!screen) return;
+  screen.classList.remove('show');
+  setTimeout(() => screen.classList.add('hidden'), 800);
 }
 
 function showEndgame() {
