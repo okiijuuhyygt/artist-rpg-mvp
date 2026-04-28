@@ -701,7 +701,7 @@ $('loginForm').addEventListener('submit', async (e) => {
     localStorage.setItem(LS_TOKEN, tok);
     route();
   } catch (err) {
-    errEl.textContent = '密碼不對(或 haorio-content.json 不在 repo 裡)';
+    errEl.textContent = '密碼不對';
     errEl.classList.remove('hidden');
     $('tokenInput').value = '';
     $('tokenInput').focus();
