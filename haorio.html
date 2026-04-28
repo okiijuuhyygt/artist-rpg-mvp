@@ -14,11 +14,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build-version" content="haorio-1.30">
+<meta name="build-version" content="haorio-1.31">
 <script>
   // iOS Safari aggressive cache buster — force hard-reload if local cache holds older build
   (function() {
-    const CURRENT = 'haorio-1.30';
+    const CURRENT = 'haorio-1.31';
     const LAST = localStorage.getItem('haorio-build');
     if (LAST && LAST !== CURRENT && !location.search.includes('_nocache=')) {
       const sep = location.search ? '&' : '?';
@@ -1465,8 +1465,11 @@ function startStage(idx) {
         enemies.push(makeBoss(tx * TILE - 8, ty * TILE - 16));
         stage.tiles[ty][tx] = '.';
       } else if (c === 'N') {
-        if (stage.npc) {
-          npcs.push(makeNpc(tx * TILE, ty * TILE, stage.npc));
+        // Multi-NPC support: stage.npcs[] array, or fallback to legacy stage.npc
+        const npcsArr = stage.npcs || (stage.npc ? [stage.npc] : []);
+        if (npcsArr.length) {
+          const idx = npcs.length % npcsArr.length;
+          npcs.push(makeNpc(tx * TILE, ty * TILE, npcsArr[idx]));
         }
         stage.tiles[ty][tx] = '.';
       }
@@ -2578,13 +2581,21 @@ function buildTallyUrl(baseUrl) {
 
 function showEndgame() {
   const eg = content.endgame || {};
-  $('modal-title').textContent = eg.title || '🎮 GAME CLEAR';
-  // body + stats summary
+  // Hidden ending: all 5 badges collected
+  const allBadges = (content.badges || []).length > 0 &&
+    (progress.badges || []).length >= (content.badges || []).length;
+  const useTitle = allBadges
+    ? (eg.allBadgesTitle || '★ 你跟耗耗走完了一段')
+    : (eg.title || '🎮 GAME CLEAR');
+  const useBody = allBadges
+    ? (eg.allBadgesBody || '你集齊了 5 個徽章 — 你比你想的,更同代。\n\n這是 demo 版。下一張 EP 還在做 — 留 email 上線那天我寄信給你。')
+    : (eg.body || '');
+  $('modal-title').textContent = useTitle;
   const bodyEl = $('modal-body');
   bodyEl.innerHTML = '';
   const t = document.createElement('div');
   t.style.whiteSpace = 'pre-wrap';
-  t.textContent = eg.body || '';
+  t.textContent = useBody;
   bodyEl.appendChild(t);
   const stats = document.createElement('div');
   stats.innerHTML = buildStageStatsHTML(stages[stageIdx]);
