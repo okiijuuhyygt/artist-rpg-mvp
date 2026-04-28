@@ -14,11 +14,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build-version" content="haorio-1.9">
+<meta name="build-version" content="haorio-1.10">
 <script>
   // iOS Safari aggressive cache buster — force hard-reload if local cache holds older build
   (function() {
-    const CURRENT = 'haorio-1.9';
+    const CURRENT = 'haorio-1.10';
     const LAST = localStorage.getItem('haorio-build');
     if (LAST && LAST !== CURRENT && !location.search.includes('_nocache=')) {
       const sep = location.search ? '&' : '?';
@@ -527,6 +527,109 @@
     box-shadow: 3px 3px 0 #1a1a1a;
   }
 
+  /* ========== Era item RPG quiz modal ========== */
+  .era-modal-back {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.85);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 250;
+    padding: 16px;
+  }
+  .era-modal-back.open { display: flex; }
+  .era-modal {
+    background: #fdfaf3;
+    border: 5px solid #1a1a1a;
+    box-shadow: 10px 10px 0 var(--nes-yellow), 14px 14px 0 var(--nes-red);
+    padding: 22px 18px 16px;
+    max-width: 580px;
+    width: 100%;
+    max-height: 92vh;
+    overflow-y: auto;
+    text-align: center;
+    font-family: 'VT323', monospace;
+  }
+  .era-mascot {
+    font-size: 110px;
+    line-height: 1;
+    margin-bottom: 6px;
+    filter: drop-shadow(4px 4px 0 #1a1a1a);
+    image-rendering: pixelated;
+    animation: era-bob 1.2s ease-in-out infinite;
+  }
+  @keyframes era-bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+  .era-label {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 13px;
+    color: var(--nes-red);
+    margin-bottom: 8px;
+  }
+  .era-intro {
+    font-size: 18px;
+    line-height: 1.5;
+    margin-bottom: 10px;
+    color: #1a1a1a;
+    white-space: pre-wrap;
+  }
+  .era-question {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 12px;
+    color: #1a1a1a;
+    background: #1a1a1a;
+    color: var(--nes-yellow);
+    padding: 12px 14px;
+    margin: 12px 0 10px;
+    text-align: left;
+    line-height: 1.6;
+  }
+  .era-opts { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+  .era-opt {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    line-height: 1.5;
+    padding: 10px 12px;
+    border: 3px solid #1a1a1a;
+    background: #fff;
+    color: #1a1a1a;
+    cursor: pointer;
+    text-align: left;
+    box-shadow: 3px 3px 0 #1a1a1a;
+  }
+  .era-opt:hover { transform: translate(-1px,-1px); box-shadow: 4px 4px 0 var(--nes-red); }
+  .era-opt:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 #1a1a1a; }
+  .era-opt.correct { background: var(--nes-yellow); border-color: var(--nes-red); }
+  .era-opt.wrong { background: #ffd0d0; opacity: 0.6; }
+  .era-feedback {
+    background: #1a1a1a;
+    color: var(--nes-yellow);
+    padding: 10px 12px;
+    margin: 10px 0;
+    border-left: 5px solid var(--nes-red);
+    font-size: 16px;
+    line-height: 1.5;
+    text-align: left;
+    white-space: pre-wrap;
+  }
+  .era-score {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 11px;
+    color: #555;
+    margin-top: 6px;
+  }
+  .era-btn {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 12px;
+    padding: 11px 18px;
+    border: 3px solid #1a1a1a;
+    background: var(--nes-yellow);
+    color: #1a1a1a;
+    cursor: pointer;
+    box-shadow: 4px 4px 0 #1a1a1a;
+    margin-top: 10px;
+  }
+  .era-btn.era-finish { background: var(--nes-red); color: #fff; }
+
   /* ========== utility ========== */
   .hidden { display: none !important; }
   a { color: var(--nes-yellow); }
@@ -735,6 +838,20 @@
     <h2 id="modal-title"></h2>
     <div class="body" id="modal-body"></div>
     <div class="row" id="modal-row"></div>
+  </div>
+</div>
+
+<div class="era-modal-back" id="era-modal">
+  <div class="era-modal">
+    <div class="era-mascot" id="era-mascot">🎮</div>
+    <div class="era-label" id="era-label">Game Boy · 1989</div>
+    <div class="era-intro" id="era-intro"></div>
+    <div class="era-question hidden" id="era-question"></div>
+    <div class="era-opts" id="era-opts"></div>
+    <div class="era-feedback hidden" id="era-feedback"></div>
+    <div class="era-score" id="era-score"></div>
+    <button class="era-btn era-next hidden" id="era-next">▶ 下一題</button>
+    <button class="era-btn era-finish hidden" id="era-finish">▶ 收進圖鑑</button>
   </div>
 </div>
 
@@ -1491,21 +1608,128 @@ function breakBrick(stage, tx, ty) {
 
 function bumpEraBrick(stage, tx, ty) {
   stage.tiles[ty][tx] = 'X';
+  addScore(50);
   const items = (content.eraItems || []);
-  if (!items.length) { addScore(50); return; }
-  // Pick a random item player hasn't collected yet (or any if all collected)
+  if (!items.length) return;
+  // Prefer uncollected
   const uncollected = items.filter(it => !progress.collected.includes(it.id));
   const pool = uncollected.length ? uncollected : items;
   const item = pool[Math.floor(Math.random() * pool.length)];
+  startEraQuiz(item, tx * TILE + TILE/2, ty * TILE - 6);
+}
+
+// =====================================================
+// ERA RPG QUIZ — popup full-screen on bumping ! brick
+// =====================================================
+let activeQuiz = null;  // { item, qIdx, score }
+
+function startEraQuiz(item, partX, partY) {
+  // No questions → just collect silently
+  if (!item.questions || !item.questions.length) {
+    if (!progress.collected.includes(item.id)) {
+      progress.collected.push(item.id);
+      saveProgress();
+    }
+    if (partX !== undefined) spawnParticle(partX, partY, item.emoji + ' ' + item.label, '#ff66cc');
+    return;
+  }
+  activeQuiz = { item, qIdx: 0, score: 0, answers: [] };
+  modalOpen = true;
+  $('era-mascot').textContent = item.emoji;
+  $('era-label').textContent = item.label + ' · ' + item.year;
+  $('era-intro').textContent = item.intro || '';
+  $('era-feedback').classList.add('hidden');
+  $('era-next').classList.add('hidden');
+  $('era-finish').classList.add('hidden');
+  $('era-score').textContent = '';
+  renderEraQuestion();
+  $('era-modal').classList.add('open');
+}
+
+function renderEraQuestion() {
+  const q = activeQuiz.item.questions[activeQuiz.qIdx];
+  const qEl = $('era-question');
+  qEl.textContent = `[題 ${activeQuiz.qIdx + 1}/${activeQuiz.item.questions.length}] ${q.q}`;
+  qEl.classList.remove('hidden');
+  $('era-feedback').classList.add('hidden');
+  $('era-next').classList.add('hidden');
+  $('era-finish').classList.add('hidden');
+  const opts = $('era-opts');
+  opts.innerHTML = '';
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'era-opt';
+    btn.textContent = String.fromCharCode(65 + i) + '. ' + opt.a;
+    bindModalButton(btn, () => eraAnswer(opt, btn));
+    opts.appendChild(btn);
+  });
+}
+
+function eraAnswer(opt, btn) {
+  // disable other buttons
+  document.querySelectorAll('#era-opts .era-opt').forEach(b => b.disabled = true);
+  btn.classList.add(opt.correct ? 'correct' : 'wrong');
+  if (opt.correct) {
+    activeQuiz.score++;
+    addScore(100);
+  }
+  activeQuiz.answers.push({ qIdx: activeQuiz.qIdx, correct: !!opt.correct });
+  $('era-feedback').textContent = (opt.correct ? '✓ 對! ' : '✗ ') + (opt.response || '');
+  $('era-feedback').classList.remove('hidden');
+  $('era-score').textContent = '答對 ' + activeQuiz.score + ' / ' + (activeQuiz.qIdx + 1);
+  const isLast = activeQuiz.qIdx >= activeQuiz.item.questions.length - 1;
+  if (isLast) {
+    $('era-finish').classList.remove('hidden');
+    $('era-finish').textContent = '▶ 收進圖鑑 (+' + (activeQuiz.score * 100) + ')';
+  } else {
+    $('era-next').classList.remove('hidden');
+  }
+}
+
+bindModalButton($('era-next'), () => {
+  if (!activeQuiz) return;
+  activeQuiz.qIdx++;
+  renderEraQuestion();
+});
+
+bindModalButton($('era-finish'), () => finishEraQuiz());
+
+function finishEraQuiz() {
+  if (!activeQuiz) return;
+  const item = activeQuiz.item;
   if (!progress.collected.includes(item.id)) {
     progress.collected.push(item.id);
-    saveProgress();
-    spawnParticle(tx * TILE + TILE/2, ty * TILE - 6, item.emoji + ' ' + item.label + ' 收進圖鑑', '#ff66cc');
-  } else {
-    spawnParticle(tx * TILE + TILE/2, ty * TILE - 6, item.emoji + ' (重複)', '#ffe000');
   }
-  addScore(50);
+  // Bonus for full clear
+  if (activeQuiz.score === activeQuiz.item.questions.length) {
+    addScore(200);
+    spawnParticle(player.x + player.w/2, player.y - 30, '★ ' + item.label + ' 大師 +200', '#ff66cc');
+  } else {
+    spawnParticle(player.x + player.w/2, player.y - 30, item.emoji + ' ' + item.label + ' 收進圖鑑', '#ff66cc');
+  }
+  saveProgress();
+  closeEraQuiz();
 }
+
+function closeEraQuiz() {
+  activeQuiz = null;
+  modalOpen = false;
+  $('era-modal').classList.remove('open');
+}
+
+// Background click closes (skip)
+$('era-modal').addEventListener('click', e => {
+  if (e.target.id === 'era-modal') {
+    if (activeQuiz) {
+      // skip = collect without bonus
+      if (!progress.collected.includes(activeQuiz.item.id)) {
+        progress.collected.push(activeQuiz.item.id);
+        saveProgress();
+      }
+      closeEraQuiz();
+    }
+  }
+});
 
 function killEnemy(e) {
   e.dead = true;

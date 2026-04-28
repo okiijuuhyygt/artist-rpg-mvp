@@ -412,14 +412,134 @@
     ]
   },
   "eraItems": [
-    { "id": "gameboy",   "emoji": "🎮", "year": 1989, "label": "Game Boy",     "note": "我國小同學家有,我去他家蹭" },
-    { "id": "tamagotchi","emoji": "🥚", "year": 1996, "label": "電子雞",       "note": "我養死過三隻" },
-    { "id": "tape",      "emoji": "📼", "year": 1995, "label": "范曉萱錄音帶", "note": "我第一張買的專輯" },
+    {
+      "id": "nokia3310", "emoji": "📞", "year": 2002, "label": "Nokia 3310", "note": "貪食蛇玩到下課鐘響",
+      "intro": "你撿到 Nokia 3310!\n這隻在 2000 年代中期幾乎人手一支,號稱地表最堅硬的手機。",
+      "title": "考你三題,答對拿分。",
+      "questions": [
+        {
+          "q": "3310 最有名的內建遊戲是?",
+          "options": [
+            { "a": "貪食蛇 2 (Snake II)", "correct": true, "response": "對啦,我國中下課前最後 30 秒每天都在按。" },
+            { "a": "俄羅斯方塊", "correct": false, "response": "那是 Game Boy 的,3310 是貪食蛇 2。" },
+            { "a": "Pokemon Go", "correct": false, "response": "Pokemon Go 是 2016 才有的,3310 那時候連 GPS 都沒。" }
+          ]
+        },
+        {
+          "q": "3310 還有一款冷門遊戲是?",
+          "options": [
+            { "a": "星際大戰 (Space Impact)", "correct": true, "response": "對! 沒幾個人記得,但 3310 真的有這個太空打飛機。" },
+            { "a": "Candy Crush", "correct": false, "response": "Candy Crush 是 2012 智慧型手機才有。" },
+            { "a": "Angry Birds", "correct": false, "response": "Angry Birds 是 2009,iPhone 才有。" }
+          ]
+        },
+        {
+          "q": "3310 最神奇的特色是?",
+          "options": [
+            { "a": "可以換背殼 + 超耐摔", "correct": true, "response": "對! 一隻可以摔 100 次,然後換 5 種顏色背殼,都是文具店買得到的。" },
+            { "a": "可以拍照", "correct": false, "response": "3310 沒鏡頭,2003 之後的 Nokia 才有。" },
+            { "a": "可以上網", "correct": false, "response": "3310 是 2G 純通話 + 簡訊,WAP 都沒做好。" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tape", "emoji": "📼", "year": 1995, "label": "范曉萱錄音帶", "note": "我第一張買的專輯",
+      "intro": "你撿到范曉萱的錄音帶!\n這是我人生第一張買的專輯。",
+      "title": "考你三題范曉萱知識。",
+      "questions": [
+        {
+          "q": "范曉萱第一張專輯封面是什麼顏色?",
+          "options": [
+            { "a": "紅色", "correct": true, "response": "對! 一個小女孩穿紅色,封面整片紅。我跟我媽吵了三天才買到。" },
+            { "a": "藍色", "correct": false, "response": "藍色是後來《雪人》那張,1997 了。" },
+            { "a": "黃色", "correct": false, "response": "黃色是更後來《我要我們在一起》。" }
+          ]
+        },
+        {
+          "q": "這張專輯第一首歌是?",
+          "options": [
+            { "a": "健康歌", "correct": true, "response": "對! 早安 你好嗎 ~ 我陪我媽運動天天聽。" },
+            { "a": "稍息立正站好", "correct": false, "response": "那是後來,大概 96 年的歌。" },
+            { "a": "雪人", "correct": false, "response": "雪人是 97 年,專輯名也叫《雪人》。" }
+          ]
+        },
+        {
+          "q": "下面哪一首卡通主題曲 *沒* 收錄在范曉萱的卡通專輯?",
+          "options": [
+            { "a": "蠟筆小新", "correct": true, "response": "對! 蠟筆小新跟柯南、烏龍派出所都沒收。她收的是豆豆龍、魔女宅急便、櫻桃小丸子那批。" },
+            { "a": "豆豆龍", "correct": false, "response": "豆豆龍有收! 而且是經典版,不是後來重唱的。" },
+            { "a": "魔女宅急便", "correct": false, "response": "魔女宅急便有收 (你打字打成『模擬宅急便』被自動校正了哈哈)。" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tamagotchi", "emoji": "🥚", "year": 1996, "label": "電子雞", "note": "我養死過三隻",
+      "intro": "你撿到電子雞!\n1996 萬代出的,那年人手一隻掛書包。",
+      "title": "考你三題養雞知識。",
+      "questions": [
+        {
+          "q": "電子雞最常死的原因?",
+          "options": [
+            { "a": "不清大便累積到牠生病", "correct": true, "response": "對! 牠拉一坨你沒按掃把,牠就病給你看。我國小數學課偷按被沒收三次。" },
+            { "a": "電池沒電", "correct": false, "response": "電池可以撐 1-2 個月,死掉通常是疏於照顧。" },
+            { "a": "被別人按掉", "correct": false, "response": "被別人 reset 是 reset,不是死,還是有得重養。" }
+          ]
+        },
+        {
+          "q": "怎麼讓電子雞長得快又健康?",
+          "options": [
+            { "a": "餵食 + 訓練 + 清便 三件事輪流", "correct": true, "response": "對,缺一個就生病。我把這個玩成上班族行程表。" },
+            { "a": "一直按開關燈", "correct": false, "response": "燈只是讓牠睡覺,不會讓牠長大。" },
+            { "a": "搖一搖", "correct": false, "response": "搖一搖會讓牠暈,會生病。" }
+          ]
+        },
+        {
+          "q": "電子雞死了之後 *出現的畫面* 是?",
+          "options": [
+            { "a": "天使飛走了", "correct": true, "response": "對 ⋯ 一隻小天使飄上去然後 GAME OVER。我看到三次都哭了。" },
+            { "a": "蛋裂開", "correct": false, "response": "蛋裂開是出生啊。" },
+            { "a": "拉屎大爆炸", "correct": false, "response": "(這個畫面我倒是希望真的有)" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gameboy", "emoji": "🎮", "year": 1989, "label": "Game Boy", "note": "我國小同學家有,我去他家蹭",
+      "intro": "你撿到任天堂 Game Boy!\n1989 年出的,我國小那年同學家有,我每天去他家蹭。",
+      "title": "考你三題 Game Boy 知識。",
+      "questions": [
+        {
+          "q": "Game Boy 最神奇的「跨機通訊」靠什麼?",
+          "options": [
+            { "a": "紅外線(對著對面那台機器)", "correct": true, "response": "對! 兩台對著紅外線,可以交換寶可夢跟對戰。我跟同學在桌上對著對著差點翻倒。" },
+            { "a": "WiFi", "correct": false, "response": "Game Boy 1989 哪有 WiFi,WiFi 是 1997 之後的。" },
+            { "a": "藍牙", "correct": false, "response": "藍牙 1999 才有,Game Boy 早 10 年。" }
+          ]
+        },
+        {
+          "q": "Game Boy 螢幕的特色是?",
+          "options": [
+            { "a": "黃綠色 + 黑灰像素", "correct": true, "response": "對! 那種獨特的綠灰色 dot matrix,沒背光,要在燈下才看得到。" },
+            { "a": "全彩 OLED", "correct": false, "response": "全彩要等到 Game Boy Color (1998) 之後。原版是 4 階灰。" },
+            { "a": "觸控螢幕", "correct": false, "response": "觸控要 NDS (2004)。原版只有十字鍵 + AB。" }
+          ]
+        },
+        {
+          "q": "Game Boy 最暢銷的遊戲是?",
+          "options": [
+            { "a": "俄羅斯方塊 (Tetris)", "correct": true, "response": "對! 隨機附贈那個 Tetris 賣到爆炸,讓 Game Boy 直接統治掌上機市場。" },
+            { "a": "馬力歐", "correct": false, "response": "馬力歐也很賣,但 Tetris 才是 Game Boy 的代表作。" },
+            { "a": "寶可夢", "correct": false, "response": "寶可夢 1996 才出,那時 Game Boy 都快被 Color 取代了。" }
+          ]
+        }
+      ]
+    },
     { "id": "discman",   "emoji": "💿", "year": 1998, "label": "CD 隨身聽",    "note": "周杰倫 10 張我都用這個聽" },
     { "id": "yahoochat", "emoji": "💬", "year": 2003, "label": "奇摩聊天室",   "note": "暱稱『冷淡的少年』,沒人理我" },
     { "id": "msn",       "emoji": "📨", "year": 2004, "label": "MSN / 即時通", "note": "半夜跟暗戀的人說晚安" },
     { "id": "wretch",    "emoji": "📔", "year": 2005, "label": "無名小站",     "note": "日記都是『今天好煩』" },
-    { "id": "nokia3310", "emoji": "📞", "year": 2002, "label": "Nokia 3310",   "note": "貪食蛇玩到下課鐘響" },
     { "id": "foxy",      "emoji": "🦊", "year": 2008, "label": "Foxy",         "note": "大學每天從這偷音樂" },
     { "id": "sunoprompt","emoji": "🎼", "year": 2024, "label": "Suno",         "note": "現在我用這個做 demo,真的快" }
   ],
