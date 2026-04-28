@@ -14,11 +14,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build-version" content="haorio-1.7">
+<meta name="build-version" content="haorio-1.8">
 <script>
   // iOS Safari aggressive cache buster — force hard-reload if local cache holds older build
   (function() {
-    const CURRENT = 'haorio-1.7';
+    const CURRENT = 'haorio-1.8';
     const LAST = localStorage.getItem('haorio-build');
     if (LAST && LAST !== CURRENT && !location.search.includes('_nocache=')) {
       const sep = location.search ? '&' : '?';
@@ -789,7 +789,7 @@ let scene = 'loading';     // loading | title | playing
 let bgmAudio = null;
 let lastFrame = 0;
 let hud = { coins: 0, lives: 10 };
-let progress = { cleared: [], best: {}, lastStage: 0, badges: [], milestones: [] };
+let progress = { cleared: [], best: {}, lastStage: 0, badges: [], milestones: [], collected: [] };
 let activeNpc = null;        // NPC the dialogue is currently for
 let dialogueOpen = false;
 
@@ -904,9 +904,14 @@ async function boot() {
     return;
   }
   stages = content.world1.stages.map(s => ({
-    ...s,
+    ...s, world: 1,
     tiles: parseLayout(s.layout)
   }));
+  if (content.world2 && content.world2.enabled && Array.isArray(content.world2.stages)) {
+    content.world2.stages.forEach(s => {
+      stages.push({ ...s, world: 2, tiles: parseLayout(s.layout) });
+    });
+  }
 
   // Load progress
   try {
@@ -914,6 +919,7 @@ async function boot() {
     if (saved.cleared) progress.cleared = saved.cleared;
     if (saved.badges)  progress.badges = saved.badges;
     if (saved.milestones) progress.milestones = saved.milestones;
+    if (saved.collected) progress.collected = saved.collected;
     if (saved.coins) hud.coins = saved.coins;
     if (typeof saved.lastStage === 'number') progress.lastStage = saved.lastStage;
   } catch {}
@@ -943,6 +949,7 @@ function saveProgress() {
       cleared: progress.cleared,
       badges: progress.badges,
       milestones: progress.milestones,
+      collected: progress.collected,
       coins: hud.coins,
       lastStage: stageIdx
     }));
@@ -1273,6 +1280,9 @@ function startStage(idx) {
       } else if (c === 'K') {
         enemies.push(makeKoopa(tx * TILE, ty * TILE));
         stage.tiles[ty][tx] = '.';
+      } else if (c === 'M') {
+        enemies.push(makeBoss(tx * TILE - 8, ty * TILE - 16));
+        stage.tiles[ty][tx] = '.';
       } else if (c === 'N') {
         if (stage.npc) {
           npcs.push(makeNpc(tx * TILE, ty * TILE, stage.npc));
@@ -1345,8 +1355,20 @@ function makeKoopa(x, y) {
     dead: false,
     deathTimer: 0,
     type: 'koopa',
-    state: 'walk',  // walk | shell | sliding
+    state: 'walk',
     shellTimer: 0
+  };
+}
+function makeBoss(x, y) {
+  return {
+    x, y, w: 48, h: 48,
+    vx: -0.6, vy: 0,
+    grounded: false,
+    facing: -1,
+    bumpOnWall: true,
+    dead: false,
+    deathTimer: 0,
+    type: 'boss'
   };
 }
 
@@ -1360,7 +1382,7 @@ function tileAt(stage, tx, ty) {
   return row[tx];
 }
 function isSolid(c) {
-  return c === '#' || c === 'B' || c === '?' || c === 'X';
+  return c === '#' || c === 'B' || c === '?' || c === 'X' || c === '!';
 }
 function moveAndCollide(entity, stage) {
   const stageW = (stage.tiles[0]?.length || 80) * TILE;
@@ -1428,6 +1450,7 @@ function moveAndCollide(entity, stage) {
         entity.vy = 0;
         if (c === '?' && entity.canBumpBlocks) bumpBlock(stage, tx, ty);
         else if (c === 'B' && entity.canBumpBlocks) breakBrick(stage, tx, ty);
+        else if (c === '!' && entity.canBumpBlocks) bumpEraBrick(stage, tx, ty);
         break;
       }
     }
@@ -1466,10 +1489,41 @@ function breakBrick(stage, tx, ty) {
   addScore(50, tx * TILE + TILE/2, ty * TILE - 6);
 }
 
+function bumpEraBrick(stage, tx, ty) {
+  stage.tiles[ty][tx] = 'X';
+  const items = (content.eraItems || []);
+  if (!items.length) { addScore(50); return; }
+  // Pick a random item player hasn't collected yet (or any if all collected)
+  const uncollected = items.filter(it => !progress.collected.includes(it.id));
+  const pool = uncollected.length ? uncollected : items;
+  const item = pool[Math.floor(Math.random() * pool.length)];
+  if (!progress.collected.includes(item.id)) {
+    progress.collected.push(item.id);
+    saveProgress();
+    spawnParticle(tx * TILE + TILE/2, ty * TILE - 6, item.emoji + ' ' + item.label + ' 收進圖鑑', '#ff66cc');
+  } else {
+    spawnParticle(tx * TILE + TILE/2, ty * TILE - 6, item.emoji + ' (重複)', '#ffe000');
+  }
+  addScore(50);
+}
+
 function killEnemy(e) {
   e.dead = true;
   e.deathTimer = 30;
   addScore(150, e.x + e.w/2, e.y - 4);
+  // Boss kill = vote for the song this stage is about
+  if (e.type === 'boss' && stages[stageIdx] && stages[stageIdx].voteKey) {
+    castVote(stages[stageIdx]);
+  }
+}
+
+function castVote(stage) {
+  // Hit the abacus shared counter
+  try {
+    const ns = (content.world2 && content.world2.voteAbacusNs) || 'haorio-ep2-vault';
+    fetch(`https://abacus.jasoncameron.dev/hit/${ns}/${encodeURIComponent(stage.voteKey)}`).catch(() => {});
+  } catch {}
+  spawnParticle(player.x + player.w/2, player.y - 30, '★ +1 票 ' + stage.songId, '#ffe000');
 }
 
 function addScore(n, partX, partY) {
@@ -1840,13 +1894,23 @@ function updatePlayer() {
             return;
           }
         }
+      } else if (e.type === 'boss') {
+        // Boss = stomp / shoot to vote
+        if (isStomp) {
+          killEnemy(e);  // triggers castVote
+          player.vy = phys.jumpVelocity * 0.8;
+          player.invuln = 24;
+        } else if (player.invuln === 0) {
+          killPlayer();
+          return;
+        }
       } else {
         // Goomba (default)
         if (isStomp) {
           e.dead = true;
           e.deathTimer = 20;
           player.vy = phys.jumpVelocity * 0.6;
-          player.invuln = 18;  // prevents adjacent Goomba killing on the same frame
+          player.invuln = 18;
           spawnParticle(e.x + e.w/2, e.y - 4, '+50', '#fff');
         } else if (player.invuln === 0) {
           killPlayer();
@@ -2304,6 +2368,7 @@ function drawTiles(stage) {
       if (c === '#') drawGround(px, py, stage.groundColor);
       else if (c === 'B') drawBrick(px, py, stage.brickColor);
       else if (c === '?') drawQuestion(px, py);
+      else if (c === '!') drawEraBlock(px, py);
       else if (c === 'X') drawUsedBlock(px, py);
       else if (c === 'F') drawFlag(px, py, ty, tx, stage);
     }
@@ -2356,6 +2421,24 @@ function drawUsedBlock(px, py) {
   ctx.fillStyle = shade('#7a4a00', -20);
   ctx.fillRect(px, py + TILE - 4, TILE, 4);
   ctx.fillRect(px, py, TILE, 3);
+}
+function drawEraBlock(px, py) {
+  // purple-magenta variant of ? block — era item brick
+  const t = Math.floor(performance.now() / 200) % 2;
+  ctx.fillStyle = t === 0 ? '#c84cc8' : '#a040a0';
+  ctx.fillRect(px, py, TILE, TILE);
+  ctx.fillStyle = '#5a2a5a';
+  ctx.fillRect(px, py, TILE, 3);
+  ctx.fillRect(px, py + TILE - 3, TILE, 3);
+  ctx.fillRect(px, py, 3, TILE);
+  ctx.fillRect(px + TILE - 3, py, 3, TILE);
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 18px monospace';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('!', px + TILE/2, py + TILE/2 + 1);
+  ctx.textAlign = 'start';
+  ctx.textBaseline = 'alphabetic';
 }
 function drawFlag(px, py, ty, tx, stage) {
   const poleH = TILE * 4;
@@ -2486,6 +2569,17 @@ function drawEnemy(e) {
   }
   const px = Math.round(e.x - camera.x);
   const py = Math.round(e.y);
+  if (e.type === 'boss') {
+    // 2x Goomba — uses GOOMBA_SPRITE at scale 4 → 56x48,hitbox 48x48
+    drawSprite(GOOMBA_SPRITE, GOOMBA_PALETTE, px, py, 4, e.facing > 0);
+    // crown effect
+    ctx.fillStyle = '#ffe000';
+    ctx.font = 'bold 14px "Press Start 2P", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('★', px + e.w/2, py - 4);
+    ctx.textAlign = 'start';
+    return;
+  }
   if (e.type === 'koopa') {
     if (e.state === 'walk') {
       // 12x16 sprite at scale 2 → 24x32, hitbox 24x32

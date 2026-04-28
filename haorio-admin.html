@@ -421,6 +421,37 @@
     font-weight: bold;
   }
 
+  /* tabs */
+  .tab-bar {
+    position: sticky;
+    top: 56px;
+    background: #1a1a1a;
+    padding: 8px;
+    margin: -8px -8px 16px;
+    z-index: 40;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    border-bottom: 3px solid var(--nes-yellow);
+  }
+  .tab-btn {
+    background: transparent;
+    color: rgba(255,255,255,0.6);
+    border: 2px solid rgba(255,255,255,0.3);
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    padding: 8px 10px;
+    cursor: pointer;
+  }
+  .tab-btn:hover { color: #fff; border-color: var(--nes-yellow); }
+  .tab-btn.active {
+    background: var(--nes-yellow);
+    color: #1a1a1a;
+    border-color: var(--nes-yellow);
+  }
+  .tab-section { display: none; }
+  .tab-section.active { display: block; }
+
   /* loading */
   #loadingContent {
     text-align: center;
@@ -478,7 +509,20 @@
         ▶ <a href="admin.html" target="_blank">舊版 admin(新分頁)</a>
       </div>
 
-      <div class="section">
+      <div class="tab-bar" id="tabBar">
+        <button class="tab-btn active" data-tab="tab-meta">🌍 世界</button>
+        <button class="tab-btn" data-tab="tab-character">👤 角色</button>
+        <button class="tab-btn" data-tab="tab-physics">🎮 物理</button>
+        <button class="tab-btn" data-tab="tab-stages">📜 World 1 (5 關)</button>
+        <button class="tab-btn" data-tab="tab-world2">🆕 World 2 (3 關)</button>
+        <button class="tab-btn" data-tab="tab-eraitems">📦 時代物件</button>
+        <button class="tab-btn" data-tab="tab-marquee">📣 跑馬燈</button>
+        <button class="tab-btn" data-tab="tab-bgm">🎵 BGM</button>
+        <button class="tab-btn" data-tab="tab-endgame">🏁 結算</button>
+        <button class="tab-btn" data-tab="tab-danger">⚠ 危險</button>
+      </div>
+
+      <div class="section tab-section" id="tab-meta">
         <h2>🌍 世界設定</h2>
         <div class="field">
           <label>WORLD NAME(標題)</label>
@@ -490,20 +534,20 @@
         </div>
       </div>
 
-      <div class="section">
+      <div class="section tab-section" id="tab-character">
         <h2>👤 角色配色</h2>
         <p class="help">點色塊修改。改完按右下「儲存到網站」上傳。</p>
         <div class="color-row" id="characterColors"></div>
       </div>
 
-      <div class="section">
+      <div class="section tab-section" id="tab-physics">
         <h2>🎮 物理參數</h2>
         <p class="help">Mario 手感的命脈。試到爽為止。</p>
         <div id="physicsSliders"></div>
       </div>
 
-      <div class="section">
-        <h2>📜 五個 STAGE</h2>
+      <div class="section tab-section" id="tab-stages">
+        <h2>📜 World 1 · 5 個 STAGE</h2>
         <div class="legend">
           地圖符號:
           <code>.</code>空 ·
@@ -520,7 +564,20 @@
         <div id="stagesList"></div>
       </div>
 
-      <div class="section">
+      <div class="section tab-section" id="tab-world2">
+        <h2>🆕 World 2 · 未發行倉庫(3 首歌 mini-boss)</h2>
+        <p class="help">每關 1 隻 boss = 1 首歌。玩家踩 / 子彈打 boss → 自動投票(abacus +1) + 跳出 backstory modal。</p>
+        <div id="world2List"></div>
+      </div>
+
+      <div class="section tab-section" id="tab-eraitems">
+        <h2>📦 時代物件圖鑑</h2>
+        <p class="help">layout 加 <code>!</code> = 時代物件磚。撞下方噴一個物件給玩家撿,進圖鑑。</p>
+        <div id="eraItemsList"></div>
+        <button class="btn-add" id="btnAddEraItem">+ 新增物件</button>
+      </div>
+
+      <div class="section tab-section" id="tab-marquee">
         <h2>📣 跑馬燈</h2>
         <div class="field-row">
           <div class="field" style="flex:0 0 130px;">
@@ -535,13 +592,13 @@
         <button class="btn-add" id="btnAddMarquee">+ 新增一條</button>
       </div>
 
-      <div class="section">
+      <div class="section tab-section" id="tab-bgm">
         <h2>🎵 BGM</h2>
         <div id="audioSlots"></div>
         <p class="help">需要新音檔可以從 <a href="admin.html#audioUploads" target="_blank">舊 admin 音檔倉庫</a> 上傳,這邊只是選 audio/ 裡有什麼。</p>
       </div>
 
-      <div class="section">
+      <div class="section tab-section" id="tab-endgame">
         <h2>🏁 GAME CLEAR(全部過完顯示)</h2>
         <div class="field">
           <label>標題</label>
@@ -563,7 +620,7 @@
         </div>
       </div>
 
-      <div class="section">
+      <div class="section tab-section" id="tab-danger">
         <h2>⚠ 危險區</h2>
         <div class="btn-row">
           <button class="btn-danger" id="btnLogout">登出 + 清除 Token</button>
@@ -735,7 +792,114 @@ function renderEditor() {
   renderStages();
   renderMarquee();
   renderAudioSlots();
+  renderWorld2();
+  renderEraItems();
 }
+
+function renderWorld2() {
+  const box = document.getElementById('world2List');
+  if (!box) return;
+  box.innerHTML = '';
+  if (!contentData.world2) contentData.world2 = { enabled: true, stages: [] };
+  const w2 = contentData.world2;
+
+  const enableRow = document.createElement('div');
+  enableRow.className = 'field-row';
+  enableRow.innerHTML = `
+    <div class="field" style="flex:0 0 200px;">
+      <label>WORLD 2 啟用</label>
+      <select class="w2-en">
+        <option value="true" ${w2.enabled ? 'selected' : ''}>on</option>
+        <option value="false" ${!w2.enabled ? 'selected' : ''}>off</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Abacus 計數器 namespace</label>
+      <input type="text" class="w2-ns" value="${escapeHtml(w2.voteAbacusNs || 'haorio-ep2-vault')}">
+    </div>
+  `;
+  enableRow.querySelector('.w2-en').addEventListener('change', e => { w2.enabled = e.target.value === 'true'; markDirty(); });
+  enableRow.querySelector('.w2-ns').addEventListener('input', e => { w2.voteAbacusNs = e.target.value; markDirty(); });
+  box.appendChild(enableRow);
+
+  (w2.stages || []).forEach((s, idx) => {
+    const block = document.createElement('div');
+    block.className = 'stage-block';
+    block.innerHTML = `
+      <div class="stage-head">
+        <span class="stage-id">${escapeHtml(s.id || '2-?')}</span>
+        <span class="stage-title-text">${escapeHtml(s.title || '')}</span>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>關卡標題</label><input type="text" class="ws-title" value="${escapeHtml(s.title || '')}"></div>
+        <div class="field"><label>歌曲 ID</label><input type="text" class="ws-songid" value="${escapeHtml(s.songId || '')}"></div>
+        <div class="field"><label>Vote Key (abacus)</label><input type="text" class="ws-votekey" value="${escapeHtml(s.voteKey || '')}"></div>
+      </div>
+      <div class="field"><label>Backstory</label><textarea class="ws-back" rows="3">${escapeHtml(s.songBackstory || '')}</textarea></div>
+      <h3>地圖布局(M = mini-boss, F = 旗杆)</h3>
+      <div class="field"><textarea class="ws-layout layout-grid" rows="14" wrap="off">${escapeHtml((s.layout || []).join('\n'))}</textarea></div>
+      <h3>過關 modal</h3>
+      <div class="field"><label>標題</label><input type="text" class="ws-mt" value="${escapeHtml(s.endModalTitle || '')}"></div>
+      <div class="field"><label>內文</label><textarea class="ws-mb" rows="4">${escapeHtml(s.endModalBody || '')}</textarea></div>
+      <div class="field-row">
+        <div class="field"><label>CTA 按鈕</label><input type="text" class="ws-cta" value="${escapeHtml(s.endModalCta || '')}"></div>
+        <div class="field-row">
+          <div class="field"><label>背景色</label><input type="color" class="ws-bg" value="${escapeHtml(s.bgColor || '#1a0a2a')}"></div>
+          <div class="field"><label>地面色</label><input type="color" class="ws-gd" value="${escapeHtml(s.groundColor || '#5a3a1a')}"></div>
+          <div class="field"><label>磚色</label><input type="color" class="ws-br" value="${escapeHtml(s.brickColor || '#8a5a2a')}"></div>
+        </div>
+      </div>
+    `;
+    block.querySelector('.ws-title').addEventListener('input', e => { s.title = e.target.value; markDirty(); });
+    block.querySelector('.ws-songid').addEventListener('input', e => { s.songId = e.target.value; markDirty(); });
+    block.querySelector('.ws-votekey').addEventListener('input', e => { s.voteKey = e.target.value; markDirty(); });
+    block.querySelector('.ws-back').addEventListener('input', e => { s.songBackstory = e.target.value; markDirty(); });
+    block.querySelector('.ws-layout').addEventListener('input', e => { s.layout = e.target.value.split('\n'); markDirty(); });
+    block.querySelector('.ws-mt').addEventListener('input', e => { s.endModalTitle = e.target.value; markDirty(); });
+    block.querySelector('.ws-mb').addEventListener('input', e => { s.endModalBody = e.target.value; markDirty(); });
+    block.querySelector('.ws-cta').addEventListener('input', e => { s.endModalCta = e.target.value; markDirty(); });
+    block.querySelector('.ws-bg').addEventListener('input', e => { s.bgColor = e.target.value; markDirty(); });
+    block.querySelector('.ws-gd').addEventListener('input', e => { s.groundColor = e.target.value; markDirty(); });
+    block.querySelector('.ws-br').addEventListener('input', e => { s.brickColor = e.target.value; markDirty(); });
+    box.appendChild(block);
+  });
+}
+
+function renderEraItems() {
+  const box = document.getElementById('eraItemsList');
+  if (!box) return;
+  box.innerHTML = '';
+  if (!Array.isArray(contentData.eraItems)) contentData.eraItems = [];
+  contentData.eraItems.forEach((it, idx) => {
+    const row = document.createElement('div');
+    row.className = 'stage-block';
+    row.style.padding = '10px';
+    row.innerHTML = `
+      <div class="field-row">
+        <div class="field" style="flex:0 0 80px;"><label>Emoji</label><input type="text" class="ei-em" value="${escapeHtml(it.emoji || '')}" maxlength="4"></div>
+        <div class="field"><label>名稱</label><input type="text" class="ei-lab" value="${escapeHtml(it.label || '')}"></div>
+        <div class="field" style="flex:0 0 100px;"><label>年份</label><input type="number" class="ei-yr" value="${it.year || ''}"></div>
+        <div class="field" style="flex:0 0 80px;"><label>id</label><input type="text" class="ei-id" value="${escapeHtml(it.id || '')}"></div>
+        <button class="btn-mini ei-del" type="button" style="align-self:end;">刪</button>
+      </div>
+      <div class="field"><label>說明</label><input type="text" class="ei-note" value="${escapeHtml(it.note || '')}"></div>
+    `;
+    row.querySelector('.ei-em').addEventListener('input', e => { it.emoji = e.target.value; markDirty(); });
+    row.querySelector('.ei-lab').addEventListener('input', e => { it.label = e.target.value; markDirty(); });
+    row.querySelector('.ei-yr').addEventListener('input', e => { it.year = parseInt(e.target.value) || 0; markDirty(); });
+    row.querySelector('.ei-id').addEventListener('input', e => { it.id = e.target.value; markDirty(); });
+    row.querySelector('.ei-note').addEventListener('input', e => { it.note = e.target.value; markDirty(); });
+    row.querySelector('.ei-del').addEventListener('click', () => { contentData.eraItems.splice(idx, 1); renderEraItems(); markDirty(); });
+    box.appendChild(row);
+  });
+}
+
+document.getElementById('btnAddEraItem').addEventListener('click', () => {
+  if (!Array.isArray(contentData.eraItems)) contentData.eraItems = [];
+  contentData.eraItems.push({ id: 'new', emoji: '🎁', label: '新物件', year: 2000, note: '' });
+  renderEraItems();
+  markDirty();
+});
 
 function renderCharacterColors() {
   const box = $('characterColors');
@@ -1148,6 +1312,24 @@ $('hdr-logout').addEventListener('click', () => {
   localStorage.removeItem(LS_TOKEN);
   route();
 });
+
+// =======================================================
+// TABS
+// =======================================================
+function activateTab(id) {
+  document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  const sec = document.getElementById(id);
+  const btn = document.querySelector(`.tab-btn[data-tab="${id}"]`);
+  if (sec) sec.classList.add('active');
+  if (btn) btn.classList.add('active');
+  window.scrollTo(0, 0);
+}
+document.querySelectorAll('.tab-btn').forEach(b => {
+  b.addEventListener('click', () => activateTab(b.dataset.tab));
+});
+// Default active
+activateTab('tab-meta');
 
 // =======================================================
 // BOOT
