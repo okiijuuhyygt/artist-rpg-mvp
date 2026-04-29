@@ -228,7 +228,7 @@
         "endModalTitle": "L2 · 分岔路",
         "endModalBody": "走到這裡,地圖分岔了。A 是繼續往深處走的慢歌,B 是把情緒撕開的節奏歌。我都寫了一半。拿到「初代 Demo 鑰匙」的人可以投票決定我先把哪一首錄完。",
         "endModalCta": "繼續 → 1-4",
-        "bgm": "audio/這也不是什麼愛情故事.mp3"
+        "bgm": "audio/haorio-bgm-1777406561784.mp3"
       },
       {
         "id": "1-4",
@@ -514,7 +514,7 @@
         "endModalTitle": "🎵 2-3 · 小九份(WORLD 2 完)",
         "endModalBody": "Bridge 缺一句。\n你選的那個我會記下來,真的可能變最後 EP3 上架的歌詞。\n\n你陪我走完了 8 關 — World 1 + World 2 倉庫。",
         "endModalCta": "▶ 前往倉庫留 email",
-        "bgm": "audio/haorio-bgm-1777406561784.mp3"
+        "bgm": "audio/haorio-bgm-1777406044850.mp3"
       }
     ]
   },
