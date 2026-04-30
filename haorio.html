@@ -24,11 +24,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build-version" content="haorio-1.54">
+<meta name="build-version" content="haorio-1.55">
 <script>
   // iOS Safari aggressive cache buster — force hard-reload if local cache holds older build
   (function() {
-    const CURRENT = 'haorio-1.54';
+    const CURRENT = 'haorio-1.55';
     const LAST = localStorage.getItem('haorio-build');
     if (LAST && LAST !== CURRENT && !location.search.includes('_nocache=')) {
       const sep = location.search ? '&' : '?';
@@ -1176,15 +1176,13 @@
   <p>這款遊戲是 <strong>橫向 8-bit</strong>，但 IG / LINE / FB 內建瀏覽器卡住兩件事：</p>
   <p>① 不支援橫向顯示<br>② 不會自動跳 Safari/Chrome</p>
   <div class="step">
-    請點 <strong>右上角的 ⋯</strong><br>
+    請點 <strong>右上角 ⋯</strong><br>
     →<br>
-    <strong>「在 Safari 開啟」</strong>
+    <strong>「在 Safari 開啟」</strong><br>
+    <span style="font-size:0.85em;opacity:0.75;">(or「用瀏覽器開啟」)</span>
   </div>
-  <p style="font-size:13px;opacity:0.65;">(IG iOS 是右上角 ⋯ / LINE 是右下角 ↗ / FB 看版本)</p>
-  <div class="btn-row">
-    <button class="primary" id="inapp-copy">📋 複製網址自己貼</button>
-    <button class="dismiss" id="inapp-dismiss">就直拿玩(體驗會差)</button>
-  </div>
+  <p style="font-size:13px;opacity:0.65;">(IG / FB 右上 ⋯ / LINE 右下 ↗)</p>
+  <button class="dismiss" id="inapp-dismiss">就直拿玩(體驗會差)</button>
 </div>
 
 <div id="marquee"><div class="track" id="marquee-track">載入中...</div></div>
@@ -1485,19 +1483,6 @@ async function boot() {
       document.body.classList.add('inapp-browser');
       const nameEl = document.getElementById('inapp-name');
       if (nameEl) nameEl.textContent = inappName;
-      const copyBtn = document.getElementById('inapp-copy');
-      if (copyBtn) copyBtn.onclick = () => {
-        const url = location.origin + location.pathname;
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(url).then(() => {
-            copyBtn.textContent = '✓ 已複製,貼到 Safari';
-          }).catch(() => {
-            copyBtn.textContent = url;
-          });
-        } else {
-          copyBtn.textContent = url;
-        }
-      };
       const dismissBtn = document.getElementById('inapp-dismiss');
       if (dismissBtn) dismissBtn.onclick = () => document.body.classList.add('inapp-dismissed');
     }
