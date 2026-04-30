@@ -24,11 +24,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build-version" content="haorio-1.53">
+<meta name="build-version" content="haorio-1.54">
 <script>
   // iOS Safari aggressive cache buster — force hard-reload if local cache holds older build
   (function() {
-    const CURRENT = 'haorio-1.53';
+    const CURRENT = 'haorio-1.54';
     const LAST = localStorage.getItem('haorio-build');
     if (LAST && LAST !== CURRENT && !location.search.includes('_nocache=')) {
       const sep = location.search ? '&' : '?';
@@ -414,6 +414,94 @@
   body.og-mode #title-scene .title-spotify,
   body.og-mode #title-scene .meta {
     display: none !important;
+  }
+
+  /* In-app browser warning (IG / LINE / FB / Threads can't go landscape, can't unlock orientation) */
+  #inapp-warn {
+    position: fixed; inset: 0;
+    background: rgba(0, 0, 0, 0.94);
+    z-index: 9998;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px 20px;
+    color: #fff;
+    overflow-y: auto;
+  }
+  body.inapp-browser:not(.inapp-dismissed) #inapp-warn { display: flex; }
+  #inapp-warn .arrow-up-right {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    font-size: 48px;
+    color: var(--nes-yellow);
+    animation: arrow-bounce 1.2s ease-in-out infinite;
+    text-shadow: 0 0 14px rgba(255, 224, 0, 0.75);
+    pointer-events: none;
+  }
+  @keyframes arrow-bounce {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(10px, -10px); }
+  }
+  #inapp-warn h2 {
+    font-family: 'Press Start 2P', 'Cubic 11', monospace;
+    font-size: clamp(16px, 4.5vw, 22px);
+    color: var(--nes-yellow);
+    margin: 0 0 14px;
+    letter-spacing: 2px;
+  }
+  #inapp-warn p {
+    font-family: 'VT323', monospace;
+    font-size: clamp(15px, 3.5vw, 18px);
+    line-height: 1.55;
+    margin: 6px 0;
+    max-width: 480px;
+    color: rgba(255, 255, 255, 0.9);
+  }
+  #inapp-warn .step {
+    background: rgba(255, 224, 0, 0.12);
+    border: 2px solid var(--nes-yellow);
+    padding: 12px 16px;
+    margin: 16px 0;
+    font-family: 'VT323', monospace;
+    font-size: clamp(15px, 3.6vw, 18px);
+    max-width: 460px;
+    line-height: 1.6;
+  }
+  #inapp-warn .step strong {
+    color: var(--nes-yellow);
+    font-family: 'Press Start 2P', 'Cubic 11', monospace;
+    font-size: 0.85em;
+    padding: 0 4px;
+  }
+  #inapp-warn .btn-row {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 12px;
+  }
+  #inapp-warn button {
+    font-family: 'Press Start 2P', 'Cubic 11', monospace;
+    font-size: 11px;
+    padding: 12px 18px;
+    cursor: pointer;
+    border: 2px solid var(--nes-yellow);
+    background: transparent;
+    color: var(--nes-yellow);
+    letter-spacing: 1px;
+    min-width: 240px;
+  }
+  #inapp-warn button.primary {
+    background: var(--nes-yellow);
+    color: #000;
+  }
+  #inapp-warn button:active { transform: translate(2px, 2px); }
+  #inapp-warn .dismiss {
+    color: rgba(255, 255, 255, 0.5);
+    border-color: rgba(255, 255, 255, 0.3);
+    font-size: 9px;
   }
 
   /* ========== badges row ========== */
@@ -1080,6 +1168,25 @@
 </head>
 <body>
 
+<!-- In-app browser warning (IG / LINE / FB / Threads — block landscape + auto-redirect) -->
+<div id="inapp-warn">
+  <div class="arrow-up-right">↗</div>
+  <h2>★ 等等 ★</h2>
+  <p>你正在用 <strong id="inapp-name">Instagram</strong> 內建瀏覽器</p>
+  <p>這款遊戲是 <strong>橫向 8-bit</strong>，但 IG / LINE / FB 內建瀏覽器卡住兩件事：</p>
+  <p>① 不支援橫向顯示<br>② 不會自動跳 Safari/Chrome</p>
+  <div class="step">
+    請點 <strong>右上角的 ⋯</strong><br>
+    →<br>
+    <strong>「在 Safari 開啟」</strong>
+  </div>
+  <p style="font-size:13px;opacity:0.65;">(IG iOS 是右上角 ⋯ / LINE 是右下角 ↗ / FB 看版本)</p>
+  <div class="btn-row">
+    <button class="primary" id="inapp-copy">📋 複製網址自己貼</button>
+    <button class="dismiss" id="inapp-dismiss">就直拿玩(體驗會差)</button>
+  </div>
+</div>
+
 <div id="marquee"><div class="track" id="marquee-track">載入中...</div></div>
 
 <div id="rotate-warn">
@@ -1363,6 +1470,39 @@ async function boot() {
 
   // OG image generation mode (?og=1): hide marquee + Spotify + meta, change btn text
   if (location.search.includes('og=1')) document.body.classList.add('og-mode');
+
+  // In-app browser detection (IG / LINE / FB / Threads block landscape + auto-redirect)
+  // ?bypass=1 query 強制跳過 (debug 用)
+  if (!location.search.includes('bypass=1')) {
+    const ua = navigator.userAgent || '';
+    let inappName = null;
+    if (/Instagram/.test(ua)) inappName = 'Instagram';
+    else if (/Line\//.test(ua)) inappName = 'LINE';
+    else if (/FBAN|FBAV|FB_IAB/.test(ua)) inappName = 'Facebook';
+    else if (/\bThreads\b|Barcelona/.test(ua)) inappName = 'Threads';
+    else if (/\biPhone\b/.test(ua) && !/Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS/.test(ua)) inappName = '內建瀏覽器';
+    if (inappName) {
+      document.body.classList.add('inapp-browser');
+      const nameEl = document.getElementById('inapp-name');
+      if (nameEl) nameEl.textContent = inappName;
+      const copyBtn = document.getElementById('inapp-copy');
+      if (copyBtn) copyBtn.onclick = () => {
+        const url = location.origin + location.pathname;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(url).then(() => {
+            copyBtn.textContent = '✓ 已複製,貼到 Safari';
+          }).catch(() => {
+            copyBtn.textContent = url;
+          });
+        } else {
+          copyBtn.textContent = url;
+        }
+      };
+      const dismissBtn = document.getElementById('inapp-dismiss');
+      if (dismissBtn) dismissBtn.onclick = () => document.body.classList.add('inapp-dismissed');
+    }
+  }
+
   initMarquee();
   initInput();
   initBGM();  // Boot init (revert v1.46 removal — was breaking BGM)
