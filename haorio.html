@@ -24,11 +24,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build-version" content="haorio-1.55">
+<meta name="build-version" content="haorio-1.56">
 <script>
   // iOS Safari aggressive cache buster — force hard-reload if local cache holds older build
   (function() {
-    const CURRENT = 'haorio-1.55';
+    const CURRENT = 'haorio-1.56';
     const LAST = localStorage.getItem('haorio-build');
     if (LAST && LAST !== CURRENT && !location.search.includes('_nocache=')) {
       const sep = location.search ? '&' : '?';
@@ -1182,7 +1182,6 @@
     <span style="font-size:0.85em;opacity:0.75;">(or「用瀏覽器開啟」)</span>
   </div>
   <p style="font-size:13px;opacity:0.65;">(IG / FB 右上 ⋯ / LINE 右下 ↗)</p>
-  <button class="dismiss" id="inapp-dismiss">就直拿玩(體驗會差)</button>
 </div>
 
 <div id="marquee"><div class="track" id="marquee-track">載入中...</div></div>
@@ -1483,8 +1482,6 @@ async function boot() {
       document.body.classList.add('inapp-browser');
       const nameEl = document.getElementById('inapp-name');
       if (nameEl) nameEl.textContent = inappName;
-      const dismissBtn = document.getElementById('inapp-dismiss');
-      if (dismissBtn) dismissBtn.onclick = () => document.body.classList.add('inapp-dismissed');
     }
   }
 
