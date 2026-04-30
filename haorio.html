@@ -24,11 +24,11 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build-version" content="haorio-1.57">
+<meta name="build-version" content="haorio-1.58">
 <script>
   // iOS Safari aggressive cache buster — force hard-reload if local cache holds older build
   (function() {
-    const CURRENT = 'haorio-1.57';
+    const CURRENT = 'haorio-1.58';
     const LAST = localStorage.getItem('haorio-build');
     if (LAST && LAST !== CURRENT && !location.search.includes('_nocache=')) {
       const sep = location.search ? '&' : '?';
@@ -1168,20 +1168,15 @@
 </head>
 <body>
 
-<!-- In-app browser warning (IG / LINE / FB / Threads — block landscape + auto-redirect) -->
+<!-- In-app browser warning (IG / Threads — block landscape) -->
 <div id="inapp-warn">
   <div class="arrow-up-right">↗</div>
   <h2>★ 等等 ★</h2>
-  <p>你正在用 <strong id="inapp-name">Instagram</strong> 內建瀏覽器</p>
-  <p>這款遊戲是 <strong>橫向 8-bit</strong>，但 IG / LINE / FB 內建瀏覽器卡住兩件事：</p>
-  <p>① 不支援橫向顯示<br>② 不會自動跳 Safari/Chrome</p>
   <div class="step">
     請點 <strong>右上角 ⋯</strong><br>
     →<br>
-    <strong>「在外部瀏覽器開啟」</strong><br>
-    <span style="font-size:0.8em;opacity:0.7;">(各 app 措辭略不同：「在瀏覽器中開啟」/「Open in browser」)</span>
+    <strong>「在外部瀏覽器開啟」</strong>
   </div>
-  <p style="font-size:13px;opacity:0.65;">(IG / FB 右上 ⋯ / LINE 右下 ↗)</p>
 </div>
 
 <div id="marquee"><div class="track" id="marquee-track">載入中...</div></div>
@@ -1480,8 +1475,6 @@ async function boot() {
     else if (/\biPhone\b/.test(ua) && !/Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS/.test(ua)) inappName = '內建瀏覽器';
     if (inappName) {
       document.body.classList.add('inapp-browser');
-      const nameEl = document.getElementById('inapp-name');
-      if (nameEl) nameEl.textContent = inappName;
     }
   }
 
